@@ -26,11 +26,11 @@ class AudioSample
 {
     
 public:
-    AudioSample( int16_t *samples, uint32_t numSamples, uint32_t sampleRate, uint16_t bitRate, uint16_t channels ):
+    AudioSample( int16_t *samples, uint32_t numSamples, uint32_t sampleRate, uint16_t bitsPerSample, uint16_t channels ):
         m_samples(samples),
         m_numSamples(numSamples),
         m_sampleRate(sampleRate),
-        m_bitRate(bitRate),
+        m_bitsPerSample(bitsPerSample),
         m_channels(channels)
     {
     }
@@ -43,9 +43,9 @@ public:
     {
         return m_sampleRate;
     }
-    uint16_t getBitRate() const
+    uint16_t getBitsPerSample() const
     {
-        return m_bitRate;
+        return m_bitsPerSample;
     }
     uint16_t getChannels() const
     {
@@ -58,8 +58,8 @@ public:
 private:
     std::unique_ptr<int16_t[]> m_samples;
     uint32_t m_sampleRate;
-    uint16_t m_bitRate;
+    uint16_t m_bitsPerSample;
     uint16_t m_channels;
-    uint32_t m_numSamples;
+    uint64_t m_numSamples;
 };
 
