@@ -7,7 +7,7 @@
 class EngineGroup
 {
 public:
-    EngineGroup( std::vector<uint16_t> sampleIDs )
+    EngineGroup( std::vector<uint16_t> sampleIDs ) :
         m_sampleIDs(std::move(sampleIDs))
     {
     }

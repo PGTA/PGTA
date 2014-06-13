@@ -4,29 +4,21 @@
 #include <memory> 
 #include <cstdint>
 
-struct wav_file
-{
-    char riff[4];
-    uint32_t chunk_size;
-    char wave[4];
-    char fmt[4];
-    uint32_t subchunk_size;
-    uint16_t format; // 1 = pcm
-    uint16_t channels;
-    uint32_t sample_rate;
-    uint32_t byte_rate;
-    uint16_t block_align;
-    uint16_t bits_per_sample;
-    char data[4];
-    uint32_t subchunk2_size;
-    std::unique_ptr<int16_t[]> samples;
-};
-
 class AudioSample
 {
     
 public:
-    AudioSample( int16_t *samples, uint32_t numSamples, uint32_t sampleRate, uint16_t bitsPerSample, uint16_t channels ):
+	AudioSample(AudioSample& other)
+	{
+		auto ptr = other.m_samples.get();
+		other.m_samples.release();
+		m_samples.reset(ptr);
+		m_sampleRate = other.m_sampleRate;
+		m_channels = other.m_channels;
+		m_numSamples = other.m_numSamples;
+		m_bitsPerSample = other.m_bitsPerSample;
+	}
+    AudioSample( char *samples, uint32_t numSamples, uint32_t sampleRate, uint16_t bitsPerSample, uint16_t channels ) :
         m_samples(samples),
         m_numSamples(numSamples),
         m_sampleRate(sampleRate),
@@ -35,9 +27,9 @@ public:
     {
     }
     
-    int16_t* getSamples() const
+    char* getSamples() const
     {
-        return m_samples;
+        return m_samples.get();
     }
     uint32_t getSampleRate() const
     {
@@ -56,10 +48,9 @@ public:
         return m_numSamples;
     }
 private:
-    std::unique_ptr<int16_t[]> m_samples;
+    std::unique_ptr<char[]> m_samples;
     uint32_t m_sampleRate;
     uint16_t m_bitsPerSample;
     uint16_t m_channels;
     uint64_t m_numSamples;
 };
-

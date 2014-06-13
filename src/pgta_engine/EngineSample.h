@@ -7,7 +7,7 @@ class EngineSample
 {
 
 public:
-    EngineSample(AudioSample sample ):
+    EngineSample( AudioSample &sample ) :
         m_sample(sample)
     {
     }

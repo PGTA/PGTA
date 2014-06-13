@@ -2,6 +2,7 @@
 #pragma once
 
 #include "EngineSample.h"
+#include "EngineGroup.h"
 #include <vector>
 
 class EngineTrack
@@ -21,7 +22,7 @@ public:
         m_samples(std::move(samples))
     {
     }
-    const std::vector<EngineSample>& getSamples() const
+    const std::vector<EngineSample*>& getSamples() const
     {
         return m_samples;
     }
