@@ -1,41 +1,62 @@
 
 #pragma once
 
-#include <algorithm>
+#include "SDL_audio.h"
+#include <cassert>
 
+template<int BITS_PER_SAMPLE>
 class AudioMixer
 {
 public:
-    void addInput( EngineSampleBuffer *sampleBuffer )
+    AudioMixer():
+        m_outputStream(nullptr)
     {
-        m_inputSamples.push_back(sampleBuffer);
     }
-    void mix( float delta )
+    void Mix()
     {
-        float deltaSec = delta / 1000.0f; 
-        // HACKHACKHACK 44100Hz  
-        uint32_t numSamples = 44100 * deltaSec;
-        m_outputBuffer.resize(numSamples);
-        std::fill(m_outputBuffer.begin(), m_outputBuffer.end(), 0);
-        for (auto &sampleBuffer : m_inputSampleBuffers)
+        auto bytesPerSample = BITS_PER_SAMPLE / 8;
+        int minByteCount = std::numeric_limits<int>::max();
+        for ( auto *inputStream : m_inputStreams )
         {
-            int16_t *samples = nullptr; 
-            auto samplesGiven = sampleBuffer.getAudioSamples(&samples, numSamples);
-            combineSamples(samples, samplesGiven);
+            auto numBytes = inputStream->GetNumSamples() * bytesPerSample;
+            minByteCount = std::min(minByteCount, numBytes);
         }
+        
+        m_mixBuffer.resize(minByteCount, 0);
+        m_inputBuffer.resize(minByteCount, 0);
+        std::fill(m_mixBuffer.begin(), m_mixBuffer.end(), 0);
+
+        for ( auto *inputStream : m_inputStreams )
+        {
+            int numSamples = inputStream->PullSamples(m_inputBuffer.data(), minByteCount / bytesPerSample);
+            
+            // HACKHACKHACK - AUDIO_S16 need to be determined for all BPS values
+            SDL_MixAudioFormat( (uint8_t*)m_mixBuffer.data(), (uint8_t*)m_inputBuffer.data(), AUDIO_S16, 
+                numSamples*bytesPerSample, 128);
+
+            // for ( int i = 0; i < numSamples; ++i )
+            // {
+            //     *mixBuff = (*mixBuff + *inputBuff++) / 2;
+            //     ++mixBuff;
+            // }
+        }
+        m_outputStream->PushSamples(m_mixBuffer.data(), m_mixBuffer.size() / bytesPerSample);
+        
+    }
+    void ConnectInputStream( AudioStreamBuffer* inputStream )
+    {
+        assert(BITS_PER_SAMPLE == inputStream->GetBitsPerSample());
+        m_inputStreams.push_back(inputStream);
     }
     
-    void combineSamples( int16_t *samples, uint32_t numSamples )
+    void ConnectOutputStream( AudioStreamBuffer* outputStream )
     {
-        auto minSampleCount = std::min(numSamples, m_outputBuffer.size());
-        for ( uint32_t i = 0; i < minSampleCount; ++i )
-        {
-            m_outputBuffer[i] += samples[i];
-        }
+        assert(BITS_PER_SAMPLE == outputStream->GetBitsPerSample());
+        m_outputStream = outputStream;
     }
-
 private:
-    std::vector<EngineSampleBuffer*> m_inputSampleBuffers;
-    std::vector<int16_t> m_outputBuffer;
+    std::vector<char> m_mixBuffer;
+    std::vector<char> m_inputBuffer;
+    std::vector<AudioStreamBuffer*> m_inputStreams;
+    AudioStreamBuffer *m_outputStream;
 };
-
