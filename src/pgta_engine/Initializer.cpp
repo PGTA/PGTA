@@ -20,7 +20,7 @@ bool Initializer::InitializeWaveSample(const char *filePath, AudioSample* &sampl
 		return false;
 	}
 
-	sample =  new AudioSample(data.samples.get(), data.numSamples, data.samplesPerSecond , data.bitsPerSample, data.channels);
+    sample = new AudioSample(data);
 	return true;
 }
 
@@ -59,7 +59,6 @@ bool Initializer::InitializeTrack(const char *trackName, EngineTrack* &track)
 		{
 			std::cerr << "Failed to initialize sample " << protoSample.filepath() << "." << std::endl;
 			continue;
-			
 		}
 	
 		EngineSample::SampleProps engineSampleProps;
@@ -83,7 +82,7 @@ bool Initializer::InitializeTrack(const char *trackName, EngineTrack* &track)
 		engineGroups.emplace_back(group);
 	}
 
-	track = new EngineTrack(engineSamples, engineGroups);
+	track = new EngineTrack(std::move(engineSamples), std::move(engineGroups));
 	// Delete all global objects allocated by libprotobuf
 	google::protobuf::ShutdownProtobufLibrary();
 	return true;

@@ -6,24 +6,22 @@
 
 class AudioSample
 {
-    
 public:
-	AudioSample(AudioSample& other)
+	AudioSample(AudioSample& other):
+        m_samples(std::move(other.m_samples)),
+        m_sampleRate(other.m_sampleRate),
+        m_channels(other.m_channels),
+        m_numSamples(other.m_numSamples),
+        m_bitsPerSample(other.m_bitsPerSample)
 	{
-		auto ptr = other.m_samples.get();
-		other.m_samples.release();
-		m_samples.reset(ptr);
-		m_sampleRate = other.m_sampleRate;
-		m_channels = other.m_channels;
-		m_numSamples = other.m_numSamples;
-		m_bitsPerSample = other.m_bitsPerSample;
 	}
-    AudioSample( char *samples, uint64_t numSamples, uint32_t sampleRate, uint16_t bitsPerSample, uint16_t channels ) :
-        m_samples(samples),
-        m_numSamples(numSamples),
-        m_sampleRate(sampleRate),
-        m_bitsPerSample(bitsPerSample),
-        m_channels(channels)
+
+    AudioSample(audio_data &data):
+        m_samples(std::move(data.samples)),
+        m_numSamples(data.numSamples),
+        m_sampleRate(data.samplesPerSecond),
+        m_bitsPerSample(data.bitsPerSample),
+        m_channels(data.channels)
     {
     }
     
