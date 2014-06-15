@@ -9,15 +9,12 @@ class AudioStreamBuffer
 {
 public:
     AudioStreamBuffer(int bitsPerSample, bool threadSafe = false):
-        m_bytesPerSample(bitsPerSample / 8)
+        m_bytesPerSample(bitsPerSample / 8),
+        m_bufferLock(threadSafe ? new std::mutex() : nullptr)
     {
-        if (threadSafe)
-        {
-            m_bufferLock.reset(new std::mutex());
-        }
     }
 
-    void PushSamples(const char *samples, int numSamples)
+    void PushSamples(const char *samples, uint64_t numSamples)
     {
         auto numBytes = numSamples * m_bytesPerSample;
         LockBuffer();

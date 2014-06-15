@@ -8,7 +8,7 @@ template<typename T>
 class DataBuffer
 {
 public:
-    void PushData(const T* data, int count)
+    void PushData(const T* data, uint64_t count)
     {
         m_buffer.insert(m_buffer.end(), data, data+count);
     }
@@ -23,7 +23,7 @@ public:
     
     int GetNumBytes() const
     {
-        return m_buffer.size() * sizeof(T);
+        return (int)m_buffer.size() * sizeof(T);
     }
 private:
     std::deque<T> m_buffer;

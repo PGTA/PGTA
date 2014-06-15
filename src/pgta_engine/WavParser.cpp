@@ -42,7 +42,7 @@ bool ParseWaveFile( const char *filePath, audio_data &dest )
     riff_header riff;
     fread(&riff, 1, sizeof(riff_header), wavFile);
 
-    while (ftell(wavFile) < riff.chunk_size+4)
+    while (ftell(wavFile) < (long)(riff.chunk_size+4))
     {
         subchunk_header header;
         fread(&header, 1, sizeof(header), wavFile);

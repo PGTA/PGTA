@@ -5,6 +5,7 @@
 #include "OALWrapper/OAL_Funcs.h"
 #include "OALWrapper/OAL_Stream.h"
 #include "OALWrapper/OAL_Buffer.h"
+#include <cassert>
 
 class AudioPlaybackStream
 {
@@ -75,7 +76,7 @@ public:
     
     void SetInputStream( AudioStreamBuffer* inputStream )
     {
-        // todo assert stream format
+        assert(inputStream->GetBitsPerSample() == (m_bytesPerSample * 8));
         m_inputStream = inputStream;
     }
     
