@@ -18,7 +18,7 @@ public:
 		m_numSamples = other.m_numSamples;
 		m_bitsPerSample = other.m_bitsPerSample;
 	}
-    AudioSample( char *samples, uint32_t numSamples, uint32_t sampleRate, uint16_t bitsPerSample, uint16_t channels ) :
+    AudioSample( char *samples, uint64_t numSamples, uint32_t sampleRate, uint16_t bitsPerSample, uint16_t channels ) :
         m_samples(samples),
         m_numSamples(numSamples),
         m_sampleRate(sampleRate),
@@ -43,7 +43,7 @@ public:
     {
         return m_channels;
     }
-    uint32_t getNumSamples() const
+    uint64_t getNumSamples() const
     {
         return m_numSamples;
     }

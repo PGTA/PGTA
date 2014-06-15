@@ -7,22 +7,13 @@
 
 class EngineTrack
 {
-    
-    struct SampleProps
-    {
-        // time difference from start of samples
-        // to next potential playback 
-        uint64_t    frequency;
-        uint32_t    probability;
-        float       volumeMultiplier;
-    };
-
 public:
-    EngineTrack( std::vector<EngineSample*> samples ):
-        m_samples(std::move(samples))
+	EngineTrack( std::vector<EngineSample> samples, std::vector<EngineGroup> groups ) :
+        m_samples(std::move(samples)),
+		m_groups(std::move(groups))
     {
     }
-    const std::vector<EngineSample*>& getSamples() const
+    const std::vector<EngineSample>& getSamples() const
     {
         return m_samples;
     }
@@ -31,8 +22,7 @@ public:
         return m_groups;
     }
 private:
-    std::vector<EngineSample*> m_samples;
+    std::vector<EngineSample> m_samples;
     std::vector<EngineGroup> m_groups;
-    std::vector<SampleProps> m_sampleProps;
 };
 
