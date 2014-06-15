@@ -4,13 +4,37 @@
 #include "AudioPlaybackStream.h"
 #include "AudioStreamBuffer.h"
 #include "AudioMixer.h"
+#include "EngineTrack.h"
+#include "EngineSample.h"
+#include "Initializer.h"
 #include "OALWrapper/OAL_Funcs.h"
 #include "SDL_timer.h"
 #include <iostream>
 #include <vector>
 
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
+
 int main( int argc, char *argv[] )
 {
+    // fix up working directory
+    {
+        char temp[128] = {};
+        const char *dir = _getcwd(temp, sizeof(temp));
+        const char *bin_pos = strstr(dir, "bin");
+        const char *build_pos = strstr(dir, "build");
+        if (bin_pos)
+        {
+            _chdir("..");
+        }
+        else if (build_pos)
+        {
+            _chdir("../..");
+        }
+    }
     // OAL_SetupLogging(true,eOAL_LogOutput_File,eOAL_LogVerbose_High);
 
     cOAL_Init_Params oal_parms;
@@ -24,26 +48,21 @@ int main( int argc, char *argv[] )
     {
         printf ("Success\n");
     }
-    
-    AudioPlaybackStream stream(16);
+
     AudioMixer<16> mixer;
-
-    std::vector<audio_data> audioData;
     std::vector<std::unique_ptr<AudioStreamBuffer>> streamBuffers;
-    for (int i = 1; i < argc; ++i)
+
+    std::unique_ptr<EngineTrack> ambientRain(Initializer::InitializeTrack("tracks/ambient_rain.track"));
+    if (!ambientRain)
     {
-        audioData.emplace_back();
-        auto &data = audioData.back();
-        ParseWaveFile(argv[i], data);
+        return -1;
+    }
 
-        std::cout << "Playing : " << argv[i] << std::endl;
-        std::cout << "Channels : " << data.channels << std::endl;
-        std::cout << "Sample-rate : " << data.samplesPerSecond << std::endl;
-        std::cout << "Bits-per-sample : " << data.bitsPerSample << std::endl;
-
-        streamBuffers.emplace_back(new AudioStreamBuffer(data.bitsPerSample));
-        streamBuffers.back()->PushSamples(data.samples.get(), data.numSamples);
-
+    for (auto &sample : ambientRain->getSamples())
+    {
+        const AudioSample *audioSample = sample.getSample();
+        streamBuffers.emplace_back(new AudioStreamBuffer(audioSample->getBitsPerSample()));
+        streamBuffers.back()->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
         mixer.ConnectInputStream(streamBuffers.back().get());
     }
 
@@ -52,16 +71,19 @@ int main( int argc, char *argv[] )
 
     mixer.Mix();
 
+    AudioPlaybackStream stream(16);
     stream.SetInputStream(&mixerOutput);
     stream.InitStream(1, 44100, AL_FORMAT_MONO16);
-    
+
     while (stream.IsPlaying())
     {
-        if (mixerOutput.GetNumSamples() == 0)
+        if (mixerOutput.GetNumSamples() <= oal_parms.mlStreamingBufferSize)
         {
-            for (int i = 0; i < streamBuffers.size(); ++i)
+            for (int i = 0; i < (int)streamBuffers.size(); ++i)
             {
-                streamBuffers[i]->PushSamples(audioData[i].samples.get(), audioData[i].numSamples);
+                const AudioSample *audioSample = ambientRain->GetEngineSample(i).getSample();
+                streamBuffers[i]->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
+                std::cout << streamBuffers[i]->GetNumSamples() << std::endl;
             }
             mixer.Mix();
         }
@@ -71,8 +93,8 @@ int main( int argc, char *argv[] )
         }
         // sleep if you want
     }
-    
+
     stream.DestroyStream();
-    OAL_Close ();
+    OAL_Close();
     return 0;
 }

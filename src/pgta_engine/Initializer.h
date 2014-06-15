@@ -9,6 +9,6 @@
 namespace Initializer
 {
 	// make different versions for different audio file formats
-	bool InitializeWaveSample(const char *filePath, AudioSample* &sample);
-	bool InitializeTrack(const char *trackName, EngineTrack* &track);
+	AudioSample* InitializeWaveSample(const char *filePath);
+	EngineTrack* InitializeTrack(const char *trackName);
 }

@@ -1,3 +1,4 @@
+
 #include "AudioData.h"
 #include "Initializer.h"
 #include "Track.pb.h"
@@ -6,56 +7,47 @@
 #include <iostream>
 #include <vector>
 
-
-bool Initializer::InitializeWaveSample(const char *filePath, AudioSample* &sample)
+AudioSample* Initializer::InitializeWaveSample(const char *filePath)
 {
-	if (sample != nullptr)
-	{
-		return false;
-	}
-
 	audio_data data;
-	if (!ParseWaveFile(filePath, data))
+	if (ParseWaveFile(filePath, data))
 	{
-		return false;
+        return new AudioSample(data);
 	}
-
-    sample = new AudioSample(data);
-	return true;
+    return nullptr;
 }
 
-bool Initializer::InitializeTrack(const char *trackName, EngineTrack* &track)
+EngineTrack* Initializer::InitializeTrack(const char *trackName)
 {
-	if (track != nullptr)
-	{
-		return false;
-	}
-
 	// Verify that the version of the library linked against is 
 	// compatible with the version the track headers
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-	PGTA::Track protoTrack;
+    PGTA::Track protoTrack;
+    {
+        std::fstream input(trackName, std::ios::in | std::ios::binary);
+        if (!input)
+        {
+            std::cerr << "Invalid track filename " << trackName << "." << std::endl;
+            return nullptr;
+        }
 
-	std::fstream input(trackName, std::ios::in | std::ios::binary);
+        bool parsed = protoTrack.ParseFromIstream(&input);
+        input.close();
 
-	if (!protoTrack.ParseFromIstream(&input))
-	{
-		std::cerr << "Failed to parse track." << std::endl;
-		return false;
-	}
+        if (!parsed)
+        {
+            std::cerr << "Failed to parse track." << std::endl;
+            return nullptr;
+        }
+    }
 
 	std::vector<EngineSample> engineSamples;
-	std::vector<EngineGroup> engineGroups;
-
-	for (int i = 0; i < protoTrack.samples_size(); ++i)
+	for (const auto &protoSample : protoTrack.samples())
 	{
-		const PGTA::Track_Sample &protoSample = protoTrack.samples(i);
-
-		AudioSample *sample = nullptr;
-
 		// TODO need to parse what format the sample is
-		if (!InitializeWaveSample(protoSample.filepath().c_str(), sample))
+        std::unique_ptr<AudioSample> sample(InitializeWaveSample(protoSample.filepath().c_str()));
+        if (!sample)
 		{
 			std::cerr << "Failed to initialize sample " << protoSample.filepath() << "." << std::endl;
 			continue;
@@ -66,24 +58,16 @@ bool Initializer::InitializeTrack(const char *trackName, EngineTrack* &track)
 		engineSampleProps.probability = protoSample.probability();
 		engineSampleProps.volumeMultiplier = protoSample.volumemultiplier();
 
-		engineSamples.emplace_back(EngineSample(sample, engineSampleProps));
+		engineSamples.emplace_back(std::move(sample), engineSampleProps);
 	}
 
-	for (int i = 0; i < protoTrack.groups_size(); ++i)
+    std::vector<EngineGroup> engineGroups;
+    for (const auto &protoGroup : protoTrack.groups())
 	{
-		const PGTA::Track_Group &protoGroup = protoTrack.groups(i);
-
-		std::vector<uint16_t> group;
-		for (int j = 0; j < protoGroup.sampleindex_size(); ++j)
-		{
-			group.emplace_back(protoGroup.sampleindex(j));
-		}
-
-		engineGroups.emplace_back(group);
+        std::vector<uint16_t> group(protoGroup.sampleindex().begin(),
+                                    protoGroup.sampleindex().end());
+        engineGroups.emplace_back(std::move(group));
 	}
 
-	track = new EngineTrack(std::move(engineSamples), std::move(engineGroups));
-	// Delete all global objects allocated by libprotobuf
-	google::protobuf::ShutdownProtobufLibrary();
-	return true;
+	return new EngineTrack(std::move(engineSamples), std::move(engineGroups));
 }
