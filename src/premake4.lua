@@ -24,6 +24,10 @@ solution "pgta_engine"
         {
             "StaticRuntime", "NoMinimalRebuild", "NoEditAndContinue", "MultiProcessorCompile"
         }
+        defines
+        {
+            "_CRT_SECURE_NO_WARNINGS"
+        }
     filter {}
     
     filter { "platforms:x32" }
