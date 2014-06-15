@@ -27,7 +27,8 @@ solution "pgta_engine"
         defines
         {
             "_CRT_SECURE_NO_WARNINGS",
-            "_SCL_SECURE_NO_WARNINGS"
+            "_SCL_SECURE_NO_WARNINGS",
+            "_CRT_NONSTDC_NO_DEPRECATE"
         }
     filter {}
     

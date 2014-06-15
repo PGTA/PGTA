@@ -23,16 +23,16 @@ int main( int argc, char *argv[] )
     // fix up working directory
     {
         char temp[128] = {};
-        const char *dir = _getcwd(temp, sizeof(temp));
+        const char *dir = getcwd(temp, sizeof(temp));
         const char *bin_pos = strstr(dir, "bin");
         const char *build_pos = strstr(dir, "build");
         if (bin_pos)
         {
-            _chdir("..");
+            chdir("..");
         }
         else if (build_pos)
         {
-            _chdir("../..");
+            chdir("../..");
         }
     }
     // OAL_SetupLogging(true,eOAL_LogOutput_File,eOAL_LogVerbose_High);
