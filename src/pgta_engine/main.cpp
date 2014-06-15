@@ -77,15 +77,25 @@ int main( int argc, char *argv[] )
 
     while (stream.IsPlaying())
     {
+        for (int i = 0; i < (int)streamBuffers.size(); ++i)
+        {
+            auto &buffer = streamBuffers[i];
+
+            if (buffer->GetNumSamples() <= oal_parms.mlStreamingBufferSize)
+            {
+                const auto *audioSample = ambientRain->GetEngineSample(i).getSample();
+                buffer->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
+                std::cout << buffer->GetNumSamples() << std::endl;
+            }
+        }
         if (mixerOutput.GetNumSamples() <= oal_parms.mlStreamingBufferSize)
         {
-            for (int i = 0; i < (int)streamBuffers.size(); ++i)
-            {
-                const AudioSample *audioSample = ambientRain->GetEngineSample(i).getSample();
-                streamBuffers[i]->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
-                std::cout << streamBuffers[i]->GetNumSamples() << std::endl;
-            }
             mixer.Mix();
+            std::cout << "mixing" << std::endl;
+            for (auto &buffer : streamBuffers)
+            {
+                std::cout << buffer->GetNumSamples() << std::endl;
+            }
         }
         else
         {
