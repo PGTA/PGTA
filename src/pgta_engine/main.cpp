@@ -8,7 +8,9 @@
 #include "EngineSample.h"
 #include "Initializer.h"
 #include "OALWrapper/OAL_Funcs.h"
-#include "SDL_timer.h"
+#include "SampleScheduler.h"
+#include <SDL_timer.h>
+#include <SDL.h>
 #include <iostream>
 #include <vector>
 
@@ -20,6 +22,8 @@
 
 int main( int argc, char *argv[] )
 {
+    SDL_Init(SDL_INIT_EVERYTHING);
+    
     // fix up working directory
     {
         char temp[128] = {};
@@ -50,26 +54,29 @@ int main( int argc, char *argv[] )
     }
 
     AudioMixer<16> mixer;
-    std::vector<std::unique_ptr<AudioStreamBuffer>> streamBuffers;
 
-    std::unique_ptr<EngineTrack> ambientRain(Initializer::InitializeTrack("tracks/ambient_rain.track"));
+
+    std::unique_ptr<EngineTrack> ambientRain(Initializer::InitializeTrack("tracks/jordan.track"));
     if (!ambientRain)
     {
         return -1;
     }
-
+    
+    std::vector<std::unique_ptr<AudioStreamBuffer>> streamBuffers;
     for (auto &sample : ambientRain->getSamples())
     {
         const AudioSample *audioSample = sample.getSample();
         streamBuffers.emplace_back(new AudioStreamBuffer(audioSample->getBitsPerSample()));
-        streamBuffers.back()->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
+        // streamBuffers.back()->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
         mixer.ConnectInputStream(streamBuffers.back().get());
     }
+    
+    SampleScheduler scheduler(ambientRain.get(), std::move(streamBuffers));
 
     AudioStreamBuffer mixerOutput(16, true);
     mixer.ConnectOutputStream(&mixerOutput);
 
-    mixer.Mix();
+    // mixer.Mix();
 
     AudioPlaybackStream stream(16);
     stream.SetInputStream(&mixerOutput);
@@ -77,34 +84,20 @@ int main( int argc, char *argv[] )
 
     while (stream.IsPlaying())
     {
-        for (int i = 0; i < (int)streamBuffers.size(); ++i)
-        {
-            auto &buffer = streamBuffers[i];
-
-            if (buffer->GetNumSamples() <= oal_parms.mlStreamingBufferSize)
-            {
-                const auto *audioSample = ambientRain->GetEngineSample(i).getSample();
-                buffer->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
-                std::cout << buffer->GetNumSamples() << std::endl;
-            }
-        }
+        scheduler.Update();
         if (mixerOutput.GetNumSamples() <= oal_parms.mlStreamingBufferSize)
         {
             mixer.Mix();
             std::cout << "mixing" << std::endl;
-            for (auto &buffer : streamBuffers)
-            {
-                std::cout << buffer->GetNumSamples() << std::endl;
-            }
         }
         else
         {
             SDL_Delay(10);
         }
-        // sleep if you want
     }
 
     stream.DestroyStream();
     OAL_Close();
+    SDL_Quit();
     return 0;
 }

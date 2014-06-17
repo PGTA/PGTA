@@ -10,6 +10,7 @@ public:
 	AudioSample(AudioSample& other):
         m_samples(std::move(other.m_samples)),
         m_sampleRate(other.m_sampleRate),
+        m_msDuration(other.m_msDuration),
         m_channels(other.m_channels),
         m_numSamples(other.m_numSamples),
         m_bitsPerSample(other.m_bitsPerSample)
@@ -23,6 +24,7 @@ public:
         m_bitsPerSample(data.bitsPerSample),
         m_channels(data.channels)
     {
+        m_msDuration = data.numSamples / data.samplesPerSecond * 1000;
     }
     
     char* getSamples() const
@@ -45,9 +47,14 @@ public:
     {
         return m_numSamples;
     }
+    uint64_t getDuration() const
+    {
+        return m_msDuration;
+    }
 private:
     std::unique_ptr<char[]> m_samples;
     uint32_t m_sampleRate;
+    uint64_t m_msDuration;
     uint16_t m_bitsPerSample;
     uint16_t m_channels;
     uint64_t m_numSamples;

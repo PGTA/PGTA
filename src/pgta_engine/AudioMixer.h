@@ -19,8 +19,13 @@ public:
         for ( auto *inputStream : m_inputStreams )
         {
             auto numBytes = inputStream->GetNumSamples() * bytesPerSample;
+            if (numBytes == 0)
+                continue;
             minByteCount = std::min(minByteCount, numBytes);
         }
+        
+        if (minByteCount == std::numeric_limits<int>::max())
+            return;
         
         m_mixBuffer.resize(minByteCount, 0);
         m_inputBuffer.resize(minByteCount, 0);

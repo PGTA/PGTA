@@ -33,7 +33,22 @@ public:
     {
         return m_sample.get();
     }
-
+    
+    uint64_t GetFrequency() const
+    {
+        return m_props.frequency;
+    }
+    
+    uint32_t GetProbability() const
+    {
+        return m_props.probability;
+    }
+    
+    float GetVolumeMultiplier() const
+    {
+        return m_props.volumeMultiplier;
+    }
+    
 private:
     std::unique_ptr<AudioSample> m_sample;
 	SampleProps m_props;
