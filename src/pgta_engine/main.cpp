@@ -56,7 +56,7 @@ int main( int argc, char *argv[] )
     AudioMixer<16> mixer;
 
 
-    std::unique_ptr<EngineTrack> ambientRain(Initializer::InitializeTrack("tracks/jordan.track"));
+    std::unique_ptr<EngineTrack> ambientRain(Initializer::InitializeTrack("tracks/demo.track"));
     if (!ambientRain)
     {
         return -1;
@@ -92,7 +92,7 @@ int main( int argc, char *argv[] )
         }
         else
         {
-            SDL_Delay(10);
+            //SDL_Delay(10);
         }
     }
 

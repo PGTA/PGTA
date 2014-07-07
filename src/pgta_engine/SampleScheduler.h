@@ -47,9 +47,9 @@ public:
             }
             m_nextPlayTime[i] = msTime + std::max(engineSample.GetFrequency(), audioSample->getDuration());
             
-            std::cout << "msTime : " << msTime << std::endl;
-            std::cout << "nextPlay : " << m_nextPlayTime[i] << std::endl;
-            std::cout << "shouldPlay : " << shouldPlay << std::endl;
+            std::cout << "msTime " << i << " : " << msTime << std::endl;
+            std::cout << "nextPlay " << i << " : " << m_nextPlayTime[i] << std::endl;
+            std::cout << "shouldPlay " << i << " : " << shouldPlay << std::endl;
         }
     }
 private:
