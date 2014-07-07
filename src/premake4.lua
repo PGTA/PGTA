@@ -66,6 +66,7 @@ solution "pgta_engine"
         filter { "system:macosx" }
             buildoptions
             {
+                "-I/System/Library/Frameworks/OpenAL.framework/Headers",
                 "-std=c++11"
             }
             includedirs
@@ -79,26 +80,31 @@ solution "pgta_engine"
             }
             links
             {
-                "OALWrapper", "ogg", "vorbisfile", "OpenAL", "SDLmain", "SDL", "SDL2"
+                "OALWrapper", "ogg", "vorbisfile", "OpenAL", "SDLmain", "SDL", "SDL2", "protobuf"
+            }
+            linkoptions
+            {
+                "-framework OpenAL"
             }
         filter {}
-        
-        -- include libogg
-        dofile (ogg_dir .. "premake5_include.lua")
-        
-        -- include libvorbis
-        dofile (vorbis_dir .. "premake5_include.lua")
-        
-        -- include OALWrapper
-        dofile (oalwrapper_dir .. "premake5_include.lua")
-        
-        -- include openal-soft
-        copy_oal_dll = true
-        dofile (oalsoft_dir .. "premake5_include.lua")
-        
-        -- include sdl2
-        copy_sdl_dll = true
-        dofile (sdl2_dir .. "premake5_include.lua")
-        
-        -- include protobuf
-        dofile (proto_dir .. "premake5_include.lua")
+        if (os.get() ~= "macosx") then
+            -- include libogg
+            dofile (ogg_dir .. "premake5_include.lua")
+            
+            -- include libvorbis
+            dofile (vorbis_dir .. "premake5_include.lua")
+            
+            -- include OALWrapper
+            dofile (oalwrapper_dir .. "premake5_include.lua")
+            
+            -- include openal-soft
+            copy_oal_dll = true
+            dofile (oalsoft_dir .. "premake5_include.lua")
+            
+            -- include sdl2
+            copy_sdl_dll = true
+            dofile (sdl2_dir .. "premake5_include.lua")
+            
+            -- include protobuf
+            dofile (proto_dir .. "premake5_include.lua")
+        end
