@@ -1,18 +1,10 @@
 
-#include "AudioData.h"
-#include "WavParser.h"
 #include "AudioPlaybackStream.h"
 #include "AudioStreamBuffer.h"
-#include "AudioMixer.h"
-#include "EngineTrack.h"
-#include "EngineSample.h"
-#include "Initializer.h"
 #include "OALWrapper/OAL_Funcs.h"
-#include "SampleScheduler.h"
-#include <SDL_timer.h>
-#include <SDL.h>
-#include <iostream>
-#include <vector>
+
+#include "utils.h"
+#include "IPGTA.h"
 
 #ifdef _WIN32
 #include <direct.h>
@@ -20,84 +12,79 @@
 #include <unistd.h>
 #endif
 
-int main( int argc, char *argv[] )
+void FixWorkingDirectory()
 {
-    SDL_Init(SDL_INIT_EVERYTHING);
-    
-    // fix up working directory
+    char temp[128] = {};
+    const char *dir = getcwd(temp, sizeof(temp));
+    const char *bin_pos = strstr(dir, "bin");
+    const char *build_pos = strstr(dir, "build");
+    if (bin_pos)
     {
-        char temp[128] = {};
-        const char *dir = getcwd(temp, sizeof(temp));
-        const char *bin_pos = strstr(dir, "bin");
-        const char *build_pos = strstr(dir, "build");
-        if (bin_pos)
-        {
-            chdir("..");
-        }
-        else if (build_pos)
-        {
-            chdir("../..");
-        }
+        chdir("..");
     }
-    // OAL_SetupLogging(true,eOAL_LogOutput_File,eOAL_LogVerbose_High);
+    else if (build_pos)
+    {
+        chdir("../..");
+    }
+}
 
+IPGTA* SetupPGTA()
+{
+    IPGTA* pgta = IPGTA::CreatePGTA();
+
+    PGTAConfig config;
+    config.samplesPerSecond = 44100;
+    config.bitsPerSample = 16;
+    config.channels = 1;
+    config.numBuffers = 4;
+    config.bufferSize = 8192;
+
+    pgta->Initialize(config);
+    return pgta;
+}
+
+void SetupOAL()
+{
     cOAL_Init_Params oal_parms;
     oal_parms.mlStreamingBufferSize = 8192;
-    if (OAL_Init(oal_parms)==false)
+    if (OAL_Init(oal_parms) == false)
     {
-        printf ("Failed - Check your OpenAL installation\n");
-        return 0;
+        printf("OAL Failed - Check your OpenAL installation\n");
     }
     else
     {
-        printf ("Success\n");
+        printf("OAL Success\n");
     }
+}
 
-    AudioMixer<16> mixer;
+int main(int argc, char *argv[])
+{
+    FixWorkingDirectory();
+    SetupOAL();
 
+    AudioStreamBuffer pgtaOutput(16);
+    AudioPlaybackStream playbackStream(16);
+    playbackStream.SetInputStream(&pgtaOutput);
+    playbackStream.InitStream(1, 44100, AL_FORMAT_MONO16);
 
-    std::unique_ptr<EngineTrack> ambientRain(Initializer::InitializeTrack("tracks/demo.track"));
-    if (!ambientRain)
+    IPGTA* pgta = SetupPGTA();
+    pgta->StartPlayback("tracks/demo.track");
+
+    utils::RunLoop(10.0f, [&]
     {
-        return -1;
-    }
-    
-    std::vector<std::unique_ptr<AudioStreamBuffer>> streamBuffers;
-    for (auto &sample : ambientRain->getSamples())
-    {
-        const AudioSample *audioSample = sample.getSample();
-        streamBuffers.emplace_back(new AudioStreamBuffer(audioSample->getBitsPerSample()));
-        // streamBuffers.back()->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
-        mixer.ConnectInputStream(streamBuffers.back().get());
-    }
-    
-    SampleScheduler scheduler(ambientRain.get(), std::move(streamBuffers));
-
-    AudioStreamBuffer mixerOutput(16, true);
-    mixer.ConnectOutputStream(&mixerOutput);
-
-    // mixer.Mix();
-
-    AudioPlaybackStream stream(16);
-    stream.SetInputStream(&mixerOutput);
-    stream.InitStream(1, 44100, AL_FORMAT_MONO16);
-
-    while (stream.IsPlaying())
-    {
-        scheduler.Update();
-        if (mixerOutput.GetNumSamples() <= oal_parms.mlStreamingBufferSize)
+        if (!playbackStream.IsPlaying())
         {
-            mixer.Mix();
-            std::cout << "mixing" << std::endl;
+            return false;
         }
-        else
-        {
-            //SDL_Delay(10);
-        }
-    }
 
-    stream.DestroyStream();
+        int numSamples = 0;
+        const char *buf = pgta->GetAudioBuffer(numSamples);
+        pgtaOutput.PushSamples(buf, numSamples);
+
+        return true;
+    });
+
+    IPGTA::FreePGTA(pgta);
     OAL_Close();
-    SDL_Quit();
     return 0;
 }
