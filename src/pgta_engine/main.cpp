@@ -36,7 +36,6 @@ IPGTA* SetupPGTA()
     config.samplesPerSecond = 44100;
     config.bitsPerSample = 16;
     config.channels = 1;
-    config.numBuffers = 4;
     config.bufferSize = 8192;
 
     pgta->Initialize(config);
@@ -77,14 +76,19 @@ int main(int argc, char *argv[])
             return false;
         }
 
+        pgta->Update();
+
         int numSamples = 0;
         const char *buf = pgta->GetAudioBuffer(numSamples);
         pgtaOutput.PushSamples(buf, numSamples);
 
+        pgta->StopPlayback();
         return true;
     });
 
     IPGTA::FreePGTA(pgta);
+
+    playbackStream.DestroyStream();
     OAL_Close();
     return 0;
 }

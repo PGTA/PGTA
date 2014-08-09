@@ -10,7 +10,6 @@ struct PGTAConfig
     uint16_t bitsPerSample;
     uint16_t channels;
 
-    uint16_t numBuffers;
     uint16_t bufferSize;
 };
 

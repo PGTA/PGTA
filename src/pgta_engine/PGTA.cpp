@@ -1,6 +1,8 @@
 
 #include "PGTA.h"
 
+#include "Initializer.h"
+
 IPGTA* IPGTA::CreatePGTA()
 {
     return new PGTA();
@@ -13,12 +15,11 @@ void IPGTA::FreePGTA(IPGTA* pgta)
 
 void PGTA::Initialize(const PGTAConfig &config)
 {
-
+    m_config = config;
 }
 
 void PGTA::StartPlayback(const std::string &trackName)
 {
-
 }
 
 void PGTA::StopPlayback()

@@ -1,8 +1,12 @@
 
 #pragma once
 
+#include "AudioStreamBuffer.h"
 #include "SDL_audio.h"
 #include <cassert>
+#include <vector>
+
+class AudioSteamBuffer;
 
 template<int BITS_PER_SAMPLE>
 class AudioMixer
