@@ -27,7 +27,7 @@ void PGTA::StopPlayback()
 
 }
 
-void PGTA::TrasitionEvent(const std::string &event, uint8_t transitionAmount)
+void PGTA::TransitionEvent(const std::string &event, uint8_t transitionAmount)
 {
 
 }

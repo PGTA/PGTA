@@ -35,7 +35,7 @@ public:
     virtual void StopPlayback() = 0;
 
     // Triggers transition event with the amount of transitionAmount [0,255]
-    virtual void TrasitionEvent(const std::string &event, uint8_t transitionAmount) = 0;
+    virtual void TransitionEvent(const std::string &event, uint8_t transitionAmount) = 0;
 
     // Call before grabbing audio data
     virtual void Update() = 0;

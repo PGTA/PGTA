@@ -19,7 +19,7 @@ public:
     
     virtual void StopPlayback() override;
     
-    virtual void TrasitionEvent(const std::string &event, uint8_t transitionAmount) override;
+    virtual void TransitionEvent(const std::string &event, uint8_t transitionAmount) override;
     
     virtual void Update() override;
     
