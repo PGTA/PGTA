@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <memory>
 #include <vector>
 #include <cstdint>
@@ -10,16 +11,18 @@ class AudioStreamBuffer;
 
 class SampleScheduler
 {
+    using TimePoint = std::chrono::high_resolution_clock::time_point;
+    using TimeDuration = std::chrono::high_resolution_clock::duration;
 public:
     SampleScheduler():
         m_engineTrack(nullptr)
     {
     }
 
-    SampleScheduler(EngineTrack *track,
+    void Initialize(EngineTrack* track,
                     std::vector<std::unique_ptr<AudioStreamBuffer>> streamBuffers);
 
-    void Update();
+    void Update(TimePoint curTime);
 
 private:
     bool IsGroupPlaying()
@@ -30,5 +33,5 @@ private:
 private:
     EngineTrack *m_engineTrack;
     std::vector<std::unique_ptr<AudioStreamBuffer>> m_streamBuffers;
-    std::vector<uint32_t> m_nextPlayTime;
+    std::vector<TimePoint> m_nextPlayTimes;
 };

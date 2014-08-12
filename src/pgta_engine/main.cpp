@@ -5,6 +5,7 @@
 
 #include "utils.h"
 #include "IPGTA.h"
+#include <iostream>
 
 #ifdef _WIN32
 #include <direct.h>
@@ -28,14 +29,16 @@ void FixWorkingDirectory()
     }
 }
 
-IPGTA* SetupPGTA()
+PGTA::IPGTA* SetupPGTA()
 {
-    IPGTA* pgta = IPGTA::CreatePGTA();
+    using namespace PGTA;
+
+    IPGTA* pgta = CreatePGTA();
 
     PGTAConfig config;
-    config.samplesPerSecond = 44100;
-    config.bitsPerSample = 16;
-    config.channels = 1;
+    config.audioDesc.samplesPerSecond = 44100;
+    config.audioDesc.bitsPerSample = 16;
+    config.audioDesc.channels = 1;
     config.bufferSize = 8192;
 
     pgta->Initialize(config);
@@ -61,15 +64,22 @@ int main(int argc, char *argv[])
     FixWorkingDirectory();
     SetupOAL();
 
-    AudioStreamBuffer pgtaOutput(16);
+    AudioStreamBuffer pgtaOutput(16, true);
+    {
+        std::unique_ptr<char[]> temp(new char[8192]());
+        pgtaOutput.PushSamples(temp.get(), 4096);
+    }
     AudioPlaybackStream playbackStream(16);
     playbackStream.SetInputStream(&pgtaOutput);
     playbackStream.InitStream(1, 44100, AL_FORMAT_MONO16);
 
-    IPGTA* pgta = SetupPGTA();
-    pgta->StartPlayback("tracks/demo.track");
+    auto* pgta = SetupPGTA();
+    if (!pgta->StartPlayback("tracks/ambient_rain.track"))
+    {
+        return -1;
+    }
 
-    utils::RunLoop(10.0f, [&]
+    utils::RunLoop(20.0f, [&]
     {
         if (!playbackStream.IsPlaying())
         {
@@ -78,15 +88,19 @@ int main(int argc, char *argv[])
 
         pgta->Update();
 
-        int numSamples = 0;
-        const char *buf = pgta->GetAudioBuffer(numSamples);
-        pgtaOutput.PushSamples(buf, numSamples);
+        int numBuffers = 0;
+        const auto* buffers = pgta->GetOutputBuffers(numBuffers);
+        for (int i = 0; i < numBuffers; ++i)
+        {
+            auto& buf = buffers[i];
+            pgtaOutput.PushSamples(buf.audioData, buf.numSamples);
+        }
 
-        pgta->StopPlayback();
+        //pgta->StopPlayback();
         return true;
     });
 
-    IPGTA::FreePGTA(pgta);
+    PGTA::FreePGTA(pgta);
 
     playbackStream.DestroyStream();
     OAL_Close();

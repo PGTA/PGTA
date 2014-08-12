@@ -3,48 +3,44 @@
 
 #include <cstdint>
 #include <string>
+#include "PGTAOutputBuffer.h"
 
-struct PGTAConfig
+namespace PGTA
 {
-    uint32_t samplesPerSecond;
-    uint16_t bitsPerSample;
-    uint16_t channels;
-
-    uint16_t bufferSize;
-};
-
-class IPGTA
-{
-public:
-    static IPGTA* CreatePGTA();
-
-    static void FreePGTA(IPGTA* pgta);
-
-public:
-    virtual ~IPGTA()
+    struct PGTAConfig
     {
-    }
+        AudioDesc audioDesc;
+        uint16_t bufferSize;
+    };
 
-    // Initialize PGTA
-    virtual void Initialize(const PGTAConfig &config) = 0;
+    class IPGTA
+    {
+    public:
+        virtual ~IPGTA()
+        {
+        }
 
-    // Enables PGTA to generate audio data on update calls
-    virtual void StartPlayback(const std::string &trackName) = 0;
+        // Initialize PGTA
+        virtual void Initialize(const PGTAConfig &config) = 0;
 
-    // Disables PGTA audio generation
-    virtual void StopPlayback() = 0;
+        // Enables PGTA to generate audio data on update calls
+        virtual bool StartPlayback(const std::string &trackName) = 0;
 
-    // Triggers transition event with the amount of transitionAmount [0,255]
-    virtual void TransitionEvent(const std::string &event, uint8_t transitionAmount) = 0;
+        // Disables PGTA audio generation
+        virtual void StopPlayback() = 0;
 
-    // Call before grabbing audio data
-    virtual void Update() = 0;
+        // Triggers transition event with the amount of transitionAmount [0,255]
+        virtual void TransitionEvent(const std::string &event, uint8_t transitionAmount) = 0;
 
-    // Puts at most length amount of bytes in buffer
-    // Returns: How many bytes actually sent
-    virtual int GetAudioData(char *buffer, int length) = 0;
+        // Call before grabbing audio data
+        virtual void Update() = 0;
 
-    // Returns the audio data buffer used by PGTA
-    // with a numSamples output parameter
-    virtual const char* GetAudioBuffer(int& numSamples) = 0;
-};
+        // Returns an array of buffers with the latest audio data.
+        // Buffers become invalid after the next call to Update().
+        virtual const OutputBuffer* GetOutputBuffers(int& numBuffers) const = 0;
+    };
+
+    IPGTA* CreatePGTA();
+
+    void FreePGTA(IPGTA* pgta);
+}
