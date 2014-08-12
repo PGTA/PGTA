@@ -35,7 +35,7 @@ public:
         m_duration = duration_cast<SystemTime>(SampleTime(data.numSamples));
     }
     
-    char* getSamples() const
+    const char* getSamples() const
     {
         return m_samples.get();
     }
