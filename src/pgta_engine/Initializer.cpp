@@ -52,9 +52,11 @@ EngineTrack* Initializer::InitializeTrack(const char *trackName)
 			std::cerr << "Failed to initialize sample " << protoSample.filepath() << "." << std::endl;
 			continue;
 		}
+
+        using namespace std::chrono;
 	
 		EngineSample::SampleProps engineSampleProps;
-		engineSampleProps.frequency = protoSample.frequency();
+		engineSampleProps.frequency = duration_cast<high_resolution_clock::duration>(milliseconds(protoSample.frequency()));
 		engineSampleProps.probability = protoSample.probability();
 		engineSampleProps.volumeMultiplier = protoSample.volumemultiplier();
 

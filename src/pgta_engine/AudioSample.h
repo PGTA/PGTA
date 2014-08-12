@@ -2,19 +2,21 @@
 #pragma once
 
 #include "AudioData.h"
+#include <chrono>
 #include <memory> 
 #include <cstdint>
 
 class AudioSample
 {
+    using TimeDuration = std::chrono::high_resolution_clock::duration;
 public:
 	AudioSample(AudioSample& other):
         m_samples(std::move(other.m_samples)),
-        m_sampleRate(other.m_sampleRate),
-        m_msDuration(other.m_msDuration),
-        m_channels(other.m_channels),
+        m_duration(other.m_duration),
         m_numSamples(other.m_numSamples),
-        m_bitsPerSample(other.m_bitsPerSample)
+        m_sampleRate(other.m_sampleRate),
+        m_bitsPerSample(other.m_bitsPerSample),
+        m_channels(other.m_channels)
 	{
 	}
 
@@ -25,7 +27,12 @@ public:
         m_bitsPerSample(data.bitsPerSample),
         m_channels(data.channels)
     {
-        m_msDuration = data.numSamples / data.samplesPerSecond * 1000;
+        using namespace std::chrono;
+        using SystemTime = high_resolution_clock::duration;
+        // TODO fix hardcode 44100
+        using SampleTime = duration<int64_t, std::ratio<1, 44100>>;
+
+        m_duration = duration_cast<SystemTime>(SampleTime(data.numSamples));
     }
     
     char* getSamples() const
@@ -48,15 +55,15 @@ public:
     {
         return m_numSamples;
     }
-    uint64_t getDuration() const
+    TimeDuration getDuration() const
     {
-        return m_msDuration;
+        return m_duration;
     }
 private:
     std::unique_ptr<char[]> m_samples;
+    TimeDuration m_duration;
+    uint64_t m_numSamples;
     uint32_t m_sampleRate;
-    uint64_t m_msDuration;
     uint16_t m_bitsPerSample;
     uint16_t m_channels;
-    uint64_t m_numSamples;
 };

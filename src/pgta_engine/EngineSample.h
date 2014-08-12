@@ -6,20 +6,21 @@
 
 class EngineSample
 {
+    using TimeDuration = std::chrono::high_resolution_clock::duration;
 public:
-	struct SampleProps
-	{
-		// time difference from start of samples
-		// to next potential playback 
-		uint64_t    frequency;
-		uint32_t    probability;
-		float       volumeMultiplier;
+    struct SampleProps
+    {
+        // time difference from start of samples
+        // to next potential playback 
+        TimeDuration frequency;
+        uint32_t probability;
+        float volumeMultiplier;
 	};
 
 public:
     EngineSample(std::unique_ptr<AudioSample> sample, SampleProps &props):
         m_sample(std::move(sample)),
-		m_props(props)
+        m_props(props)
     {
     }
 
@@ -34,7 +35,7 @@ public:
         return m_sample.get();
     }
     
-    uint64_t GetFrequency() const
+    TimeDuration GetFrequency() const
     {
         return m_props.frequency;
     }

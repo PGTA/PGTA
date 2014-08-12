@@ -38,7 +38,7 @@ void SampleScheduler::Update(TimePoint curTime)
             m_streamBuffers[i]->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
         }
         auto nextPlayDelta = std::max(engineSample.GetFrequency(), audioSample->getDuration());
-        m_nextPlayTimes[i] = curTime + std::chrono::milliseconds(nextPlayDelta);
+        m_nextPlayTimes[i] = curTime + nextPlayDelta;
 
         //std::cout << "msTime " << i << " : " << msTime << std::endl;
         //std::cout << "nextPlay " << i << " : " << m_nextPlayTime[i] << std::endl;
