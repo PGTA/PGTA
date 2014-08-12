@@ -67,7 +67,7 @@ void PGTAEngine::Update()
 {
     using namespace std::chrono;
     auto now = high_resolution_clock::now();
-    auto dt = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastUpdate);
+    auto dt = now - m_lastUpdate;
     m_lastUpdate = now;
     
     m_scheduler.Update(now);
