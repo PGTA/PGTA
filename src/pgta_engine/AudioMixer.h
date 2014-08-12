@@ -21,7 +21,8 @@ public:
         int bytesPerSample = BITS_PER_SAMPLE / 8;
         int totalSamplesToMix = CalcNumSamplesToMix(dt);
 
-        outputBuffer = std::vector<char>(totalSamplesToMix * bytesPerSample, 0);
+        outputBuffer.resize(totalSamplesToMix * bytesPerSample);
+        std::fill(outputBuffer.begin(), outputBuffer.end(), 0);
 
         int minSampleCount = 0;
         int samplesMixed = 0;

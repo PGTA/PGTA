@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <deque>
 #include <algorithm>
+#include <vector>
 
 template<typename T>
 class DataBuffer
@@ -27,5 +28,5 @@ public:
         return (int)m_buffer.size() * sizeof(T);
     }
 private:
-    std::deque<T> m_buffer;
+    std::vector<T> m_buffer;
 };
