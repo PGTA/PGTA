@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     playbackStream.InitStream(1, 44100, AL_FORMAT_MONO16);
 
     auto* pgta = SetupPGTA();
-    if (!pgta->StartPlayback("tracks/ambient_rain.track"))
+    if (!pgta->StartPlayback("tracks/groupTest.track"))
     {
         return -1;
     }
