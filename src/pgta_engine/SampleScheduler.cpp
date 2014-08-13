@@ -25,14 +25,16 @@ void SampleScheduler::Update(TimeDuration dt)
     int numEngineSamples = (int)m_engineTrack->getSamples().size();
     for (int i = 0; i < numEngineSamples; ++i)
     {
-        if (dt < m_nextCheckCountdowns[i])
+        if (dt <= m_nextCheckCountdowns[i])
         {
             m_nextCheckCountdowns[i] -= dt;
             continue;
         }
 
         const auto &engineSample = m_engineTrack->getSamples()[i];
-        bool shouldPlay = true;// evalProbability(engineSample.GetProbability());
+        const auto *audioSample = engineSample.getSample();
+        m_nextCheckCountdowns[i] = std::max(engineSample.GetFrequency(), audioSample->getDuration());
+        bool shouldPlay = evalProbability(engineSample.GetProbability());
         if (!shouldPlay)
         {
             continue;
@@ -51,10 +53,9 @@ void SampleScheduler::Update(TimeDuration dt)
             m_streamBuffers[i]->PushSamples(m_paddingBuffer.data(), numPaddingSamples);
         }*/
 
-        const auto *audioSample = engineSample.getSample();
+
         m_streamBuffers[i]->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
 
-        m_nextCheckCountdowns[i] += std::max(engineSample.GetFrequency(), audioSample->getDuration());
 
         //std::cout << "msTime " << i << " : " << msTime << std::endl;
         //std::cout << "nextPlay " << i << " : " << m_nextPlayTime[i] << std::endl;

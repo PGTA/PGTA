@@ -86,8 +86,26 @@ solution "pgta_engine"
             {
                 "-framework OpenAL"
             }
+        filter { "system:linux" }
+            buildoptions
+            {
+                "-std=c++11"
+            }
+            includedirs
+            {
+                path.getabsolute("../../OALWrapper/include/"),
+                "/usr/local/include/SDL2/"
+            }
+            libdirs
+            {
+                path.getabsolute("../../OALWrapper/build/")
+            }
+            links
+            {
+                "OALWrapper", "ogg", "vorbisfile", "openal", "SDL2", "protobuf"
+            }
         filter {}
-        if (os.get() ~= "macosx") then
+        if (os.get() == "windows") then
             -- include libogg
             dofile (ogg_dir .. "premake5_include.lua")
             

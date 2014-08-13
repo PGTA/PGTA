@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "IPGTA.h"
 #include <iostream>
+#include <string.h>
 
 #ifdef _WIN32
 #include <direct.h>

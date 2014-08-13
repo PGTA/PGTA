@@ -5,6 +5,7 @@
 #include <chrono>
 #include <memory> 
 #include <cstdint>
+#include <math.h>
 
 class AudioSample
 {
@@ -29,7 +30,7 @@ public:
     {
         using namespace std::chrono;
         double secs = static_cast<double>(data.numSamples) / data.samplesPerSecond;
-        m_duration = duration_cast<TimeDuration>(duration<double>(secs));
+        m_duration = duration_cast<TimeDuration>(duration<double>(floor(secs)));
     }
     
     const char* getSamples() const
