@@ -22,7 +22,7 @@ public:
     void Initialize(EngineTrack* track,
                     std::vector<std::unique_ptr<AudioStreamBuffer>> streamBuffers);
 
-    void Update(TimePoint curTime);
+    void Update(TimeDuration dt);
 
 private:
     bool IsGroupPlaying()
@@ -33,5 +33,6 @@ private:
 private:
     EngineTrack *m_engineTrack;
     std::vector<std::unique_ptr<AudioStreamBuffer>> m_streamBuffers;
-    std::vector<TimePoint> m_nextPlayTimes;
+    std::vector<TimeDuration> m_nextCheckCountdowns;
+    std::vector<char> m_paddingBuffer;
 };

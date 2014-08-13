@@ -7,6 +7,7 @@
 #include <cassert>
 #include <vector>
 #include "RealToInt.h"
+#include <iostream>
 
 class AudioSteamBuffer;
 
@@ -15,27 +16,22 @@ class AudioMixer
 {
     using TimeDuration = std::chrono::high_resolution_clock::duration;
 public:
-    int Mix(TimeDuration dt,
-            std::vector<char>& outputBuffer)
+    int Mix(char* outputBuffer, int numSamplesToMix, int numBytesToMix)
     {
         int bytesPerSample = BITS_PER_SAMPLE / 8;
-        int totalSamplesToMix = CalcNumSamplesToMix(dt);
-
-        outputBuffer.resize(totalSamplesToMix * bytesPerSample);
-        std::fill(outputBuffer.begin(), outputBuffer.end(), 0);
+        memset(outputBuffer, 0, numBytesToMix);
 
         int minSampleCount = 0;
         int samplesMixed = 0;
-        uint8_t* dstBuffer = reinterpret_cast<uint8_t*>(outputBuffer.data());
-        while ((minSampleCount = GetMinInputSampleCount()) > 0
-               && (samplesMixed < totalSamplesToMix))
+        while (((minSampleCount = GetMinInputSampleCount()) > 0)
+               && (samplesMixed < numSamplesToMix))
         {
-            int samplesToMix = std::min(totalSamplesToMix, minSampleCount);
-            IncrementalMix(samplesToMix, bytesPerSample, dstBuffer);
-            dstBuffer += (samplesToMix*bytesPerSample);
+            int samplesToMix = std::min(numSamplesToMix, minSampleCount);
+            IncrementalMix(numSamplesToMix - samplesMixed, bytesPerSample, outputBuffer);
+            outputBuffer += (samplesToMix*bytesPerSample);
             samplesMixed += samplesToMix;
         }
-        return totalSamplesToMix;
+        return numSamplesToMix;
     }
 
     void ConnectInputStream( AudioStreamBuffer* inputStream )
@@ -45,27 +41,23 @@ public:
     }
 
 private:
-    void IncrementalMix(int numSamples, int bytesPerSample,
-                        uint8_t* dstBuffer)
+    void IncrementalMix(int numSamplesToMix, int bytesPerSample, char* dstBuffer)
     {
-        m_inputBuffer.resize(numSamples * bytesPerSample, 0);
+        int totalBytes = numSamplesToMix * bytesPerSample;
+        m_inputBuffer.resize(totalBytes, 0);
         for (auto *inputStream : m_inputStreams)
         {
-            int numGivenSamples = inputStream->PullSamples(m_inputBuffer.data(), numSamples);
-            uint8_t* srcBuffer = reinterpret_cast<uint8_t*>(m_inputBuffer.data());
-
+            std::fill(m_inputBuffer.begin(), m_inputBuffer.end(), 0);
+            int numGivenSamples = inputStream->PullSamples(m_inputBuffer.data(), numSamplesToMix);
+            if (numGivenSamples == 0)
+            {
+                continue;
+            }
+            //assert(numGivenSamples == numSamplesToMix);
             // HACKHACKHACK - AUDIO_S16 need to be determined for all BPS values
-            SDL_MixAudioFormat(dstBuffer, srcBuffer, AUDIO_S16,
-                               numGivenSamples*bytesPerSample, SDL_MIX_MAXVOLUME);
+            SDL_MixAudioFormat((uint8_t*)dstBuffer, (uint8_t*)m_inputBuffer.data(),
+                               AUDIO_S16, totalBytes, SDL_MIX_MAXVOLUME);
         }
-    }
-
-    int CalcNumSamplesToMix(TimeDuration dt)
-    {
-        using namespace std::chrono;
-        double seconds = duration_cast<duration<double>>(dt).count();
-        // TODO: get rid of hardcoded sample rate
-        return Real2Int(seconds * 44100.0);
     }
 
     int GetMinInputSampleCount()

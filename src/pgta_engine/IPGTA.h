@@ -10,7 +10,9 @@ namespace PGTA
     struct PGTAConfig
     {
         AudioDesc audioDesc;
-        uint16_t bufferSize;
+
+        uint16_t numBuffers;
+        uint16_t bufferSizeInSamples;
     };
 
     class IPGTA

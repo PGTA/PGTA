@@ -12,7 +12,8 @@ class DataBuffer
 public:
     void PushData(const T* data, uint64_t count)
     {
-        m_buffer.insert(m_buffer.end(), data, data+count);
+        const char *pData = reinterpret_cast<const char*>(data);
+        m_buffer.insert(m_buffer.end(), pData, pData + count);
     }
     
     int PullData(T* data, int maxCount)

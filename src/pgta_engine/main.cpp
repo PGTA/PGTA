@@ -37,9 +37,10 @@ PGTA::IPGTA* SetupPGTA()
 
     PGTAConfig config;
     config.audioDesc.samplesPerSecond = 44100;
-    config.audioDesc.bitsPerSample = 16;
+    config.audioDesc.bytesPerSample = 2;
     config.audioDesc.channels = 1;
-    config.bufferSize = 8192;
+    config.numBuffers = 4;
+    config.bufferSizeInSamples = 8192;
 
     pgta->Initialize(config);
     return pgta;
@@ -59,8 +60,11 @@ void SetupOAL()
     }
 }
 
+#include <SDL.h>
+
 int main(int argc, char *argv[])
 {
+    SDL_Init(SDL_INIT_EVERYTHING);
     FixWorkingDirectory();
     SetupOAL();
 
@@ -79,7 +83,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    utils::RunLoop(20.0f, [&]
+    utils::RunLoop(10.0f, [&]
     {
         if (!playbackStream.IsPlaying())
         {
@@ -104,5 +108,6 @@ int main(int argc, char *argv[])
 
     playbackStream.DestroyStream();
     OAL_Close();
+    SDL_Quit();
     return 0;
 }

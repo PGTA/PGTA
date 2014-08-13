@@ -28,11 +28,8 @@ public:
         m_channels(data.channels)
     {
         using namespace std::chrono;
-        using SystemTime = high_resolution_clock::duration;
-        // TODO fix hardcode 44100
-        using SampleTime = duration<int64_t, std::ratio<1, 44100>>;
-
-        m_duration = duration_cast<SystemTime>(SampleTime(data.numSamples));
+        double secs = static_cast<double>(data.numSamples) / data.samplesPerSecond;
+        m_duration = duration_cast<TimeDuration>(duration<double>(secs));
     }
     
     const char* getSamples() const

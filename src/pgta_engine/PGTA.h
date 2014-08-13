@@ -5,6 +5,7 @@
 #include "AudioMixer.h"
 #include "SampleScheduler.h"
 #include <vector>
+#include <queue>
 #include <memory>
 #include <chrono>
 
@@ -13,6 +14,7 @@ class AudioStreamBuffer;
 
 class PGTAEngine: public PGTA::IPGTA
 {
+    using TimeDuration = std::chrono::high_resolution_clock::duration;
 public:
     PGTAEngine();
     ~PGTAEngine();
@@ -30,11 +32,17 @@ public:
     virtual const PGTA::OutputBuffer* GetOutputBuffers(int& numBuffers) const override;
 
 private:
-    std::chrono::high_resolution_clock::time_point m_lastUpdate;
+    TimeDuration NumSamplesToDuration(int numSamples);
+
+private:
+    std::chrono::high_resolution_clock::time_point m_mixTime;
     std::unique_ptr<EngineTrack> m_currentTrack;
     AudioMixer<16> m_mixer;
     SampleScheduler m_scheduler;
-    std::vector<char> m_mixerOutput;
+
+    std::queue<int> m_freeBuffers;
+    std::vector<std::unique_ptr<char[]>> m_mixBuffers;
     std::vector<PGTA::OutputBuffer> m_outputBuffers;
+
     PGTA::PGTAConfig m_config;
 };
