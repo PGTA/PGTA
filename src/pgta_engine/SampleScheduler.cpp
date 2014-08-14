@@ -18,10 +18,10 @@ void SampleScheduler::Initialize(EngineTrack *track,
     m_streamBuffers = std::move(streamBuffers);
     m_nextCheckCountdowns.resize(track->getSamples().size());
 
-    auto numGroups = (int)track->getGroups().size();
+    int numGroups = (int)m_engineTrack->getGroups().size();
     for (int i = 0; i < numGroups; ++i)
     {
-       // m_scheduledGroups[i] = std::chrono::duration::zero();
+        m_scheduledGroups.emplace_back(TimeDuration::zero());
     }
 }
 
@@ -31,9 +31,9 @@ void SampleScheduler::Update(TimeDuration dt)
 
     for (auto groupEndTime = m_scheduledGroups.begin(); groupEndTime != m_scheduledGroups.end(); ++groupEndTime)
     { 
-        if (dt <= groupEndTime->second)
+        if (dt <= *groupEndTime)
         {
-            groupEndTime->second -= dt;
+            *groupEndTime -= dt;
         }
     }
 
@@ -52,7 +52,8 @@ void SampleScheduler::Update(TimeDuration dt)
 
         auto &sampleGroups = m_engineTrack->getSampleGroups();
         auto sampleGroup = sampleGroups.find(i);
-        if (shouldPlay && sampleGroup != sampleGroups.end() && m_scheduledGroups[sampleGroup->second] > m_nextCheckCountdowns[i])
+        if (shouldPlay && sampleGroup != sampleGroups.end() 
+            && m_scheduledGroups[sampleGroup->second] > m_nextCheckCountdowns[i])
         {
             shouldPlay = false;
         }
@@ -84,9 +85,9 @@ void SampleScheduler::Update(TimeDuration dt)
 
     for (auto groupEndTime = m_scheduledGroups.begin(); groupEndTime != m_scheduledGroups.end(); ++groupEndTime)
     {
-        if (dt > groupEndTime->second)
+        if (dt > *groupEndTime)
         {
-            groupEndTime->second -= dt; //JORDAN MAKE THIS TIME DURATION 0
+            *groupEndTime = TimeDuration::zero();
         }
     }
 }

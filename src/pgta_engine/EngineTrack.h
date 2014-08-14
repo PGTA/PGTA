@@ -6,7 +6,6 @@
 #include <vector>
 #include <map>
 #include <cassert>
-#include <iostream>
 
 class EngineTrack
 {
