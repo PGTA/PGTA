@@ -21,7 +21,8 @@ void SampleScheduler::Initialize(EngineTrack *track,
     int numGroups = (int)m_engineTrack->getGroups().size();
     for (int i = 0; i < numGroups; ++i)
     {
-        m_scheduledGroups.emplace_back(TimeDuration::zero());
+        m_groupRemainingDurations.emplace_back(TimeDuration::zero());
+        m_readyGroupSamples.emplace_back(std::vector<uint16_t>());
     }
 }
 
@@ -29,7 +30,7 @@ void SampleScheduler::Update(TimeDuration dt)
 {
     using namespace std::chrono;
 
-    for (auto groupEndTime = m_scheduledGroups.begin(); groupEndTime != m_scheduledGroups.end(); ++groupEndTime)
+    for (auto groupEndTime = m_groupRemainingDurations.begin(); groupEndTime != m_groupRemainingDurations.end(); ++groupEndTime)
     { 
         if (dt <= *groupEndTime)
         {
@@ -49,13 +50,20 @@ void SampleScheduler::Update(TimeDuration dt)
         const auto &engineSample = m_engineTrack->getSamples()[i];
         const auto *audioSample = engineSample.getSample();
         bool shouldPlay = evalProbability(engineSample.GetProbability()); 
-
+    
         auto &sampleGroups = m_engineTrack->getSampleGroups();
         auto sampleGroup = sampleGroups.find(i);
-        if (shouldPlay && sampleGroup != sampleGroups.end() 
-            && m_scheduledGroups[sampleGroup->second] > m_nextCheckCountdowns[i])
+        bool inGroup = sampleGroup != sampleGroups.end();
+        if (shouldPlay && inGroup)
         {
-            shouldPlay = false;
+            if (m_groupRemainingDurations[sampleGroup->second] > m_nextCheckCountdowns[i])
+            {
+                shouldPlay = false;
+            }
+            else
+            {
+                m_readyGroupSamples[sampleGroup->second].emplace_back(i);
+            }
         }
 
         // padding code
@@ -71,19 +79,38 @@ void SampleScheduler::Update(TimeDuration dt)
             m_streamBuffers[i]->PushSamples(m_paddingBuffer.data(), numPaddingSamples);
         }*/
  
-        if (shouldPlay)
+        if (shouldPlay && !inGroup)
         {
-            m_streamBuffers[i]->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
-            m_scheduledGroups[sampleGroup->second] = m_nextCheckCountdowns[i] + audioSample->getDuration();
-        }
-        m_nextCheckCountdowns[i] = std::max(engineSample.GetFrequency(), audioSample->getDuration());
+            m_streamBuffers[i]->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());  
+        } 
+        m_nextCheckCountdowns[i] += std::max(engineSample.GetFrequency(), audioSample->getDuration());
 
         //std::cout << "msTime " << i << " : " << msTime << std::endl;
         //std::cout << "nextPlay " << i << " : " << m_nextPlayTime[i] << std::endl;
-        std::cout << "shouldPlay " << i << " : " << shouldPlay << std::endl;
+        //std::cout << "shouldPlay " << i << " : " << shouldPlay << std::endl;
     }
 
-    for (auto groupEndTime = m_scheduledGroups.begin(); groupEndTime != m_scheduledGroups.end(); ++groupEndTime)
+    int numGroups = (int)m_readyGroupSamples.size();
+    for (int i = 0; i < numGroups; ++i)
+    {
+        int numReadySamples = (int)m_readyGroupSamples[i].size();
+
+        if (numReadySamples == 0)
+        {
+            continue;
+        }
+        int sampleIdx = randomIntInRange(0, numReadySamples - 1);
+        int sampleNum = m_readyGroupSamples[i][sampleIdx];
+        const auto &engineSample = m_engineTrack->getSamples()[sampleNum];
+        const auto *audioSample = engineSample.getSample();
+
+        m_streamBuffers[sampleNum]->PushSamples(audioSample->getSamples(), audioSample->getNumSamples());
+        m_groupRemainingDurations[i] = m_nextCheckCountdowns[sampleNum];
+        m_readyGroupSamples[i].clear();
+    }
+
+
+    for (auto groupEndTime = m_groupRemainingDurations.begin(); groupEndTime != m_groupRemainingDurations.end(); ++groupEndTime)
     {
         if (dt > *groupEndTime)
         {

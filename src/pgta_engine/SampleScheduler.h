@@ -36,5 +36,6 @@ private:
     std::vector<std::unique_ptr<AudioStreamBuffer>> m_streamBuffers;
     std::vector<TimeDuration> m_nextCheckCountdowns;
     std::vector<char> m_paddingBuffer;
-    std::vector <TimeDuration> m_scheduledGroups;
+    std::vector <TimeDuration> m_groupRemainingDurations;
+    std::vector< std::vector<uint16_t> > m_readyGroupSamples;
 };

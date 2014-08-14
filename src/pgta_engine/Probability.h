@@ -22,3 +22,17 @@ bool evalProbability( uint32_t probability )
     return probability >= value;
 }
 
+int randomIntInRange(int lowerBound, int upperBound)
+{
+    if (lowerBound == upperBound)
+    {
+        return lowerBound;
+    }
+    static std::default_random_engine generator;
+    static std::uniform_int_distribution<int> distribution(lowerBound, upperBound);
+
+    int value = distribution(generator);
+    
+    return value;
+}
+
