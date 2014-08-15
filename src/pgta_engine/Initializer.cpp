@@ -57,6 +57,7 @@ EngineTrack* Initializer::InitializeTrack(const char *trackName)
 	
 		EngineSample::SampleProps engineSampleProps;
 		engineSampleProps.frequency = duration_cast<high_resolution_clock::duration>(milliseconds(protoSample.frequency()));
+        engineSampleProps.startTime = duration_cast<high_resolution_clock::duration>(milliseconds(protoSample.starttime()));
 		engineSampleProps.probability = protoSample.probability();
 		engineSampleProps.volumeMultiplier = protoSample.volumemultiplier();
 

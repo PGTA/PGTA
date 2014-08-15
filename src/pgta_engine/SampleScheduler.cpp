@@ -16,7 +16,13 @@ void SampleScheduler::Initialize(EngineTrack *track,
 {
     m_engineTrack = track;
     m_streamBuffers = std::move(streamBuffers);
-    m_nextCheckCountdowns.resize(track->getSamples().size());
+    
+    int numSamples = m_engineTrack->getSamples().size();
+    m_nextCheckCountdowns.resize(numSamples);
+    for (int i = 0; i < numSamples; ++i)
+    {
+        m_nextCheckCountdowns[i] = m_engineTrack->getSamples()[i].GetStartTime();
+    }
 
     int numGroups = (int)m_engineTrack->getGroups().size();
     for (int i = 0; i < numGroups; ++i)

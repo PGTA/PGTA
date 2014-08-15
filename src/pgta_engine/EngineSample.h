@@ -13,6 +13,7 @@ public:
         // time difference from start of samples
         // to next potential playback 
         TimeDuration frequency;
+        TimeDuration startTime;
         uint32_t probability;
         float volumeMultiplier;
 	};
@@ -38,6 +39,11 @@ public:
     TimeDuration GetFrequency() const
     {
         return m_props.frequency;
+    }
+
+    TimeDuration GetStartTime() const
+    {
+        return m_props.startTime;
     }
     
     uint32_t GetProbability() const

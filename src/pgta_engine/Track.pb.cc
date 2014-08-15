@@ -56,11 +56,12 @@ void protobuf_AssignDesc_Track_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Track));
   Track_Sample_descriptor_ = Track_descriptor_->nested_type(0);
-  static const int Track_Sample_offsets_[4] = {
+  static const int Track_Sample_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Track_Sample, filepath_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Track_Sample, frequency_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Track_Sample, probability_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Track_Sample, volumemultiplier_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Track_Sample, starttime_),
   };
   Track_Sample_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -126,13 +127,13 @@ void protobuf_AddDesc_Track_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\013Track.proto\022\004PGTA\"\333\001\n\005Track\022#\n\007samples"
+    "\n\013Track.proto\022\004PGTA\"\361\001\n\005Track\022#\n\007samples"
     "\030\001 \003(\0132\022.PGTA.Track.Sample\022!\n\006groups\030\002 \003"
-    "(\0132\021.PGTA.Track.Group\032h\n\006Sample\022\020\n\010fileP"
+    "(\0132\021.PGTA.Track.Group\032~\n\006Sample\022\020\n\010fileP"
     "ath\030\001 \001(\t\022\027\n\tfrequency\030\002 \001(\004:\0041000\022\026\n\013pr"
     "obability\030\003 \001(\r:\0010\022\033\n\020volumeMultiplier\030\004"
-    " \001(\002:\0011\032 \n\005Group\022\027\n\013sampleIndex\030\001 \003(\rB\002\020"
-    "\001", 241);
+    " \001(\002:\0011\022\024\n\tstartTime\030\005 \001(\004:\0010\032 \n\005Group\022\027"
+    "\n\013sampleIndex\030\001 \003(\rB\002\020\001", 263);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "Track.proto", &protobuf_RegisterTypes);
   Track::default_instance_ = new Track();
@@ -158,6 +159,7 @@ const int Track_Sample::kFilePathFieldNumber;
 const int Track_Sample::kFrequencyFieldNumber;
 const int Track_Sample::kProbabilityFieldNumber;
 const int Track_Sample::kVolumeMultiplierFieldNumber;
+const int Track_Sample::kStartTimeFieldNumber;
 #endif  // !_MSC_VER
 
 Track_Sample::Track_Sample()
@@ -180,6 +182,7 @@ void Track_Sample::SharedCtor() {
   frequency_ = GOOGLE_ULONGLONG(1000);
   probability_ = 0u;
   volumemultiplier_ = 1;
+  starttime_ = GOOGLE_ULONGLONG(0);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -226,6 +229,7 @@ void Track_Sample::Clear() {
     frequency_ = GOOGLE_ULONGLONG(1000);
     probability_ = 0u;
     volumemultiplier_ = 1;
+    starttime_ = GOOGLE_ULONGLONG(0);
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -297,6 +301,22 @@ bool Track_Sample::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(40)) goto parse_startTime;
+        break;
+      }
+
+      // optional uint64 startTime = 5 [default = 0];
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_startTime:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, &starttime_)));
+          set_has_starttime();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -343,6 +363,11 @@ void Track_Sample::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteFloat(4, this->volumemultiplier(), output);
   }
 
+  // optional uint64 startTime = 5 [default = 0];
+  if (has_starttime()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(5, this->starttime(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -374,6 +399,11 @@ void Track_Sample::SerializeWithCachedSizes(
   // optional float volumeMultiplier = 4 [default = 1];
   if (has_volumemultiplier()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteFloatToArray(4, this->volumemultiplier(), target);
+  }
+
+  // optional uint64 startTime = 5 [default = 0];
+  if (has_starttime()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(5, this->starttime(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -411,6 +441,13 @@ int Track_Sample::ByteSize() const {
     // optional float volumeMultiplier = 4 [default = 1];
     if (has_volumemultiplier()) {
       total_size += 1 + 4;
+    }
+
+    // optional uint64 startTime = 5 [default = 0];
+    if (has_starttime()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt64Size(
+          this->starttime());
     }
 
   }
@@ -452,6 +489,9 @@ void Track_Sample::MergeFrom(const Track_Sample& from) {
     if (from.has_volumemultiplier()) {
       set_volumemultiplier(from.volumemultiplier());
     }
+    if (from.has_starttime()) {
+      set_starttime(from.starttime());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -479,6 +519,7 @@ void Track_Sample::Swap(Track_Sample* other) {
     std::swap(frequency_, other->frequency_);
     std::swap(probability_, other->probability_);
     std::swap(volumemultiplier_, other->volumemultiplier_);
+    std::swap(starttime_, other->starttime_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

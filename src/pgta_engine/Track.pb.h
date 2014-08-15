@@ -126,6 +126,13 @@ class Track_Sample : public ::google::protobuf::Message {
   inline float volumemultiplier() const;
   inline void set_volumemultiplier(float value);
 
+  // optional uint64 startTime = 5 [default = 0];
+  inline bool has_starttime() const;
+  inline void clear_starttime();
+  static const int kStartTimeFieldNumber = 5;
+  inline ::google::protobuf::uint64 starttime() const;
+  inline void set_starttime(::google::protobuf::uint64 value);
+
   // @@protoc_insertion_point(class_scope:PGTA.Track.Sample)
  private:
   inline void set_has_filepath();
@@ -136,6 +143,8 @@ class Track_Sample : public ::google::protobuf::Message {
   inline void clear_has_probability();
   inline void set_has_volumemultiplier();
   inline void clear_has_volumemultiplier();
+  inline void set_has_starttime();
+  inline void clear_has_starttime();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -143,9 +152,10 @@ class Track_Sample : public ::google::protobuf::Message {
   ::google::protobuf::uint64 frequency_;
   ::google::protobuf::uint32 probability_;
   float volumemultiplier_;
+  ::google::protobuf::uint64 starttime_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_Track_2eproto();
   friend void protobuf_AssignDesc_Track_2eproto();
@@ -482,6 +492,28 @@ inline float Track_Sample::volumemultiplier() const {
 inline void Track_Sample::set_volumemultiplier(float value) {
   set_has_volumemultiplier();
   volumemultiplier_ = value;
+}
+
+// optional uint64 startTime = 5 [default = 0];
+inline bool Track_Sample::has_starttime() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void Track_Sample::set_has_starttime() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void Track_Sample::clear_has_starttime() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void Track_Sample::clear_starttime() {
+  starttime_ = GOOGLE_ULONGLONG(0);
+  clear_has_starttime();
+}
+inline ::google::protobuf::uint64 Track_Sample::starttime() const {
+  return starttime_;
+}
+inline void Track_Sample::set_starttime(::google::protobuf::uint64 value) {
+  set_has_starttime();
+  starttime_ = value;
 }
 
 // -------------------------------------------------------------------

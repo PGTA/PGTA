@@ -6,6 +6,7 @@ message Track {
 		optional uint64 frequency = 2		[default = 1000];
 		optional uint32 probability = 3		[default = 0];
 		optional float volumeMultiplier = 4	[default = 1];
+        optional uint64 startTime = 5       [default = 0];
 	}
 	message Group {
 		repeated uint32 sampleIndex = 1	[packed=true];
