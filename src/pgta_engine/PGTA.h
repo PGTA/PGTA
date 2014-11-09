@@ -27,9 +27,9 @@ public:
 
     virtual void TransitionEvent(const std::string &event, uint8_t transitionAmount) override;
 
-    virtual void Update() override;
+    virtual const PGTA::OutputBuffer* Update(int& numOutputBuffers) override;
 
-    virtual const PGTA::OutputBuffer* GetOutputBuffers(int& numBuffers) const override;
+    virtual const PGTA::OutputBuffer* GetOutputBuffers(int& numOutputBuffers) const override;
 
 private:
     TimeDuration NumSamplesToDuration(int numSamples);

@@ -86,15 +86,8 @@ int main(int argc, char *argv[])
 
     utils::RunLoop(10.0f, [&]
     {
-        if (!playbackStream.IsPlaying())
-        {
-            return false;
-        }
-
-        pgta->Update();
-
         int numBuffers = 0;
-        const auto* buffers = pgta->GetOutputBuffers(numBuffers);
+        const auto* buffers = pgta->Update(numBuffers);
         for (int i = 0; i < numBuffers; ++i)
         {
             auto& buf = buffers[i];
@@ -102,7 +95,7 @@ int main(int argc, char *argv[])
         }
 
         //pgta->StopPlayback();
-        return true;
+        return playbackStream.IsPlaying();
     });
 
     PGTA::FreePGTA(pgta);
