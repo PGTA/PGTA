@@ -86,10 +86,8 @@ int main(int argc, char *argv[])
 
     utils::RunLoop(10.0f, [&]
     {
-        pgta->Update();
-
         int numBuffers = 0;
-        const auto* buffers = pgta->GetOutputBuffers(numBuffers);
+        const auto* buffers = pgta->Update(numBuffers);
         for (int i = 0; i < numBuffers; ++i)
         {
             auto& buf = buffers[i];

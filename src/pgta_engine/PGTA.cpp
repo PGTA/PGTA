@@ -69,9 +69,9 @@ void PGTAEngine::TransitionEvent(const std::string &event, uint8_t transitionAmo
 {
 }
 
-void PGTAEngine::Update()
+const PGTA::OutputBuffer* PGTAEngine::Update(int& numOutputBuffers)
 {
-    int numBuffers = m_config.numBuffers;
+    const int numBuffers = m_config.numBuffers;
     m_freeBuffers = std::queue<int>();
     for (int i = 0; i < numBuffers; ++i)
     {
@@ -79,21 +79,21 @@ void PGTAEngine::Update()
     }
     m_outputBuffers.clear();
     using namespace std::chrono;
-    auto now = high_resolution_clock::now();
+    const auto now = high_resolution_clock::now();
     while (now > m_mixTime && !m_freeBuffers.empty())
     {
         //std::cout << m_mixTime.time_since_epoch().count() << std::endl;
 
-        int numBufferSamples = m_config.bufferSizeInSamples;
-        auto mixAmount = NumSamplesToDuration(numBufferSamples);
+        const int numBufferSamples = m_config.bufferSizeInSamples;
+        const auto mixAmount = NumSamplesToDuration(numBufferSamples);
         m_mixTime += mixAmount;
 
         m_scheduler.Update(mixAmount);
 
-        int buffer = m_freeBuffers.front();
+        const int buffer = m_freeBuffers.front();
         m_freeBuffers.pop();
-        int bufferSize = numBufferSamples * m_config.audioDesc.bytesPerSample;
-        int numSamples = m_mixer.Mix(m_mixBuffers[buffer].get(), numBufferSamples, bufferSize);
+        const int bufferSize = numBufferSamples * m_config.audioDesc.bytesPerSample;
+        const int numSamples = m_mixer.Mix(m_mixBuffers[buffer].get(), numBufferSamples, bufferSize);
 
         PGTA::OutputBuffer output;
         output.audioDesc = &m_config.audioDesc;
@@ -101,11 +101,14 @@ void PGTAEngine::Update()
         output.numSamples = numSamples;
         m_outputBuffers.emplace_back(output);
     }
+
+    numOutputBuffers = static_cast<int>(m_outputBuffers.size());
+    return m_outputBuffers.data();
 }
 
-const PGTA::OutputBuffer* PGTAEngine::GetOutputBuffers(int& numBuffers) const
+const PGTA::OutputBuffer* PGTAEngine::GetOutputBuffers(int& numOutputBuffers) const
 {
-    numBuffers = static_cast<int>(m_outputBuffers.size());
+    numOutputBuffers = static_cast<int>(m_outputBuffers.size());
     return m_outputBuffers.data();
 }
 

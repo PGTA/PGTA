@@ -34,12 +34,14 @@ namespace PGTA
         // Triggers transition event with the amount of transitionAmount [0,255]
         virtual void TransitionEvent(const std::string &event, uint8_t transitionAmount) = 0;
 
-        // Call before grabbing audio data
-        virtual void Update() = 0;
+        // Updates and returns the output buffers.
+        // Return values are the same as GetOutputBuffers
+        // Buffers become invalid after the next call to Update().
+        virtual const OutputBuffer* Update(int& numOutputBuffers) = 0;
 
         // Returns an array of buffers with the latest audio data.
         // Buffers become invalid after the next call to Update().
-        virtual const OutputBuffer* GetOutputBuffers(int& numBuffers) const = 0;
+        virtual const OutputBuffer* GetOutputBuffers(int& numOutputBuffers) const = 0;
     };
 
     IPGTA* CreatePGTA();
