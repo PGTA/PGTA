@@ -17,6 +17,7 @@ void SampleScheduler::Initialize(EngineTrack *track,
     m_engineTrack = track;
     m_streamBuffers = std::move(streamBuffers);
     
+    //set the next play time of each sample to be its start time
     int numSamples = m_engineTrack->getSamples().size();
     m_nextCheckCountdowns.resize(numSamples);
     for (int i = 0; i < numSamples; ++i)
@@ -24,6 +25,7 @@ void SampleScheduler::Initialize(EngineTrack *track,
         m_nextCheckCountdowns[i] = m_engineTrack->getSamples()[i].GetStartTime();
     }
 
+    //set all groups to be ready to schedule a new sample
     int numGroups = (int)m_engineTrack->getGroups().size();
     for (int i = 0; i < numGroups; ++i)
     {
@@ -36,6 +38,7 @@ void SampleScheduler::Update(TimeDuration dt)
 {
     using namespace std::chrono;
 
+    //decrement the group end time for all groups not ready to schedule during this update
     for (auto groupEndTime = m_groupRemainingDurations.begin(); groupEndTime != m_groupRemainingDurations.end(); ++groupEndTime)
     { 
         if (dt <= *groupEndTime)
@@ -44,6 +47,7 @@ void SampleScheduler::Update(TimeDuration dt)
         }
     }
 
+    //decrement sample end times until the sample is ready ot be scheduled again
     int numEngineSamples = (int)m_engineTrack->getSamples().size();
     for (int i = 0; i < numEngineSamples; ++i)
     {

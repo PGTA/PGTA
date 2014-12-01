@@ -10,9 +10,11 @@
 class EngineTrack
 {
 public:
-	EngineTrack(std::vector<EngineSample> samples, std::vector<EngineGroup> groups):
+	EngineTrack(std::vector<EngineSample> samples, std::vector<EngineGroup> groups, uint16_t instance, const char* trackName):
         m_samples(std::move(samples)),
-		m_groups(std::move(groups))
+		m_groups(std::move(groups)),
+        m_instance(instance),
+        m_name(trackName)
     {
         int numGroups = (int)m_groups.size();
         for (int i = 0; i < numGroups; ++i)
@@ -22,6 +24,16 @@ public:
                 m_sampleGroups[sample] = i;
             }
         }
+    }
+
+    const uint16_t getInstance() const
+    {
+        return m_instance;
+    }
+
+    const std::string getName() const
+    {
+        return m_name;
     }
 
     const std::vector<EngineSample>& getSamples() const
@@ -46,6 +58,8 @@ public:
     }
 
 private:
+    const uint16_t m_instance;
+    const char* m_name;
     std::vector<EngineSample> m_samples;
     std::map<uint16_t, uint16_t> m_sampleGroups;
     std::vector<EngineGroup> m_groups;

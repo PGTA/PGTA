@@ -79,10 +79,15 @@ int main(int argc, char *argv[])
     playbackStream.InitStream(1, 44100, AL_FORMAT_MONO16);
 
     auto* pgta = SetupPGTA();
-    if (!pgta->StartPlayback("tracks/groupTest.track"))
+    const uint16_t demoTrack = pgta->LoadTrack("tracks/demo2.track");
+    
+    if (demoTrack < 0)
     {
         return -1;
     }
+
+    pgta->PlayTrack(demoTrack);
+    pgta->StartPlayback();
 
     utils::RunLoop(10.0f, [&]
     {

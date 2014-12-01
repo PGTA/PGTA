@@ -17,7 +17,7 @@ namespace PGTA
     }
 }
 
-PGTAEngine::PGTAEngine()
+PGTAEngine::PGTAEngine() : m_isPlaying(false)
 {
 }
 
@@ -39,16 +39,53 @@ void PGTAEngine::Initialize(const PGTA::PGTAConfig &config)
     }
 }
 
-bool PGTAEngine::StartPlayback(const std::string &trackName)
+uint16_t const PGTAEngine::LoadTrack(const std::string &trackName)
 {
+    // If the track has already been loaded, just return its instance number
+    for (const auto& track : m_tracks)
+    {
+        if (trackName == track->getName())
+        {
+            return track->getInstance();
+        }
+    }
+
     auto track = Initializer::InitializeTrack(trackName.c_str());
     if (!track)
     {
+        return -1; // error code
+    }
+
+    m_tracks.emplace_back(track);
+    return track->getInstance();
+}
+
+void PGTAEngine::FreeTrack(const uint16_t)
+{
+    //TODO: implement this
+}
+
+bool PGTAEngine::PlayTrack(const uint16_t instance)
+{
+
+    EngineTrack* track;
+    auto trackIter = m_tracks.begin();
+    for (trackIter; trackIter != m_tracks.end(); ++trackIter)
+    {
+        if ((*trackIter)->getInstance() == instance)
+        {
+            track = *trackIter;
+            break;
+        }
+    }
+
+    if (trackIter == m_tracks.end())
+    {
         return false;
     }
-    m_currentTrack.reset(track);
 
     std::vector<std::unique_ptr<AudioStreamBuffer>> streamBuffers;
+
     for (auto& sample : track->getSamples())
     {
         const auto *audioSample = sample.getSample();
@@ -58,11 +95,19 @@ bool PGTAEngine::StartPlayback(const std::string &trackName)
     }
     m_scheduler.Initialize(track, std::move(streamBuffers));
     m_mixTime = std::chrono::high_resolution_clock::now();
+
+    StartPlayback();
     return true;
+}
+
+void PGTAEngine::StartPlayback()
+{
+    m_isPlaying = true;
 }
 
 void PGTAEngine::StopPlayback()
 {
+    m_isPlaying = false;
 }
 
 void PGTAEngine::TransitionEvent(const std::string &event, uint8_t transitionAmount)
@@ -71,6 +116,7 @@ void PGTAEngine::TransitionEvent(const std::string &event, uint8_t transitionAmo
 
 const PGTA::OutputBuffer* PGTAEngine::Update(int& numOutputBuffers)
 {
+    //TODO: check the isPlaying flag to see if you should actually update the buffers
     const int numBuffers = m_config.numBuffers;
     m_freeBuffers = std::queue<int>();
     for (int i = 0; i < numBuffers; ++i)

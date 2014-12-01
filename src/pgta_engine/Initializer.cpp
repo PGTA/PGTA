@@ -72,5 +72,5 @@ EngineTrack* Initializer::InitializeTrack(const char *trackName)
         engineGroups.emplace_back(std::move(group));
 	}
 
-	return new EngineTrack(std::move(engineSamples), std::move(engineGroups));
+	return new EngineTrack(std::move(engineSamples), std::move(engineGroups), ++instanceNumber, trackName);
 }

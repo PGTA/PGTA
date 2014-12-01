@@ -21,7 +21,13 @@ public:
 
     virtual void Initialize(const PGTA::PGTAConfig &config) override;
 
-    virtual bool StartPlayback(const std::string &trackName) override;
+    virtual uint16_t const LoadTrack(const std::string &trackName) override;
+
+    virtual void FreeTrack(const uint16_t instance) override;
+
+    virtual bool PlayTrack(const uint16_t instance) override;
+
+    virtual void StartPlayback() override;
 
     virtual void StopPlayback() override;
 
@@ -36,7 +42,7 @@ private:
 
 private:
     std::chrono::high_resolution_clock::time_point m_mixTime;
-    std::unique_ptr<EngineTrack> m_currentTrack;
+    std::vector<EngineTrack*> m_tracks;
     AudioMixer<16> m_mixer;
     SampleScheduler m_scheduler;
 
@@ -44,5 +50,6 @@ private:
     std::vector<std::unique_ptr<char[]>> m_mixBuffers;
     std::vector<PGTA::OutputBuffer> m_outputBuffers;
 
+    bool m_isPlaying;
     PGTA::PGTAConfig m_config;
 };
