@@ -31,7 +31,7 @@ public:
         return m_instance;
     }
 
-    const std::string getName() const
+    const char* getName() const
     {
         return m_name;
     }
