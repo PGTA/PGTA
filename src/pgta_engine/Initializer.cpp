@@ -3,6 +3,7 @@
 #include "Initializer.h"
 #include "Track.pb.h"
 #include "EngineSample.h"
+#include "WavParser.h"
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -72,5 +73,6 @@ EngineTrack* Initializer::InitializeTrack(const char *trackName)
         engineGroups.emplace_back(std::move(group));
 	}
 
+    static uint32_t instanceNumber = 0;
 	return new EngineTrack(std::move(engineSamples), std::move(engineGroups), ++instanceNumber, trackName);
 }
