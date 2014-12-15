@@ -79,9 +79,9 @@ int main(int argc, char *argv[])
     playbackStream.InitStream(1, 44100, AL_FORMAT_MONO16);
 
     auto* pgta = SetupPGTA();
-    const uint16_t demoTrack = pgta->LoadTrack("tracks/demo.track");
+    const PGTA::PGTATrackHandle demoTrack = pgta->LoadTrack("tracks/demo.track");
     
-    if (demoTrack < 0)
+    if (demoTrack.instanceNumber < 0)
     {
         return -1;
     }

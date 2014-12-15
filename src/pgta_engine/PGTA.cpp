@@ -39,40 +39,54 @@ void PGTAEngine::Initialize(const PGTA::PGTAConfig &config)
     }
 }
 
-uint16_t const PGTAEngine::LoadTrack(const std::string &trackName)
+PGTA::PGTATrackHandle const PGTAEngine::LoadTrack(const std::string &trackName)
 {
     // If the track has already been loaded, just return its instance number
     for (const auto& track : m_tracks)
     {
         if (trackName == track->getName())
         {
-            return track->getInstance();
+            return PGTA::PGTATrackHandle(track->getInstance());
         }
     }
 
     auto track = Initializer::InitializeTrack(trackName.c_str());
     if (!track)
     {
-        return -1; // error code
+        return PGTA::PGTATrackHandle (-1); // error code
     }
 
     m_tracks.emplace_back(track);
-    return track->getInstance();
+    return PGTA::PGTATrackHandle(track->getInstance());
 }
 
-void PGTAEngine::FreeTrack(const uint16_t)
+void PGTAEngine::FreeTrack(const PGTA::PGTATrackHandle handle)
 {
-    //TODO: implement this
+    //TODO: should we just delete a track even if it is currently playing?
+    auto track = m_tracks.begin();
+    while (track != m_tracks.end())
+    {
+        if ((*track)->getInstance() == handle.instanceNumber)
+        {
+            delete(*track);
+            track = m_tracks.erase(track);
+            break; // The instance number should be unique
+        }
+        else
+        {
+            ++track;
+        }
+    }
 }
 
-bool PGTAEngine::PlayTrack(const uint16_t instance)
+bool PGTAEngine::PlayTrack(const PGTA::PGTATrackHandle  handle)
 {
 
     EngineTrack* track;
     auto trackIter = m_tracks.begin();
     for (trackIter; trackIter != m_tracks.end(); ++trackIter)
     {
-        if ((*trackIter)->getInstance() == instance)
+        if ((*trackIter)->getInstance() == handle.instanceNumber)
         {
             track = *trackIter;
             break;

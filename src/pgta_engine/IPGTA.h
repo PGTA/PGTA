@@ -15,6 +15,12 @@ namespace PGTA
         uint16_t bufferSizeInSamples;
     };
 
+    struct PGTATrackHandle
+    {
+        PGTATrackHandle(int16_t instNum) : instanceNumber(instNum) {}
+        const int16_t instanceNumber;
+    };
+
     class IPGTA
     {
     public:
@@ -25,14 +31,14 @@ namespace PGTA
         // Initialize PGTA
         virtual void Initialize(const PGTAConfig &config) = 0;
 
-        // Loads a track into PGTA so that it is ready to play (returns -1 if an invalid track is given) 
-        virtual uint16_t const LoadTrack(const std::string &trackName) = 0;
+        // Loads a track into PGTA so that it is ready to play (returns handle with instance number -1 if an invalid track is given) 
+        virtual PGTATrackHandle const LoadTrack(const std::string &trackName) = 0;
         
         // Releases the track with the specified instance number from PGTA
-        virtual void FreeTrack(const uint16_t instance) = 0;
+        virtual void FreeTrack(const PGTATrackHandle instance) = 0;
 
         // Start generating audio data on update calls for the specifed track
-        virtual bool PlayTrack(const uint16_t instance) = 0;
+        virtual bool PlayTrack(const PGTATrackHandle instance) = 0;
 
         // Enables PGTA to generate audio data on update calls
         virtual void StartPlayback() = 0;

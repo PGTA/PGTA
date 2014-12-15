@@ -21,11 +21,11 @@ public:
 
     virtual void Initialize(const PGTA::PGTAConfig &config) override;
 
-    virtual uint16_t const LoadTrack(const std::string &trackName) override;
+    virtual PGTA::PGTATrackHandle const LoadTrack(const std::string &trackName) override;
 
-    virtual void FreeTrack(const uint16_t instance) override;
+    virtual void FreeTrack(const PGTA::PGTATrackHandle  instance) override;
 
-    virtual bool PlayTrack(const uint16_t instance) override;
+    virtual bool PlayTrack(const PGTA::PGTATrackHandle  instance) override;
 
     virtual void StartPlayback() override;
 
