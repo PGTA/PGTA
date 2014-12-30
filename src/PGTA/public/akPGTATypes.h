@@ -42,9 +42,4 @@ struct PGTATrackSample
     int16_t sampleId;
 };
 
-struct PGTATrackData
-{
-    
-};
-
 #undef DECLARE_HANDLE

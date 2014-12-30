@@ -4,7 +4,7 @@
 
 #include "akPGTAc.h"
 #include <string>
-#include <unordered_map>
+#include <vector>
 
 namespace PGTA
 {
@@ -17,12 +17,15 @@ namespace PGTA
         inline bool Initialize();
         inline void Destroy();
 
-        inline HPGTATrack LoadTrack(const char* trackName);
+        inline int CreateTracks(const int numTracks, const char** trackSourcesIn, HPGTATrack* tracksOut);
+        inline void FreeTracks(const int numTracks, HPGTATrack* tracksIn);
+
         inline HPGTAContext PGTACreateContext(const PGTAConfig &config);
         
     private:
         HPGTADevice m_pgtaDevice;
-        std::unordered_map<std::string, HPGTATrack> m_loadedTracks;
+
+        std::vector<HPGTATrack> m_loadedTrackHandles;
     };
     
     class PGTAContext

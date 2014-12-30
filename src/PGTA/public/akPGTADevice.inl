@@ -19,7 +19,7 @@ namespace PGTA
     {
         if (!m_pgtaDevice)
         {
-            m_pgtaDevice = PGTACreateDevice();
+            m_pgtaDevice = pgtaCreateDevice();
             return m_pgtaDevice != nullptr;
         }
         return true;
@@ -27,42 +27,27 @@ namespace PGTA
 
     void PGTADevice::Destroy()
     {
-        if (!m_pgtaDevice)
-        {
-            return;
-        }
+        const int numTracks = m_loadedTrackHandles.size();
+        pgtaFreeTracks(m_pgtaDevice, numTracks, m_loadedTrackHandles.data());
+        m_loadedTrackHandles.clear();
 
-        for (auto& pair : m_loadedTracks)
-        {
-            PGTAFreeTrack(m_pgtaDevice, pair.second);
-        }
-        m_loadedTracks.clear();
-
-        PGTADestroyDevice(m_pgtaDevice);
+        pgtaDestroyDevice(m_pgtaDevice);
         m_pgtaDevice = nullptr;
     }
 
-    HPGTATrack PGTADevice::LoadTrack(const char* trackName)
+    int PGTADevice::CreateTracks(const int numTracks, const char** trackSourceIn, HPGTATrack* tracksOut)
     {
-        if (!m_pgtaDevice || !trackName)
+        auto numLoadedTracks = pgtaCreateTracks(m_pgtaDevice, numTracks, trackSourceIn, tracksOut);
+        if (numLoadedTracks > 0)
         {
-            return nullptr;
+            m_loadedTrackHandles.insert(m_loadedTrackHandles.end(), tracksOut, tracksOut + numTracks);
         }
+        return numLoadedTracks;
+    }
 
-        auto it = m_loadedTracks.find(trackName);
-        if (it != m_loadedTracks.end())
-        {
-            return it->second;
-        }
-
-        auto track = PGTALoadTrack(m_pgtaDevice, trackName);
-        if (!track)
-        {
-            return nullptr;
-        }
-
-        m_loadedTracks.emplace(trackName, track);
-        return track;
+    void PGTADevice::FreeTracks(const int numTracks, HPGTATrack* tracksIn)
+    {
+        pgtaFreeTracks(m_pgtaDevice, numTracks, tracksIn);
     }
 
     HPGTAContext PGTADevice::PGTACreateContext(const PGTAConfig &config)

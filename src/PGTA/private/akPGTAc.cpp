@@ -1,29 +1,88 @@
 
 #include <public/akPGTAc.h>
+#include <private/akPGTADeviceImpl.h>
+#include <private/akPGTAContextImpl.h>
+#include <private/akPGTATrack.h>
 
-HPGTADevice PGTACreateDevice()
+union PGTADeviceUnion
 {
-    return nullptr;
+    HPGTADevice deviceHandle;
+    PGTADeviceImpl* pgtaDevice;
+};
+
+union PGTAContextUnion
+{
+    HPGTAContext deviceHandle;
+    PGTAContextImpl* pgtaDevice;
+};
+
+union PGTATrackUnion
+{
+    HPGTATrack trackHandle;
+    PGTATrack* pgtaTrack;
+};
+
+union PGTATrackArrayUnion
+{
+    HPGTATrack* trackHandle;
+    PGTATrack** pgtaTrack;
+};
+
+HPGTADevice pgtaCreateDevice()
+{
+    PGTADeviceUnion temp;
+    temp.pgtaDevice = new PGTADeviceImpl();
+    if (!temp.pgtaDevice->Initialize())
+    {
+        delete temp.pgtaDevice;
+        temp.pgtaDevice = nullptr;
+    }
+    return temp.deviceHandle;
 }
 
-void PGTADestroyDevice(HPGTADevice device)
+void pgtaDestroyDevice(HPGTADevice device)
 {
+    if (device)
+    {
+        PGTADeviceUnion temp;
+        temp.deviceHandle = device;
+        temp.pgtaDevice->Shutdown();
+
+        delete temp.pgtaDevice;
+    }
 }
 
-HPGTATrack PGTALoadTrack(HPGTADevice device, const char* trackName)
+int pgtaCreateTracks(HPGTADevice device, const int numTracks,
+                     const char** trackSourcesIn, HPGTATrack* tracksOut)
 {
-    return nullptr;
+    if (!device || (numTracks <= 0) || !trackSourcesIn || !tracksOut)
+    {
+        return 0;
+    }
+
+    PGTATrackArrayUnion tracks;
+    tracks.trackHandle = tracksOut;
+
+    PGTADeviceUnion temp;
+    temp.deviceHandle = device;
+    return temp.pgtaDevice->CreateTracks(numTracks, trackSourcesIn, tracks.pgtaTrack);
 }
 
-void PGTAFreeTrack(HPGTADevice device, HPGTATrack track)
+void pgtaFreeTracks(HPGTADevice device, const int numTracks, HPGTATrack* tracksIn)
 {
+    PGTATrackArrayUnion tracks;
+    tracks.trackHandle = tracksIn;
+
+    PGTADeviceUnion temp;
+    temp.deviceHandle = device;
+    temp.pgtaDevice->FreeTracks(numTracks, tracks.pgtaTrack);
 }
 
-PGTA_API int32_t         PGTAGetTrackData(HPGTATrack track);
-PGTA_API void            PGTABindTrackSamples();
+PGTA_API int32_t         pgtaGetTrackData(HPGTATrack track);
+PGTA_API void            pgtaBindTrackSamples();
 
-PGTA_API HPGTAContext    PGTACreateContext(HPGTADevice device, const PGTAConfig &config);
-PGTA_API void            PGTADestroyContext(HPGTAContext context);
-PGTA_API void            PGTABindTrack(HPGTAContext context, HPGTATrack track);
-PGTA_API PGTABuffer*     PGTAUpdate(HPGTAContext context, float delta, int32_t* numOutputBuffers);
-PGTA_API PGTABuffer*     PGTAGetOutputBuffers(int32_t* numOutputBuffers);
+PGTA_API HPGTAContext    pgtaCreateContext(HPGTADevice device, const PGTAConfig &config);
+PGTA_API void            pgtaDestroyContext(HPGTAContext context);
+PGTA_API void            pgtaBindTrack(HPGTAContext context, HPGTATrack track);
+PGTA_API PGTABuffer*     pgtaUpdate(HPGTAContext context, float delta, int32_t* numOutputBuffers);
+PGTA_API PGTABuffer*     pgtaGetOutputBuffers(int32_t* numOutputBuffers);

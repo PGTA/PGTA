@@ -54,7 +54,11 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    const HPGTATrack demoTrack = pgtaDevice.LoadTrack("tracks/demo.track");
+    // load track data to memory
+    // "tracks/demo.track"
+
+    HPGTATrack demoTrack = nullptr;
+    pgtaDevice.CreateTracks(1, nullptr, &demoTrack);
     if (!demoTrack)
     {
         return -1;
