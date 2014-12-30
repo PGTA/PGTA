@@ -5,10 +5,6 @@
 
 #define DECLARE_HANDLE(type) typedef struct J##type { int unused; }* type
 
-#ifdef __cplusplus
-namespace PGTA {
-#endif
-
 DECLARE_HANDLE(HPGTADevice);
 DECLARE_HANDLE(HPGTAContext);
 DECLARE_HANDLE(HPGTATrack);
@@ -50,9 +46,5 @@ struct PGTATrackData
 {
     
 };
-
-#ifdef __cplusplus
-} // namespace PGTA
-#endif
 
 #undef DECLARE_HANDLE

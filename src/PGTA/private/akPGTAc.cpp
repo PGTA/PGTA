@@ -1,18 +1,24 @@
 
-#pragma once
+#include <public/akPGTAc.h>
 
-#include <public/akPGTATypes.h>
-#include <public/akPlatform.h>
+HPGTADevice PGTACreateDevice()
+{
+    return nullptr;
+}
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+void PGTADestroyDevice(HPGTADevice device)
+{
+}
 
-PGTA_API HPGTADevice     PGTACreateDevice();
-PGTA_API void            PGTADestroyDevice(HPGTADevice device);
+HPGTATrack PGTALoadTrack(HPGTADevice device, const char* trackName)
+{
+    return nullptr;
+}
 
-PGTA_API HPGTATrack      PGTALoadTrack(HPGTADevice device, const char* trackName);
-PGTA_API void            PGTAFreeTrack(HPGTADevice device, HPGTATrack track);
+void PGTAFreeTrack(HPGTADevice device, HPGTATrack track)
+{
+}
+
 PGTA_API int32_t         PGTAGetTrackData(HPGTATrack track);
 PGTA_API void            PGTABindTrackSamples();
 
@@ -21,7 +27,3 @@ PGTA_API void            PGTADestroyContext(HPGTAContext context);
 PGTA_API void            PGTABindTrack(HPGTAContext context, HPGTATrack track);
 PGTA_API PGTABuffer*     PGTAUpdate(HPGTAContext context, float delta, int32_t* numOutputBuffers);
 PGTA_API PGTABuffer*     PGTAGetOutputBuffers(int32_t* numOutputBuffers);
-
-#ifdef __cplusplus
-} // extern "C"
-#endif

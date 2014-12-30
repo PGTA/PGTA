@@ -1,5 +1,5 @@
 
-#ifdef AK_PGTA
+#ifndef AK_PGTA
 #define AK_PGTA
 
 #ifdef __cplusplus
