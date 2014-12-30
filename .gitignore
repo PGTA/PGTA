@@ -33,6 +33,7 @@ _ReSharper*/
 # Ignore VS solution and projects
 *.sln
 *.vcxproj
+*.filters
 
 # Ignore dlls
 *.dll
