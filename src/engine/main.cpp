@@ -28,18 +28,6 @@ void FixWorkingDirectory()
         chdir("../..");
     }
 }
-/*
-PGTA::IPGTA* SetupPGTA()
-{
-    using namespace PGTA;
-
-    IPGTA* pgta = CreatePGTA();
-
-    
-
-    pgta->Initialize(config);
-    return pgta;
-}*/
 
 int main(int argc, char *argv[])
 {
@@ -80,7 +68,7 @@ int main(int argc, char *argv[])
     utils::RunLoop(10.0f, [&]
     {
         int32_t numBuffers = 0;
-        const auto* buffers = pgtaContext.Update(10.0f, &numBuffers);
+        const PGTABuffer* buffers = pgtaContext.Update(10.0f, &numBuffers);
         for (int32_t i = 0; i < numBuffers; ++i)
         {
             auto& buf = buffers[i];
