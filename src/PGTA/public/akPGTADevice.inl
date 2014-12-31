@@ -27,7 +27,7 @@ namespace PGTA
 
     void PGTADevice::Destroy()
     {
-        const int numTracks = m_loadedTrackHandles.size();
+        const int numTracks = static_cast<int>(m_loadedTrackHandles.size());
         pgtaFreeTracks(m_pgtaDevice, numTracks, m_loadedTrackHandles.data());
         m_loadedTrackHandles.clear();
 
