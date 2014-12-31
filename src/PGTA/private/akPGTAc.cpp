@@ -111,7 +111,7 @@ HPGTAContext pgtaCreateContext(HPGTADevice device, const PGTAConfig &config)
 
 void pgtaDestroyContext(HPGTADevice device, HPGTAContext context)
 {
-    if (!device)
+    if (!device || !context)
     {
         return;
     }

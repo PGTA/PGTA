@@ -27,14 +27,7 @@ namespace PGTA
 
     void PGTADevice::Destroy()
     {
-        for (auto contextHandle : m_contexts)
-        {
-            pgtaDestroyContext(m_pgtaDevice, contextHandle);
-        }
-
-        const int numTracks = static_cast<int>(m_loadedTrackHandles.size());
-        pgtaFreeTracks(m_pgtaDevice, numTracks, m_loadedTrackHandles.data());
-
+        // pgtaDestroyDevice takes care of deallocation
         m_contexts.clear();
         m_loadedTrackHandles.clear();
 

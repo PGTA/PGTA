@@ -72,5 +72,6 @@ PGTAContextImpl* PGTADeviceImpl::CreateContext(const PGTAConfig& config)
 
 void PGTADeviceImpl::DestroyContext(PGTAContextImpl* pgtaContext)
 {
-
+    pgtaContext->Shutdown();
+    delete pgtaContext;
 }
