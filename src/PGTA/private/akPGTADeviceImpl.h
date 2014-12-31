@@ -1,38 +1,29 @@
 
 #pragma once
 
-#include <private/akPGTATrack.h>
+#include <stdint.h>
 #include <set>
+
+struct PGTAConfig;
+class PGTATrack;
+class PGTAContextImpl;
 
 class PGTADeviceImpl
 {
 public:
-    PGTADeviceImpl() {}
-    ~PGTADeviceImpl() {}
+    PGTADeviceImpl();
+    ~PGTADeviceImpl();
 
-    bool Initialize() { return true; }
-    void Shutdown() {}
+    bool Initialize();
+    void Shutdown();
 
-    int CreateTracks(const int numTracks, const char** trackSourcesIn, PGTATrack** tracksOut)
-    {
-        for (int i = 0; i < numTracks; ++i)
-        {
-            PGTATrack* track = new PGTATrack();
-            //load track from json source
-            tracksOut[i] = track;
-            m_tracks.emplace(track);
-        }
-        return numTracks;
-    }
+    int32_t CreateTracks(const int32_t numTracks, const char** trackSourcesIn, PGTATrack** tracksOut);
+    void FreeTracks(const int32_t numTracks, PGTATrack** tracksIn);
 
-    void FreeTracks(const int numTracks, PGTATrack** tracksIn)
-    {
-        for (int i = 0; i < numTracks; ++i)
-        {
-            m_tracks.erase(tracksIn[i]);
-        }
-    }
+    PGTAContextImpl* CreateContext(const PGTAConfig& config);
+    void DestroyContext(PGTAContextImpl* pgtaContext);
 
 private:
+    std::set<PGTAContextImpl*> m_contexts;
     std::set<PGTATrack*> m_tracks;
 };

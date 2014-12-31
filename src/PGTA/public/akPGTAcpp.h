@@ -3,11 +3,14 @@
 #define AK_PGTA_CPP_H
 
 #include "akPGTAc.h"
-#include <string>
+#include <set>
 #include <vector>
 
 namespace PGTA
 {
+    class PGTADevice;
+    class PGTAContext;
+
     class PGTADevice
     {
     public:
@@ -20,18 +23,32 @@ namespace PGTA
         inline int CreateTracks(const int numTracks, const char** trackSourcesIn, HPGTATrack* tracksOut);
         inline void FreeTracks(const int numTracks, HPGTATrack* tracksIn);
 
-        inline HPGTAContext PGTACreateContext(const PGTAConfig &config);
+        inline PGTAContext CreateContext(const PGTAConfig &config);
+        inline void DestroyContext(PGTAContext& context);
         
     private:
         HPGTADevice m_pgtaDevice;
 
+        std::set<PGTAContext> m_contexts;
         std::vector<HPGTATrack> m_loadedTrackHandles;
     };
     
     class PGTAContext
     {
     public:
+        inline PGTAContext(const PGTAContext& other);
+        inline ~PGTAContext();
+        
+        inline PGTABuffer* Update(const float delta, int* numOutputBuffers);
+        inline PGTABuffer* GetOutputBuffers(int32_t* numOutputBuffers);
+
+    protected:
+        friend PGTAContext PGTADevice::CreateContext(const PGTAConfig &config);
+        friend void PGTADevice::DestroyContext(PGTAContext& context);
+        explicit inline PGTAContext(HPGTAContext context);
+
     private:
+        HPGTAContext m_pgtaContext;
     };
 }
 

@@ -4,6 +4,8 @@
 class PGTATrack
 {
 public:
-    PGTATrack() {}
-    ~PGTATrack() {}
+    PGTATrack();
+    ~PGTATrack();
+
+    
 };

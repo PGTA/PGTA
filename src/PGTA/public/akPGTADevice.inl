@@ -50,8 +50,13 @@ namespace PGTA
         pgtaFreeTracks(m_pgtaDevice, numTracks, tracksIn);
     }
 
-    HPGTAContext PGTADevice::PGTACreateContext(const PGTAConfig &config)
+    PGTAContext PGTADevice::CreateContext(const PGTAConfig &config)
     {
+        return PGTAContext(pgtaCreateContext(m_pgtaDevice, config));
+    }
 
+    void PGTADevice::DestroyContext(PGTAContext &context)
+    {
+        pgtaDestroyContext(m_pgtaDevice, context.m_pgtaContext);
     }
 }

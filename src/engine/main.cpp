@@ -4,6 +4,9 @@
 #include <SDL.h>
 #include <akPGTA.h>
 
+#include "FileUtils.h"
+#include "utils.h"
+
 #ifdef _WIN32
 #include <direct.h>
 #else
@@ -32,12 +35,7 @@ PGTA::IPGTA* SetupPGTA()
 
     IPGTA* pgta = CreatePGTA();
 
-    PGTAConfig config;
-    config.audioDesc.samplesPerSecond = 44100;
-    config.audioDesc.bytesPerSample = 2;
-    config.audioDesc.channels = 1;
-    config.numBuffers = 4;
-    config.bufferSizeInSamples = 8192;
+    
 
     pgta->Initialize(config);
     return pgta;
@@ -56,36 +54,42 @@ int main(int argc, char *argv[])
 
     // load track data to memory
     // "tracks/demo.track"
-
-    HPGTATrack demoTrack = nullptr;
-    pgtaDevice.CreateTracks(1, nullptr, &demoTrack);
-    if (!demoTrack)
+    std::string trackSource;
+    if (!ReadBinaryFileToString("tracks/demo.track", trackSource))
     {
         return -1;
     }
 
-    /*
+    HPGTATrack demoTrack = nullptr;
+    const char* source = trackSource.data();
+    if (pgtaDevice.CreateTracks(1, &source, &demoTrack) <= 0 || !demoTrack)
+    {
+        return -1;
+    }
 
-    pgta->PlayTrack(demoTrack);
-    pgta->StartPlayback();
+    PGTAConfig config;
+    config.audioDesc.samplesPerSecond = 44100;
+    config.audioDesc.bytesPerSample = 2;
+    config.audioDesc.channels = 1;
+    config.numBuffers = 4;
+    config.bufferSizeInSamples = 8192;
+    PGTA::PGTAContext pgtaContext(pgtaDevice.CreateContext(config));
+
+    //pgtaContext.BindTrack(demoTrack);
 
     utils::RunLoop(10.0f, [&]
     {
-        int numBuffers = 0;
-        const auto* buffers = pgta->Update(numBuffers);
-        for (int i = 0; i < numBuffers; ++i)
+        int32_t numBuffers = 0;
+        const auto* buffers = pgtaContext.Update(10.0f, &numBuffers);
+        for (int32_t i = 0; i < numBuffers; ++i)
         {
             auto& buf = buffers[i];
-            pgtaOutput.PushSamples(buf.audioData, buf.numSamples);
+            // use samples
         }
 
-        //pgta->StopPlayback();
-        return playbackStream.IsPlaying();
+        return (buffers != nullptr);
     });
 
-    PGTA::FreePGTA(pgta);
-
-    playbackStream.DestroyStream();*/
     SDL_Quit();
     return 0;
 }
