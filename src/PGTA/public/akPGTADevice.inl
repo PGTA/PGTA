@@ -27,8 +27,15 @@ namespace PGTA
 
     void PGTADevice::Destroy()
     {
+        for (auto contextHandle : m_contexts)
+        {
+            pgtaDestroyContext(m_pgtaDevice, contextHandle);
+        }
+
         const int numTracks = static_cast<int>(m_loadedTrackHandles.size());
         pgtaFreeTracks(m_pgtaDevice, numTracks, m_loadedTrackHandles.data());
+
+        m_contexts.clear();
         m_loadedTrackHandles.clear();
 
         pgtaDestroyDevice(m_pgtaDevice);
@@ -52,11 +59,21 @@ namespace PGTA
 
     PGTAContext PGTADevice::CreateContext(const PGTAConfig &config)
     {
-        return PGTAContext(pgtaCreateContext(m_pgtaDevice, config));
+        HPGTAContext contextHandle = pgtaCreateContext(m_pgtaDevice, config);
+        if (contextHandle)
+        {
+            m_contexts.emplace(contextHandle);
+        }
+        return PGTAContext(contextHandle);
     }
 
     void PGTADevice::DestroyContext(PGTAContext &context)
     {
-        pgtaDestroyContext(m_pgtaDevice, context.m_pgtaContext);
+        HPGTAContext contextHandle = context.m_pgtaContext;
+        if (m_contexts.find(contextHandle) != m_contexts.end())
+        {
+            pgtaDestroyContext(m_pgtaDevice, contextHandle);
+            m_contexts.erase(contextHandle);
+        }
     }
 }

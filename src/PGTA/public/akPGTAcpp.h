@@ -29,7 +29,7 @@ namespace PGTA
     private:
         HPGTADevice m_pgtaDevice;
 
-        std::set<PGTAContext> m_contexts;
+        std::set<HPGTAContext> m_contexts;
         std::vector<HPGTATrack> m_loadedTrackHandles;
     };
     
