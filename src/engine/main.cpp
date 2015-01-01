@@ -35,7 +35,7 @@ class AudioBuffer
 {
     struct AudioChunk
     {
-        static const int MAX_SAMPLES = 508;
+        static const int MAX_SAMPLES = 1020;
         int64_t numSamples;
         int16_t samples[MAX_SAMPLES];
     };
