@@ -172,10 +172,10 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, AudioBuffer* audioOut)
 
     //pgtaContext.BindTrack(demoTrack);
 
-    utils::RunLoop(10.0f, [&]
+    utils::RunLoop(10.0f, [&](double absoluteTime, float delta)
     {
         int32_t numBuffers = 0;
-        const PGTABuffer* buffers = pgtaContext.Update(10.0f, &numBuffers);
+        const PGTABuffer* buffers = pgtaContext.Update(delta, &numBuffers);
         for (int32_t i = 0; i < numBuffers; ++i)
         {
             const PGTABuffer& buf = buffers[i];

@@ -5,5 +5,5 @@
 
 namespace utils
 {
-    void RunLoop(float msTime, std::function<bool()> loopFunc);
+    void RunLoop(float msTime, std::function<bool(double, float)> loopFunc);
 }
