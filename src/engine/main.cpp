@@ -223,9 +223,19 @@ int main(int argc, char *argv[])
     {
         AudioBuffer* buffer = reinterpret_cast<AudioBuffer*>(userdata);
         int16_t* samples = reinterpret_cast<int16_t*>(stream);
-        if (buffer->PopSamples(samples, len * sizeof(int16_t)) < 0)
+        const int samplesToWrite = len / sizeof(int16_t);
+        const int samplesWritten = buffer->PopSamples(samples, samplesToWrite);
+
+        // write silence for unfilled samples
+        if (samplesWritten < 0)
         {
             printf("PopSamples failed!\n");
+            memset(stream, 0, len);
+        }
+        else if (samplesWritten < samplesToWrite)
+        {
+            const int bytesWritten = samplesWritten * 2;
+            memset(stream + bytesWritten, 0, len - bytesWritten);
         }
     };
     audioSpec.userdata = &audioBuffer;
