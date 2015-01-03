@@ -68,13 +68,19 @@ public:
             return -1;
         }
 
+        if (m_freeBuffers.empty())
+        {
+            printf("AudioBuffer::PushSamples: no free buffers!\n");
+            return -1;
+        }
+
         int numSamplesPushed = 0;
         while (numSamples > 0)
         {
             if (m_freeBuffers.empty())
             {
                 printf("AudioBuffer::PushSamples: buffer overflow pushing %i samples!\n", numSamples);
-                return -1;
+                return numSamplesPushed;
             }
 
             AudioChunk* chunk = m_freeBuffers.front();
@@ -100,13 +106,19 @@ public:
             return -1;
         }
 
+        if (m_loadedBuffers.empty())
+        {
+            printf("AudioBuffer::PopSamples: no loaded buffers!\n");
+            return -1;
+        }
+
         int numSamplesPopped = 0;
         while (numSamples > 0)
         {
             if (m_loadedBuffers.empty())
             {
                 printf("AudioBuffer::PopSamples: buffer underflow popping %i samples!\n", numSamples);
-                return -1;
+                return numSamplesPopped;
             }
 
             AudioChunk* chunk = m_loadedBuffers.front();
