@@ -74,7 +74,7 @@ public:
             if (m_freeBuffers.empty())
             {
                 printf("AudioBuffer::PushSamples: buffer overflow pushing %i samples!\n", numSamples);
-                break;
+                return -1;
             }
 
             AudioChunk* chunk = m_freeBuffers.front();
@@ -105,8 +105,8 @@ public:
         {
             if (m_loadedBuffers.empty())
             {
-                printf("AudioBuffer::PushSamples: buffer underflow popping %i samples!\n", numSamples);
-                break;
+                printf("AudioBuffer::PopSamples: buffer underflow popping %i samples!\n", numSamples);
+                return -1;
             }
 
             AudioChunk* chunk = m_loadedBuffers.front();
