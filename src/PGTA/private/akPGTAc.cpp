@@ -131,7 +131,7 @@ void pgtaBindTrack(HPGTAContext context, HPGTATrack track)
 
 PGTABuffer* pgtaUpdate(HPGTAContext context, float delta, int32_t* numOutputBuffers)
 {
-    if (!context)
+    if (!context || delta <= 0.0f)
     {
         return nullptr;
     }
