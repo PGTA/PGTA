@@ -17,7 +17,8 @@ public:
     bool Initialize();
     void Shutdown();
 
-    int32_t CreateTracks(const int32_t numTracks, const char** trackSourcesIn, PGTATrack** tracksOut);
+    int32_t CreateTracks(const int32_t numTracks, const char** trackSourcesIn,
+                         const size_t* trackSourceLengths, PGTATrack** tracksOut);
     void FreeTracks(const int32_t numTracks, PGTATrack** tracksIn);
 
     PGTAContextImpl* CreateContext(const PGTAConfig& config);

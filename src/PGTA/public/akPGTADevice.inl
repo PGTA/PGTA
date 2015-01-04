@@ -35,9 +35,11 @@ namespace PGTA
         m_pgtaDevice = nullptr;
     }
 
-    int PGTADevice::CreateTracks(const int numTracks, const char** trackSourceIn, HPGTATrack* tracksOut)
+    int PGTADevice::CreateTracks(const int numTracks, const char** trackSourceIn,
+                                 const size_t* trackSourceLengths, HPGTATrack* tracksOut)
     {
-        auto numLoadedTracks = pgtaCreateTracks(m_pgtaDevice, numTracks, trackSourceIn, tracksOut);
+        auto numLoadedTracks = pgtaCreateTracks(m_pgtaDevice, numTracks, trackSourceIn,
+                                                trackSourceLengths, tracksOut);
         if (numLoadedTracks > 0)
         {
             m_loadedTrackHandles.insert(m_loadedTrackHandles.end(), tracksOut, tracksOut + numTracks);

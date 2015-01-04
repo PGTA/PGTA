@@ -162,14 +162,15 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, AudioBuffer* audioOut)
     // load track data to memory
     // "tracks/demo.track"
     std::string trackSource;
-    if (!ReadBinaryFileToString("tracks/demo.track", trackSource))
+    if (!ReadBinaryFileToString("tracks/rain_thunder.track", trackSource))
     {
         return -1;
     }
 
     HPGTATrack demoTrack = nullptr;
     const char* source = trackSource.data();
-    if (pgtaDevice.CreateTracks(1, &source, &demoTrack) <= 0 || !demoTrack)
+    const size_t length = trackSource.length();
+    if (pgtaDevice.CreateTracks(1, &source, &length, &demoTrack) <= 0 || !demoTrack)
     {
         return -1;
     }

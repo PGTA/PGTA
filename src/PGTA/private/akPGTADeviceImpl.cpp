@@ -3,6 +3,7 @@
 #include <private/akPGTAContextImpl.h>
 #include <private/akPGTATrack.h>
 #include <public/akPGTATypes.h>
+#include <memory>
 
 PGTADeviceImpl::PGTADeviceImpl()
 {
@@ -35,14 +36,20 @@ void PGTADeviceImpl::Shutdown()
     m_tracks.clear();
 }
 
-int32_t PGTADeviceImpl::CreateTracks(const int32_t numTracks, const char** trackSourcesIn, PGTATrack** tracksOut)
+int32_t PGTADeviceImpl::CreateTracks(const int32_t numTracks, const char** trackSourcesIn,
+                                     const size_t* trackSourceLengths, PGTATrack** tracksOut)
 {
+    std::unique_ptr<PGTATrack> track;
     for (int32_t i = 0; i < numTracks; ++i)
     {
-        PGTATrack* track = new PGTATrack();
+        const char* source = trackSourcesIn[i];
+        const size_t length = trackSourceLengths[i];
+
+        track.reset(new PGTATrack());
         //load track from json source
-        tracksOut[i] = track;
-        m_tracks.emplace(track);
+
+        tracksOut[i] = track.get();
+        m_tracks.emplace(track.release());
     }
     return numTracks;
 }
@@ -51,14 +58,16 @@ void PGTADeviceImpl::FreeTracks(const int32_t numTracks, PGTATrack** tracksIn)
 {
     for (int32_t i = 0; i < numTracks; ++i)
     {
-        m_tracks.erase(tracksIn[i]);
+        PGTATrack* track = tracksIn[i];
+        m_tracks.erase(track);
+        delete track;
     }
 }
 
 PGTAContextImpl* PGTADeviceImpl::CreateContext(const PGTAConfig& config)
 {
     auto context = new PGTAContextImpl();
-    if (context->Initialize())
+    if (context->Initialize(config))
     {
         m_contexts.emplace(context);
     }

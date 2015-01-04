@@ -20,7 +20,8 @@ namespace PGTA
         inline bool Initialize();
         inline void Destroy();
 
-        inline int CreateTracks(const int numTracks, const char** trackSourcesIn, HPGTATrack* tracksOut);
+        inline int CreateTracks(const int numTracks, const char** trackSourcesIn,
+                                const size_t* trackSourceLengths, HPGTATrack* tracksOut);
         inline void FreeTracks(const int numTracks, HPGTATrack* tracksIn);
 
         inline PGTAContext CreateContext(const PGTAConfig &config);

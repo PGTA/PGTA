@@ -14,6 +14,7 @@ PGTA_API void           pgtaDestroyDevice(HPGTADevice device);
 PGTA_API int32_t        pgtaCreateTracks(HPGTADevice device,
                                          const int32_t numTracks,
                                          const char** trackSourcesIn,
+                                         const size_t* trackSourceLengths,
                                          HPGTATrack* tracksOut);
 
 PGTA_API void           pgtaFreeTracks(HPGTADevice device,

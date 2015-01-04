@@ -54,8 +54,8 @@ void pgtaDestroyDevice(HPGTADevice device)
     delete temp.pgtaDevice;
 }
 
-int pgtaCreateTracks(HPGTADevice device, const int numTracks,
-                     const char** trackSourcesIn, HPGTATrack* tracksOut)
+int pgtaCreateTracks(HPGTADevice device, const int numTracks, const char** trackSourcesIn,
+                     const size_t* trackSourceLengths, HPGTATrack* tracksOut)
 {
     if (!device)
     {
@@ -67,7 +67,8 @@ int pgtaCreateTracks(HPGTADevice device, const int numTracks,
 
     PGTADeviceUnion temp;
     temp.handle = device;
-    return temp.pgtaDevice->CreateTracks(numTracks, trackSourcesIn, tracks.pgtaTracks);
+    return temp.pgtaDevice->CreateTracks(numTracks, trackSourcesIn,
+                                         trackSourceLengths, tracks.pgtaTracks);
 }
 
 void pgtaFreeTracks(HPGTADevice device, const int numTracks, HPGTATrack* tracksIn)
