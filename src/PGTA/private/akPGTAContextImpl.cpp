@@ -10,7 +10,7 @@ PGTAContextImpl::~PGTAContextImpl()
     Shutdown();
 }
 
-bool PGTAContextImpl::Initialize()
+bool PGTAContextImpl::Initialize(const PGTAConfig& config)
 {
     return true;
 }
