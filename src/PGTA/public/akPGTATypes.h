@@ -2,6 +2,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define DECLARE_HANDLE(type) typedef struct J##type { int unused; }* type
 
