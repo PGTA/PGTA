@@ -26,6 +26,8 @@ solution "PGTA"
             "_CRT_NONSTDC_NO_DEPRECATE",
             "SDL_MAIN_HANDLED"
         }
+    filter { "system:macosx or system:linux" }
+        buildoptions "-std=c++11"
     filter {}
     
     filter { "platforms:x32" }
@@ -71,7 +73,6 @@ solution "PGTA"
         }
         
         filter { "system:macosx or system:linux" }
-            buildoptions "-std=c++11"
             includedirs "/usr/local/include/SDL2/"
             links
             {

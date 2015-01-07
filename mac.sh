@@ -1,7 +1,7 @@
 #!/bin/bash
 
-./premake5_osx clean --file=src/premake4.lua
-./premake5_osx gmake --file=src/premake4.lua
+./premake5_osx clean --file=src/pgta.lua
+./premake5_osx gmake --file=src/pgta.lua
 
 pushd src/build/ 
 make clean
