@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <private/AudioDevice.h/akAudioDevice.h>
 #include <stdint.h>
 
 struct PGTABuffer;
@@ -20,4 +21,5 @@ public:
     PGTABuffer* GetOutputBuffers(int32_t* numOutputBuffers);
 
 private:
+    AudioDevice m_audioDevice;
 };
