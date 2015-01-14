@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <private/AudioDevice.h/akAudioDevice.h>
+#include <private/AudioDevice/akAudioDevice.h>
 #include <stdint.h>
 
 struct PGTABuffer;
