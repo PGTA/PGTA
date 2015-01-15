@@ -6,7 +6,7 @@
 namespace PGTA
 {
     PGTAContext::PGTAContext(HPGTAContext context):
-        m_pgtaContext(nullptr)
+        m_pgtaContext(context)
     {
     }
 
