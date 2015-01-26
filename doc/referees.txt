@@ -1,0 +1,60 @@
+Use this file to nominate possible referees for your project. Notes:
+
+- We recommend you nominate three candidates, but you may nominate
+  more or less than that. If you nominate fewer, or if your candidates
+  are not available, then you will be assigned referees.
+
+- Assigned referees are likely to be from the core SE faculty, or
+  others invited by them: for example, SE alumnus, ECE lab staff, etc.
+
+- It is generally recommended (but not required) that your customer be
+  one of your referees.
+
+- Each nomination should include a name, an email address, and a
+  rationale. The rationale explains why you want that person as a
+  referee. The rationale is read by the SE491 instructor and by the
+  referee.
+
+- Contacting referees: Do not contact core SE Faculty directly, unless
+  they are your customer or have previously expressed personal
+  interest in your project. The SE491 instructor will contact them in
+  a coordinated manner on behalf of all requesting teams. Please
+  contact your customer directly. If there are other referees that you
+  are interested in who are not likely to get requests from other
+  teams then you may contact them directly (and CC the SE491
+  instructor).
+
+- The job of the referee is to show up on symposium day and grade your
+  project. This should take 30-45 minutes. First the referee goes to
+  your booth to see your poster and demo. Then they see your talk.
+
+- Remote referees: We will try to accommodate remote referees if that
+  person has a particular interest in the project. The most common
+  reason for this request is a remote customer.
+
+
+-----------------------------------------------------------------------
+Referee1: Assigned Referee <se-a2dir@uwaterloo.ca>
+
+Location1: UW
+
+Rationale1: Please assign us a referee. We do not have a preference.
+
+
+-----------------------------------------------------------------------
+Referee2: Assigned Referee <se-a2dir@uwaterloo.ca>
+
+Location2: UW
+
+Rationale2: Please assign us a referee. We do not have a preference.
+
+
+-----------------------------------------------------------------------
+Referee3: Assigned Referee <se-a2dir@uwaterloo.ca>
+
+Location3: UW
+
+Rationale3: Please assign us a referee. We do not have a preference.
+
+
+
