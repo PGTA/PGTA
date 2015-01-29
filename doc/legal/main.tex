@@ -35,18 +35,6 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\marginnote{%
-Comment on the legal, social, ethical, and environmental aspects of
-your projects, as applicable. For most projects legal is the main
-issue, and in most cases software licences (\ie, copyright) is the
-primary concern.
-
-Your goal here is to demonstrate awareness of the issues. You are not
-a lawyer, and you do not need to provide a legal judgement: if there
-are grey areas then you can just say that a legal opinion should be
-sought on the matter.
-}% end marginnote
-
 \input{../abstract}
 
 %-----------------------------------------------------------------------
@@ -93,59 +81,36 @@ following questions:
 
     \item What are the licenses attached to the software you are using?
     \begin{itemize}
-        \item SDL2 - zlib License
-        \item protobuf - New BSD License
+        \item SDL2 - zlib License\cite{SDL}
+        \item protobuf - New BSD License\cite{protobuf}
     \end{itemize}
 
-%-----------------------------------------------------------------------
-\marginnote{\textsc{gpl} compatibility is discussed on the
-\textsc{gnu} web site. There are many other online resources on this
-topic.
-
-\parbox{3in}{%
-\url{http://www.gnu.org/licenses/quick-guide-gplv3.html}
-
-\url{http://www.gnu.org/licenses/license-list.html}}}
-%-----------------------------------------------------------------------
-
-    \item Are %
-    \marginnote{Please provide appropriate references for your claims,
-    \eg: 
-
-    \url{http://www.softwarefreedom.org/resources/2007/gpl-non-gpl-collaboration.html}
-
-    \url{http://www.apache.org/licenses/GPL-compatibility.html}}
-    %
-    the pieces of software that you are using license
+    \item Are the pieces of software that you are using license
     compatible with each other? 
 
-    Yes, all libraries used can be redistributed in source or binary form with or without modification in a commercial
-    or non-commercial environment. 
+    Yes, all libraries used can be redistributed in source or binary form with or without modification in a
+    commercial or non-commercial environment.\cite{zlib}\cite{BSD}
 
     \item What license options are available for your project? If you
     are linking with \textsc{gpl} software then your project must be
     \textsc{gpl}, \etc
 
-    There are a number of open-source licenses available for our project such as, MIT, zlib, GPL, New BSD. 
+    There are a number of open-source licenses available for our project such as, MIT, zlib, GPL, New BSD.
 
     \item What license are you choosing for your project? Why?
 
     The MIT open-source licence is being used for PGTA. This license fits the criteria of being open-source 
     software with minimal restrictions on usage for third-parties. The MIT license also protects against
-    accidental damages that result from the use of the PGTA engine. We as developers of PGTA do not want to be 
-    held responsible for any such damages. 
+    accidental damages that result from the use of the PGTA engine.\cite{MIT} We as developers of PGTA do not want
+    to be held responsible for any such damages. 
 
     \item Does your project involve, or appear to involve, 
-    %
-    \marginnote{There is a rich legal history on this topic that you
-    could briefly reference, \eg, Napster, Morpheus, MegaUpload, \etc}
-    %
     sharing or capture of third party data?  Third party data should
     be understood broadly, including at least recorded music or
     movies, Google maps data, Yelp local business data, \etc.  
     What are the terms of service/usage for the data?
 
-    Not applicable
+    \textbf{Not applicable}
 
     \item Who will retain ownership of the copyrights on your software
     after you graduate? You? Your customer? Someone else?
@@ -153,7 +118,6 @@ topic.
     The developers of the PGTA engine will retain ownership of all aspects of the software upon graduation.
 
 \end{itemize}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Patent} 
@@ -166,20 +130,13 @@ topic.
     The scheduling algorithm with respect to how it handles transitions between tracks is patentable. As a group there
     currently is no intention to obtain a patent for any aspect of the PGTA engine. 
 
-    \item Is the 
-    %
-    \marginnote{For example, many \textsc{codecs} are patent
-    encumbered in most of the developed world, and hence do not ship
-    with many \textsc{gnu}/Linux distributions.}
-    %
-    software that you are using patent encumbered in certain
+    \item Is the software that you are using patent encumbered in certain
     countries? Does this restrict the ability to redistribute your
     software? 
 
     Our research was inconclusive, thus consultation with a legal expert is required for this matter. 
 
 \end{itemize}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Trademark}
@@ -193,7 +150,7 @@ topic.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Trade Secrets}
 
-Not applicable
+\textbf{Not applicable}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Export Controls} 
@@ -201,16 +158,11 @@ Not applicable
 In some countries, such as the United States, some technologies, such
 as cryptography, are restricted by export controls. For example, this
 is why OpenSSH and OpenBSD are developed in
-Canada.\marginnote{\url{http://www.openbsd.org/crypto.html}}.
-%
-If technology used in your project is subject to export or import
+Canada. If technology used in your project is subject to export or import
 controls in Canada, the United States, or the United Kingdom, please
 discuss.
 
-
-Not applicable 
-
-
+\textbf{Not applicable}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{End User License Agreement or Terms of Service}
@@ -221,7 +173,7 @@ Service agreement, please provide and discuss it here.
 
 The End User License Agreement is outlined in the MIT license. The PGTA engine is to be provided as is without 
 warranty of any kind. The developers and copyright holders of PGTA are not responsible for any damages or liability
-arising form the use of the PGTA engine. 
+arising form the use of the PGTA engine.\cite{MIT}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
@@ -234,25 +186,19 @@ users be? Which jurisdictions should be considered?
 
 This tool is distributed to the open-source community and thus is not bound to a specific jurisdiction. 
 
-
 \item Canada: \emph{Personal
 Information Protection and Electronic Documents Act (PIPEDA)}.
-\marginnote{Some provinces, such as Ontario, Quebec, Alberta, and
-British Columbia, have their own privacy legislation. This provincial
-legislation largely mirrors the federal legislation but is not
-identical, and in some cases the differences might count.}
 
 PGTA does not collect personal information and therefore cannot expose any personal information. 
-
 
 \item USA: \emph{Health Insurance Portability and Accountability Act
 (HIPAA)} 
 
-Not applicable
+\textbf{Not applicable}
 
 \item Europe: \emph{Data Protection Directive}
 
-Not applicable
+\textbf{Not applicable}
 
 \end{itemize}
 
@@ -263,7 +209,7 @@ Not applicable
 \begin{itemize}
     \item PGTA provides a C application programming interface (compatible with all languages)
     \item PGTA is designed to work with common game engine architectures (game loop with update calls)
-    \item PGTA makes us of streaming Pulse-code Modulation (PCM) 
+    \item PGTA makes use of streaming Pulse-code Modulation (PCM) 
     \item PGTA uses the SI unit for time (seconds)
 \end{itemize}
 
@@ -273,8 +219,6 @@ Not applicable
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Professional Ethics (PEO)}
-
-\marginnote{\url{http://www1.peo.on.ca/Ethics/code_of_ethics.html}}
 
 \begin{itemize}
 
@@ -324,12 +268,12 @@ communicating with clients, representatives of PGTA will conduct themselves prof
 \newpage
 \section{Social}
 
-Not applicable
+\textbf{Not applicable}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Environmental} 
 
-Not applicable
+\textbf{Not applicable}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
