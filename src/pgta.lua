@@ -56,6 +56,10 @@ solution "PGTA"
         defines { "NDEBUG" }
     filter {}
     
+    group "external"
+        run_include("flatbuffers.lua", "flatbuffers")
+    group ""
+    
     project "PGTA"
         kind "SharedLib"
         includedirs "PGTA"
@@ -66,6 +70,7 @@ solution "PGTA"
             "PGTA/**.cpp",
             "PGTA/**.inl"
         }
+        run_include("flatbuffers_include.lua", "flatbuffers")
 
     -- A project defines one build target
     project "engine"
