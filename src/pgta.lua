@@ -5,6 +5,12 @@ target_dir = path.getabsolute("../bin/") .. "/"
 local sdks_dir = (path.getabsolute("../../SDKs/") .. "/")
 local sdl2_dir = (sdks_dir .. "SDL2-2.0.3/")
 
+local function run_include(script, rel_dir)
+    local script_full = "external/build-tools/premake_scripts/" .. script
+    local module_full = iif(string.find(_ACTION, "vs20"), "$(ProjectDir)../", "") .. "external/" .. rel_dir
+    assert(loadfile(script_full))(module_full)
+end
+
 -- A solution contains projects, and defines the available configurations
 solution "PGTA"
     location "build"
