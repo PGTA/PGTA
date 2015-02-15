@@ -5,14 +5,21 @@
 #include <public/schema/track.fbs.h>
 #include <flatbuffers/idl.h>
 
-static PGTATrack* LoadBinaryTrack(const char* src, const size_t length, PGTATrack* track);
+static PGTATrack* LoadBinaryTrack(const uint8_t* src, const size_t length, PGTATrack* track);
 static PGTATrack* LoadAsciiTrack(const char* src, const size_t length, PGTATrack* track);
+
+static const size_t MAX_TRACK_LEN = (1 << 16);
 
 PGTATrack* PGTATrackLoader::LoadTrack(const char* src, const size_t length, PGTATrack* track)
 {
-    if (flatbuffers::BufferHasIdentifier(src, "PGTA"))
+    if (!src || length > MAX_TRACK_LEN || !track)
     {
-        return LoadBinaryTrack(src, length, track);
+        return nullptr;
+    }
+
+    if (PGTASchema::TrackBufferHasIdentifier(src))
+    {
+        return LoadBinaryTrack(reinterpret_cast<const uint8_t*>(src), length, track);
     }
     else
     {
@@ -20,8 +27,18 @@ PGTATrack* PGTATrackLoader::LoadTrack(const char* src, const size_t length, PGTA
     }
 }
 
-static PGTATrack* LoadBinaryTrack(const char* src, const size_t length, PGTATrack* track)
+static PGTATrack* LoadBinaryTrack(const uint8_t* src, const size_t length, PGTATrack* track)
 {
+    if (!PGTASchema::VerifyTrackBuffer(flatbuffers::Verifier(src, length)))
+    {
+        return nullptr;
+    }
+
+    const PGTASchema::Track* t = PGTASchema::GetTrack(src);
+    auto s = t->samples();
+    auto sample = s->Get(0);
+    sample->startTime();
+
     return nullptr;
 }
 
@@ -32,6 +49,11 @@ static PGTATrack* LoadAsciiTrack(const char* src, const size_t length, PGTATrack
     {
         return nullptr;
     }
+
+    const PGTASchema::Track* t = PGTASchema::GetTrack(parser.builder_.GetBufferPointer());
+    auto s = t->samples();
+    auto sample = s->Get(0);
+    sample->startTime();
 
     return nullptr;
 }
