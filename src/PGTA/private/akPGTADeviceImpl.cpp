@@ -2,6 +2,7 @@
 #include <private/akPGTADeviceImpl.h>
 #include <private/akPGTAContextImpl.h>
 #include <private/akPGTATrack.h>
+#include <private/akPGTATrackLoader.h>
 #include <public/akPGTATypes.h>
 #include <memory>
 
@@ -45,11 +46,16 @@ int32_t PGTADeviceImpl::CreateTracks(const int32_t numTracks, const char** track
         const char* source = trackSourcesIn[i];
         const size_t length = trackSourceLengths[i];
 
-        track.reset(new PGTATrack());
-        //load track from json source
+        PGTATrack* newTrack = new PGTATrack();
+        track.reset(newTrack);
+        if (!PGTATrackLoader::LoadTrack(source, length, newTrack))
+        {
+            // error
+        }
 
-        tracksOut[i] = track.get();
-        m_tracks.emplace(track.release());
+        tracksOut[i] = newTrack;
+        m_tracks.emplace(newTrack);
+        track.release();
     }
     return numTracks;
 }
