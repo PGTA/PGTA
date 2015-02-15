@@ -7,8 +7,8 @@ local sdl2_dir = (sdks_dir .. "SDL2-2.0.3/")
 
 local function run_include(script, rel_dir)
     local script_full = "external/build-tools/premake_scripts/" .. script
-    local incl_prefix = iif(string.find(_ACTION, "vs20"), "$(ProjectDir)../", "")
-    local module_full = "external/" .. rel_dir
+    local incl_prefix = iif(string.find(_ACTION, "vs20"), "$(ProjectDir)", "")
+    local module_full = "../external/" .. rel_dir
     assert(loadfile(script_full))(incl_prefix, module_full)
 end
 
@@ -16,16 +16,21 @@ end
 solution "PGTA"
     location "build"
     startproject "engine"
+    targetdir "../bin"
     
+    language "C++"
     platforms { "x64", "x32" }
     configurations { "Debug", "Release" }
-    flags { "Symbols" }
+    flags
+    {
+        "Symbols",
+        "StaticRuntime",
+        "NoMinimalRebuild",
+        "NoEditAndContinue",
+        "MultiProcessorCompile"
+    }
     
-    filter { "action:vs*" }
-        flags
-        {
-            "StaticRuntime", "NoMinimalRebuild", "NoEditAndContinue", "MultiProcessorCompile"
-        }
+    filter "action:vs*"
         defines
         {
             "_CRT_SECURE_NO_WARNINGS",
@@ -33,33 +38,38 @@ solution "PGTA"
             "_CRT_NONSTDC_NO_DEPRECATE",
             "SDL_MAIN_HANDLED"
         }
-    filter { "system:macosx or system:linux" }
+    filter "system:macosx or system:linux"
         buildoptions "-std=c++11"
-    filter {}
-    
-    filter { "platforms:x32" }
+        
+    filter "platforms:x32"
         targetsuffix "_x32"
-    filter { "platforms:x64" }
+    filter "platforms:x64"
         targetsuffix "_x64"
-    filter {}
-    
-    filter { "Release" }
-        flags { "LinkTimeOptimization" }
-        optimize "Full"
-    filter {}
-    
-    language "C++"
-    targetdir "../bin"
-    
-    filter { "Debug" }
+        
+    filter "Debug"
         defines { "DEBUG", "_DEBUG" }
-    filter { "Release" }
-        defines { "NDEBUG" }
+    filter "Release"
+        flags "LinkTimeOptimization"
+        defines "NDEBUG"
+        optimize "Full"
+    
+    filter "files:**.fbs"
+        buildmessage "flatc: Compiling %{file.relpath}"
+        buildcommands
+        {
+            
+        }
+        buildoutputs "%{cfg.objdir}/%{file.basename}.h"
     filter {}
     
     group "external"
         run_include("flatbuffers.lua", "flatbuffers")
     group ""
+    
+    project "PGTAschema"
+        kind "None"
+        files "PGTA/**.fbs"
+        dependson "flatc"
     
     project "PGTA"
         kind "SharedLib"
