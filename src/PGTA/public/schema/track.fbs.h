@@ -4,8 +4,7 @@
 
 namespace PGTASchemaHeader
 {
-    static const char* TRACK_FBS = R"(
-file_identifier "PGTA";
+    static const char* TRACK_FBS = R"(file_identifier "PGTA";
 namespace PGTASchema;
 
 table Sample

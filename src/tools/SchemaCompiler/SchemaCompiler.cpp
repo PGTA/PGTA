@@ -12,8 +12,7 @@ namespace PGTASchemaHeader
 {
     static const char* )-";
 
-static const char* CPP_MID = R"-( = R"(
-)-";
+static const char* CPP_MID = R"-( = R"()-";
 
 static const char* CPP_FOOTER = R"-()";
 }
@@ -35,6 +34,29 @@ void convertFilename(const char* filenameIn, char* filenameOut)
         filenameIn++;
     }
     *filenameOut = '\0';
+}
+
+int trimFbsWhitespace(const char* fbsSrc, char* trimmedSrcOut, const int bufLen)
+{
+    const char* outBegin = trimmedSrcOut;
+    const char* end = fbsSrc + bufLen;
+    char c;
+    bool inString = false;
+    while (fbsSrc < end && (c = *fbsSrc))
+    {
+        if (c == '\"')
+        {
+            inString = !inString;
+        }
+
+        // TODO: fbs trim conditions
+        if (inString || true)
+        {
+            *trimmedSrcOut++ = c;
+        }
+        ++fbsSrc;
+    }
+    return (trimmedSrcOut - outBegin);
 }
 
 int perform(const char* fbsPath, const char* headerOutPath)
@@ -68,14 +90,17 @@ int perform(const char* fbsPath, const char* headerOutPath)
     char* cppVarName = static_cast<char*>(malloc(filenameLen + 1));
     convertFilename(filename, cppVarName);
     
-    int len;
-    char buf[256];
     fputs(CPP_HEADER, dstFp);
     fputs(cppVarName, dstFp);
     fputs(CPP_MID, dstFp);
+
+    int len;
+    char buf[256];
+    char trimmedBuf[256];
     while (!feof(srcFp) && (len = fread(&buf, 1, sizeof(buf), srcFp)) > 0)
     {
-        fwrite(&buf, 1, len, dstFp);
+        len = trimFbsWhitespace(buf, trimmedBuf, len);
+        fwrite(&trimmedBuf, 1, len, dstFp);
     }
     fputs(CPP_FOOTER, dstFp);
 
