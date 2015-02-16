@@ -29,6 +29,7 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
+src/premake/*/
 
 # Ignore VS solution and projects
 *.sln
