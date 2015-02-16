@@ -33,7 +33,7 @@ solution "PGTA"
             "_CRT_NONSTDC_NO_DEPRECATE"
         }
     filter "system:macosx or system:linux"
-        buildoptions "-std=c++11"
+        buildoptions { "-std=c++11", "-fPIC" }
         
     filter "Debug"
         defines { "DEBUG", "_DEBUG" }
