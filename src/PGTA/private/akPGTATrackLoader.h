@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <stddef.h>
+
 class PGTATrack;
 
 namespace PGTATrackLoader

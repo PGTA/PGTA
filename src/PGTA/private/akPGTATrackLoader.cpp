@@ -29,7 +29,8 @@ PGTATrack* PGTATrackLoader::LoadTrack(const char* src, const size_t length, PGTA
 
 static PGTATrack* LoadBinaryTrack(const uint8_t* src, const size_t length, PGTATrack* track)
 {
-    if (!PGTASchema::VerifyTrackBuffer(flatbuffers::Verifier(src, length)))
+    flatbuffers::Verifier verifier = flatbuffers::Verifier(src, length);
+    if (!PGTASchema::VerifyTrackBuffer(verifier))
     {
         return nullptr;
     }
