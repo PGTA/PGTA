@@ -9,12 +9,22 @@ filter "files:**.fbs"
     buildoutputs ""
 filter {}
 
+local function TOUCH(file)
+    if(os.get() == "windows") then
+        return "type nul >> "..file.." && copy /b "..file.."+,, "..file
+    else
+        return "touch "..file
+    end
+end
+
 project "SchemaCompiler"
     kind "ConsoleApp"
     dependson "flatc"
     files "../tools/SchemaCompiler/SchemaCompiler.cpp"
 project "FlatbufCompiler"
-    kind "SharedLib"
+    kind "StaticLib"
     dependson "SchemaCompiler"
+    prebuildcommands(TOUCH("dummy.cpp"))
     files "../PGTA/**.fbs"
+    files (_ACTION.."/dummy.cpp")
 project "*"
