@@ -25,14 +25,22 @@ project(testname)
     filter "system:macosx or system:linux"
         includedirs "/usr/local/include/SDL2/"
         links "SDL2"
+
+    filter "system:windows"
+        postbuildcommands{
+            MKDIR("..\\..\\..\\bin\\"),
+            COPY(testname.."_*", "..\\..\\..\\bin\\")
+        }
+    filter "system:macosx or system:linux"
+        postbuildcommands{
+            MKDIR("../../../bin/"),
+            COPY(testname.."_*", "../../../bin/")
+        }
     filter {}
     if (os.get() == "windows") then
         -- include sdl2
         copy_sdl_dll = true
         dofile (sdl2_dir .. "premake5_include.lua")
     end
-    postbuildcommands{
-        MKDIR("../../../bin/"),
-        COPY(testname.."_*", "../../../bin/")
-    }
+
 project "*"

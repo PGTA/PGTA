@@ -14,8 +14,8 @@ project "PGTALib"
 
     filter "system:windows"
         postbuildcommands{
-            MKDIR("../../../bin/"),
-            COPY("PGTALib.dll", "../../../bin/")
+            MKDIR("..\\..\\..\\bin\\"),
+            COPY("PGTALib.dll", "..\\..\\..\\bin\\")
         }
     filter "system:linux"
         postbuildcommands{
