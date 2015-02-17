@@ -1,24 +1,28 @@
 
+local testname = ...
+
 target_dir = path.getabsolute("../../bin/") .. "/"
 local sdl2_dir = (path.getabsolute("../../../SDKs/") .. "/SDL2-2.0.3/")
 
-project "TestEngine"
+project(testname)
     targetdir "../../bin"
     kind "ConsoleApp"
-    includedirs "../PGTA"
+    includedirs { "../PGTA", "../tests/Common" }
     links "PGTALib"
     defines "SDL_MAIN_HANDLED"
     files
     {
-       "../engine/**.h",
-       "../engine/**.cpp"
+       "../tests/"..testname.."/**.h",
+       "../tests/"..testname.."/**.cpp",
+       "../tests/Common/**.h",
+       "../tests/Common/**.cpp"
     }
-    
+
     filter "platforms:x32"
         targetsuffix "_x32"
     filter "platforms:x64"
         targetsuffix "_x64"
-    
+
     filter "system:macosx or system:linux"
         includedirs "/usr/local/include/SDL2/"
         links "SDL2"

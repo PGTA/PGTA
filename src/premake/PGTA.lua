@@ -12,7 +12,7 @@ solution "PGTA"
     location(_ACTION)
     targetdir(_ACTION)
     startproject "TestEngine"
-    
+
     language "C++"
     platforms { "x64", "x32" }
     configurations { "Debug", "Release" }
@@ -24,7 +24,7 @@ solution "PGTA"
         "NoEditAndContinue",
         "MultiProcessorCompile"
     }
-    
+
     filter "action:vs*"
         defines
         {
@@ -34,7 +34,7 @@ solution "PGTA"
         }
     filter "system:macosx or system:linux"
         buildoptions { "-std=c++11", "-fPIC" }
-        
+
     filter "Debug"
         defines { "DEBUG", "_DEBUG" }
     filter "Release"
@@ -42,11 +42,12 @@ solution "PGTA"
         defines "NDEBUG"
         optimize "Full"
     filter {}
-    
+
     group "external"
         run_include("flatbuffers.lua", "flatbuffers")
     group ""
-    
+
     dofile "SchemaCompiler.lua"
     dofile "PGTALib.lua"
-    dofile "TestEngine.lua"
+    assert(loadfile("Test.lua"))("AudioMixerTest")
+    assert(loadfile("Test.lua"))("EngineTest")
