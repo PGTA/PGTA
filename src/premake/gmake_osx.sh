@@ -5,5 +5,5 @@
 
 pushd gmake/ 
 make clean
-make
+make -j16
 popd
