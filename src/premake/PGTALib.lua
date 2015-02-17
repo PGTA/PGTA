@@ -4,7 +4,7 @@ project "PGTALib"
     kind "SharedLib"
     includedirs "../PGTA"
     defines "PGTA_EXPORTS"
-    dependson "SchemaCompiler"
+    dependson "FlatbufCompiler"
     files
     {
         "../PGTA/**.h",
