@@ -1,0 +1,24 @@
+
+box: dirkvdb/cxx14@0.1.0
+
+build:
+    steps:
+    - script:
+        name: compiler versions
+        code: |
+          gcc --version
+          g++ --version
+          clang --version
+    - script:
+        name: building SDL
+        code: |
+          git clone https://github.com/spurious/SDL-mirror.git
+          pushd SDL-mirror
+          ./configure; make -j16
+          sudo make install
+          popd
+    - script: 
+        name: building PGTA
+        code: |
+          pushd src/premake/
+          ./gmake_linux.sh
