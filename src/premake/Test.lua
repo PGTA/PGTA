@@ -1,6 +1,7 @@
 
 local testname = ...
 
+target_dir = path.getabsolute("../../bin/") .. "/"
 local sdl2_dir = (path.getabsolute("../../../SDKs/") .. "/SDL2-2.0.3/")
 
 project(testname)
