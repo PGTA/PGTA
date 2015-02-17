@@ -43,7 +43,7 @@ end
 solution "PGTA"
     location(_ACTION)
     targetdir(_ACTION)
-    startproject "TestEngine"
+    startproject "EngineTest"
 
     language "C++"
     platforms { "x64", "x32" }

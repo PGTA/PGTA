@@ -15,17 +15,17 @@ project "PGTALib"
     filter "system:windows"
         postbuildcommands{
             MKDIR("../../../bin/"),
-            COPY("libPGTALib.dll", "../../../bin/libPGTALib.dll")
+            COPY("PGTALib.dll", "../../../bin/")
         }
     filter "system:linux"
         postbuildcommands{
             MKDIR("../../../bin/"),
-            COPY("libPGTALib.so", "../../../bin/libPGTALib.so")
+            COPY("libPGTALib.so", "../../../bin/")
         }
     filter "system:macosx"
         postbuildcommands{
             MKDIR("../../../bin/"),
-            COPY("libPGTALib.dylib", "../../../bin/libPGTALib.dylib")
+            COPY("libPGTALib.dylib", "../../../bin/")
         }
     filter {}
 project "*"
