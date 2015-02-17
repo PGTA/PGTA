@@ -1,11 +1,9 @@
 
 local testname = ...
 
-target_dir = path.getabsolute("../../bin/") .. "/"
 local sdl2_dir = (path.getabsolute("../../../SDKs/") .. "/SDL2-2.0.3/")
 
 project(testname)
-    targetdir "../../bin"
     kind "ConsoleApp"
     includedirs { "../PGTA", "../tests/Common" }
     links "PGTALib"
@@ -32,4 +30,8 @@ project(testname)
         copy_sdl_dll = true
         dofile (sdl2_dir .. "premake5_include.lua")
     end
+    postbuildcommands{
+        MKDIR("../../../bin/"),
+        COPY(testname.."_*", "../../../bin/")
+    }
 project "*"

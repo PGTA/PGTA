@@ -9,14 +9,6 @@ filter "files:**.fbs"
     buildoutputs ""
 filter {}
 
-local function TOUCH(file)
-    if(os.get() == "windows") then
-        return "type nul >> "..file.." && copy /b "..file.."+,, "..file
-    else
-        return "touch "..file
-    end
-end
-
 project "SchemaCompiler"
     kind "ConsoleApp"
     dependson "flatc"

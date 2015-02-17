@@ -8,6 +8,38 @@ function run_include(script, rel_dir)
     assert(loadfile(script_full))(incl_prefix, module_full)
 end
 
+function TOUCH(file)
+    if(os.get() == "windows") then
+        return "type nul >> "..file.." && copy /b "..file.."+,, "..file
+    else
+        return "touch "..file
+    end
+end
+
+function COPY(source, destination)
+    if(os.get() == "windows") then
+        return "xcopy /Q /E /Y /I "..source.." "..destination
+    else
+        return "cp -rf "..source.." "..destination
+    end
+end
+
+function MOVE(source, destination)
+    if(os.get() == "windows") then
+        return "move /Y "..source.." "..destination
+    else
+        return "mv -f "..source.." "..destination
+    end
+end
+
+function MKDIR(dirpath)
+    if(os.get() == "windows") then
+        return "mkdir "..dirpath
+    else
+        return "mkdir -p "..dirpath
+    end
+end
+
 solution "PGTA"
     location(_ACTION)
     targetdir(_ACTION)
