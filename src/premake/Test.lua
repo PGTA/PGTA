@@ -6,6 +6,8 @@ local sdl2_dir = (path.getabsolute("../../../SDKs/") .. "/SDL2-2.0.3/")
 
 project(testname)
     kind "ConsoleApp"
+    debugdir "../.."
+    debugcommand "%{cfg.buildtarget.directory}../../../bin/%{cfg.buildtarget.name}"
     includedirs { "../PGTA", "../tests/Common" }
     links "PGTALib"
     defines "SDL_MAIN_HANDLED"

@@ -69,8 +69,6 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, AudioBuffer* audioOut)
 int main(int argc, char *argv[])
 {
     SDL_Init(SDL_INIT_EVERYTHING);
-    utils::FixWorkingDirectory();
-
     AudioBuffer audioBuffer;
 
     SDL_AudioSpec audioSpec;
