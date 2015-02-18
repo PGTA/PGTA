@@ -13,7 +13,7 @@ project "SchemaCompiler"
     kind "ConsoleApp"
     dependson "flatc"
     files "../tools/SchemaCompiler/SchemaCompiler.cpp"
-    postbuildcommands(TOUCH("dummy.cpp"))
+    postbuildcommands "{TOUCH} dummy.cpp"
 project "FlatbufCompiler"
     kind "StaticLib"
     dependson "SchemaCompiler"

@@ -12,20 +12,9 @@ project "PGTALib"
     }
     run_include("flatbuffers_include.lua", "flatbuffers")
 
-    filter "system:windows"
-        postbuildcommands{
-            MKDIR("..\\..\\..\\bin\\"),
-            COPY("PGTALib.dll", "..\\..\\..\\bin\\")
-        }
-    filter "system:linux"
-        postbuildcommands{
-            MKDIR("../../../bin/"),
-            COPY("libPGTALib.so", "../../../bin/")
-        }
-    filter "system:macosx"
-        postbuildcommands{
-            MKDIR("../../../bin/"),
-            COPY("libPGTALib.dylib", "../../../bin/")
-        }
-    filter {}
+    postbuildcommands
+    {
+        "{MKDIR} ../../../bin",
+        "{COPY} %{cfg.buildtarget.name} ../../../bin/"
+    }
 project "*"
