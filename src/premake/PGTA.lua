@@ -3,9 +3,9 @@
 
 function run_include(script, rel_dir)
     local script_full = "../external/build-tools/premake_scripts/" .. script
-    local incl_prefix = iif(string.find(_ACTION, "vs20"), "$(ProjectDir)../", "")
-    local module_full = "../external/" .. rel_dir
-    assert(loadfile(script_full))(incl_prefix, module_full)
+    local incl_prefix = iif(string.find(_ACTION, "vs20"), "$(ProjectDir)../../external/", "../../")
+    local files_prefix = "../../"
+    assert(loadfile(script_full))(incl_prefix, files_prefix, rel_dir)
 end
 
 function TOUCH(file)
