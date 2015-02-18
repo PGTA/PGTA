@@ -8,8 +8,8 @@ project(testname)
     kind "ConsoleApp"
     debugdir "../.."
     debugcommand "%{cfg.buildtarget.directory}../../../bin/%{cfg.buildtarget.name}"
-    includedirs { "../PGTA", "../tests/Common" }
-    links "PGTALib"
+    includedirs { "../PGTA", "../AudioMixer/include", "../tests/Common" }
+    links { "PGTALib", "AudioMixer" }
     defines "SDL_MAIN_HANDLED"
     files
     {

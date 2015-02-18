@@ -4,6 +4,11 @@ project "PGTALib"
     includedirs "../PGTA"
     defines "PGTA_EXPORTS"
     dependson "FlatbufCompiler"
+    links "AudioMixer"
+    includedirs
+    {
+        "../AudioMixer/include/"
+    }
     files
     {
         "../PGTA/**.h",

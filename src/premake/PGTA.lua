@@ -47,6 +47,7 @@ solution "PGTA"
         run_include("flatbuffers.lua", "flatbuffers")
     group ""
 
+    dofile "AudioMixer.lua"
     dofile "SchemaCompiler.lua"
     dofile "PGTALib.lua"
     assert(loadfile("Test.lua"))("AudioMixerTest")
