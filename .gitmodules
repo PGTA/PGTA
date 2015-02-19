@@ -4,3 +4,6 @@
 [submodule "src/external/flatbuffers"]
 	path = src/external/flatbuffers
 	url = https://github.com/google/flatbuffers
+[submodule "src/external/SDL2"]
+	path = src/external/SDL2
+	url = https://github.com/spurious/SDL-mirror.git
