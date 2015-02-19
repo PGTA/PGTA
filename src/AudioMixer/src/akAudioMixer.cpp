@@ -24,4 +24,18 @@ namespace akAudioMixer
     {
         return ToImpl(this)->GetOutputBuffer();
     }
+
+    AudioMixer* CreateAudioMixer(const AudioMixerConfig& cfg)
+    {
+        return new AudioMixerImpl();
+    }
+
+    void FreeAudioMixer(AudioMixer*& mixer)
+    {
+        if (mixer)
+        {
+            delete ToImpl(mixer);
+            mixer = nullptr;
+        }
+    }
 }

@@ -8,8 +8,12 @@ class AudioMixerImpl;
 
 namespace akAudioMixer
 {
-    struct AudioMixerConfig;
     class MixControl;
+
+    struct AudioMixerConfig
+    {
+
+    };
 
     struct AudioBuffer
     {
