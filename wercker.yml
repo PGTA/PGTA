@@ -1,5 +1,5 @@
 
-box: dirkvdb/cxx14@0.1.0
+box: kt2davie/pgtabox@0.0.1
 
 build:
     steps:
