@@ -43,12 +43,16 @@ solution "PGTA"
         optimize "Full"
     filter {}
 
-    group "external"
+    group "Externals"
         run_include("flatbuffers.lua", "flatbuffers")
+    group "PGTA"
+        dofile "AudioMixer.lua"
+    group "PGTA"
+        dofile "PGTALib.lua"
+    group "BuildTools"
+        dofile "SchemaCompiler.lua"
+    group "Tests"
+        assert(loadfile("Test.lua"))("AudioMixerTest")
+    group "Tests"
+        assert(loadfile("Test.lua"))("EngineTest")
     group ""
-
-    dofile "AudioMixer.lua"
-    dofile "SchemaCompiler.lua"
-    dofile "PGTALib.lua"
-    assert(loadfile("Test.lua"))("AudioMixerTest")
-    assert(loadfile("Test.lua"))("EngineTest")
