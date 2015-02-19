@@ -1,12 +1,20 @@
 
+local function runexe(name)
+    if (os.get() == "windows") then
+        return name
+    else
+        return './'..name
+    end
+end
+
 filter "files:**.fbs"
     buildmessage "flatc: Compiling %{file.relpath}"
     buildcommands
     {
-        'flatc -c -o "../../PGTA/public/schema" %{file.relpath}',
-        'SchemaCompiler %{file.relpath}'
+        runexe('flatc')..' -c -o "../../PGTA/public/schema" %{file.relpath}',
+        runexe('SchemaCompiler')..' %{file.relpath}'
     }
-    buildoutputs ""
+    buildoutputs { "%{file.name}.h", "%{file.basename}_generated.h" }
 filter {}
 
 project "SchemaCompiler"
