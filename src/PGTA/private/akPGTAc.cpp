@@ -95,9 +95,9 @@ void pgtaBindTrackSamples()
 {
 }
 
-HPGTAContext pgtaCreateContext(HPGTADevice device, const PGTAConfig &config)
+HPGTAContext pgtaCreateContext(HPGTADevice device, const PGTAConfig* config)
 {
-    if (!device)
+    if (!device || !config)
     {
         return nullptr;
     }
@@ -106,7 +106,7 @@ HPGTAContext pgtaCreateContext(HPGTADevice device, const PGTAConfig &config)
     devUnion.handle = device;
     
     PGTAContextUnion contextUnion;
-    contextUnion.pgtaContext = devUnion.pgtaDevice->CreateContext(config);
+    contextUnion.pgtaContext = devUnion.pgtaDevice->CreateContext(*config);
     return contextUnion.handle;
 }
 

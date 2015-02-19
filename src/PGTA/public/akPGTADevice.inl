@@ -52,9 +52,9 @@ namespace PGTA
         pgtaFreeTracks(m_pgtaDevice, numTracks, tracksIn);
     }
 
-    PGTAContext PGTADevice::CreateContext(const PGTAConfig &config)
+    PGTAContext PGTADevice::CreateContext(const PGTAConfig& config)
     {
-        HPGTAContext contextHandle = pgtaCreateContext(m_pgtaDevice, config);
+        HPGTAContext contextHandle = pgtaCreateContext(m_pgtaDevice, &config);
         if (contextHandle)
         {
             m_contexts.emplace(contextHandle);

@@ -24,7 +24,7 @@ PGTA_API void           pgtaFreeTracks(HPGTADevice device,
 PGTA_API PGTATrackData  pgtaGetTrackData(HPGTATrack track);
 PGTA_API void           pgtaBindTrackSamples();
 
-PGTA_API HPGTAContext   pgtaCreateContext(HPGTADevice device, const PGTAConfig &config);
+PGTA_API HPGTAContext   pgtaCreateContext(HPGTADevice device, const PGTAConfig* config);
 PGTA_API void           pgtaDestroyContext(HPGTADevice device, HPGTAContext context);
 
 PGTA_API void           pgtaBindTrack(HPGTAContext context, HPGTATrack track);

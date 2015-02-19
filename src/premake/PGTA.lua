@@ -55,4 +55,6 @@ solution "PGTA"
         assert(loadfile("Test.lua"))("AudioMixerTest")
     group "Tests"
         assert(loadfile("Test.lua"))("EngineTest")
+    group "Tests"
+        assert(loadfile("TestC.lua"))("CInterfaceTest")
     group ""
