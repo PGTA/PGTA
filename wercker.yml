@@ -21,4 +21,4 @@ build:
         name: building PGTA
         code: |
           pushd src/premake/
-          ./gmake_linux.sh
+          ./linux_gmake.sh
