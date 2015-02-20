@@ -2,6 +2,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <string.h>
 #include <memory>
 
 #define NUM_UUID_BYTES 16
@@ -10,7 +11,7 @@ struct PGTAUUID
 {
     bool operator==(const PGTAUUID& other) const
     {
-        return memcmp(bytes, other.bytes, sizeof(bytes) == 0) ? true : false;
+        return memcmp(bytes, other.bytes, sizeof(bytes)) == 0 ? true : false;
     }
 
     bool operator!=(const PGTAUUID& other) const
@@ -25,7 +26,7 @@ struct PGTAUUID
             return *this;
         }
 
-        memcpy(bytes, other.bytes, sizeof(bytes)/sizeof(char));
+        memcpy(bytes, other.bytes, sizeof(bytes));
         return *this;
     }
 

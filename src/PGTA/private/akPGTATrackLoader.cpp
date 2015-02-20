@@ -86,7 +86,7 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
             auto* group = schemaSample->groupIds()->Get(j);
 
             if (group->uuid()->size() != NUM_UUID_BYTES) { continue; }
-            memcpy(sample.groups[j].bytes, group->uuid()->Data(), sizeof(sample.groups[j].bytes) / sizeof(char));
+            memcpy(sample.groups[j].bytes, group->uuid()->Data(), sizeof(sample.groups[j].bytes));
         }
     }
 
