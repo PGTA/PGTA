@@ -5,11 +5,6 @@
 #include <assert.h>
 #include "utils.h"
 
-int isPowerOfTwo(unsigned int x)
-{
-    return ((x > 0) && ((x & (~x + 1)) == x));
-}
-
 class SDLWav
 {
 public:
@@ -47,7 +42,7 @@ public:
 
     uint32_t GetNumSamples() const
     {
-        assert(isPowerOfTwo(m_audioLen));
+        assert((m_audioLen % 2) == 0);
         return (m_audioLen >> 2);
     }
 
@@ -73,7 +68,7 @@ int mixerMain(const SDLWav& wav)
 
     utils::RunLoop(10.0f, [&](double absoluteTime, float delta)
     {
-        const uint32_t deltaSamples = delta * 100.0f * 44100.0f;
+        const uint32_t deltaSamples = static_cast<uint32_t>(round(delta / 100.0f * 44100.0f));
         akAudioMixer::AudioBuffer output = mixer->Update(deltaSamples);
         return (output.samples != nullptr);
     });
