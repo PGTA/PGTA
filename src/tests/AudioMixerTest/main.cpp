@@ -73,7 +73,7 @@ int mixerMain(const SDLWav& wav)
 
     utils::RunLoop(10.0f, [&](double absoluteTime, float delta)
     {
-        const uint32_t deltaSamples = delta * 100.0f * 44100;
+        const uint32_t deltaSamples = delta * 100.0f * 44100.0f;
         akAudioMixer::AudioBuffer output = mixer->Update(deltaSamples);
         return (output.samples != nullptr);
     });
