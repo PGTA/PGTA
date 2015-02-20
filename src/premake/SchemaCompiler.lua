@@ -14,6 +14,7 @@ filter "files:**.fbs"
         runexe('flatc')..' -c -o "../../PGTA/public/schema" %{file.relpath}',
         runexe('SchemaCompiler')..' %{file.relpath}'
     }
+filter { "files:**.fbs", "system:not windows" }
     buildoutputs { "%{file.name}.h", "%{file.basename}_generated.h" }
 filter {}
 
