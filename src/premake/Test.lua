@@ -30,13 +30,12 @@ project(testname)
         targetsuffix "_x64"
     filter {}
 
-    run_include("sdl2_include.lua", "SDL2")
-
     postbuildcommands
     {
         "{MKDIR} ../../../bin",
-        "{COPY} %{cfg.buildtarget.name} ../../../bin/",
-        "{COPY} libSDL2* ../../../bin/"
+        "{COPY} %{cfg.buildtarget.name} ../../../bin/"
     }
+
+    run_include("sdl2_include.lua", "SDL2")
 
 project "*"
