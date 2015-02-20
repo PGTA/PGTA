@@ -36,7 +36,7 @@ solution "PGTA"
     filter { "action:not vs*" }
         buildoptions "-fPIC"
     filter { "action:not vs*", "language:C++" }
-        buildoptions "-std=c++11"
+        buildoptions "-std=c++1y"
 
     filter "Debug"
         defines { "DEBUG", "_DEBUG" }
