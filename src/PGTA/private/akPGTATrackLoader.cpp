@@ -53,41 +53,64 @@ static PGTATrack* LoadAsciiTrack(const char* src, const size_t length, PGTATrack
     }
 
     const PGTASchema::Track* trackSchema = PGTASchema::GetTrack(parser.builder_.GetBufferPointer());
-
+ 
     return InitTrackData(track, trackSchema);
 }
 
 static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track* t)
 {
-    auto* s = t->samples();
-
-    int len = s->size();
-
-    if (len == 0) 
-    { 
-        return nullptr; 
+    if (t == nullptr || t->samples() == nullptr || t->samples()->size() <= 0)
+    {
+        return nullptr;
     }
+
+    auto* s = t->samples();
+    int len = s->size();
+    bool hasValidSamples = false;
 
     auto* samples = new PGTATrackSample[len];
     for (int i = 0; i < len; ++i)
     {
         PGTATrackSample &sample = samples[i];
         auto* schemaSample = s->Get(i);
+        
+        if (schemaSample == nullptr || strlen(schemaSample->name()->c_str()) == 0 ||
+            schemaSample->startTime() < 0 || schemaSample->frequency() < 0 ||
+            schemaSample->probability() <= 0 || schemaSample->volumeMultiplier() <= 0)
+        {
+            continue;
+        }
+
         sample.sampleName = schemaSample->name()->c_str();
         sample.startTime = schemaSample->startTime();
         sample.frequency = schemaSample->frequency();
         sample.probability = (uint32_t)(schemaSample->probability());
         sample.volumeMultiplier = schemaSample->volumeMultiplier();
 
+        bool hasInvalidGroup = false;
         int numGroups = schemaSample->groupIds()->size();
         sample.groups.resize(numGroups);
         for (int j = 0; j < numGroups; ++j)
         {
             auto* group = schemaSample->groupIds()->Get(j);
 
-            if (group->uuid()->size() != NUM_UUID_BYTES) { continue; }
+            if (group->uuid()->size() != NUM_UUID_BYTES) 
+            { 
+                hasInvalidGroup = true;
+                break;
+            }
             memcpy(sample.groups[j].bytes, group->uuid()->Data(), sizeof(sample.groups[j].bytes));
         }
+
+        if (!hasInvalidGroup)
+        {
+            hasValidSamples = true;
+        }
+    }
+
+    if (!hasValidSamples)
+    {
+        return nullptr;
     }
 
     track->setSamples(samples);
