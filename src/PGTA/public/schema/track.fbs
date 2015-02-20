@@ -27,7 +27,6 @@ table Group
 table Track
 {
     samples:[Sample];
-    groups:[Group];
 }
 
 root_type Track;

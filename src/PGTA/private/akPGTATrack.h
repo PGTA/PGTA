@@ -2,7 +2,7 @@
 #pragma once
 
 #include <private/akPGTASample.h>
-#include <vector>
+#include <memory>
 
 class PGTATrack
 {
@@ -10,8 +10,8 @@ public:
     PGTATrack();
     ~PGTATrack();
 
-	void setSamples(std::vector<PGTATrackSample> &samples);
+	void setSamples(PGTATrackSample samples[]);
 
 private:
-	std::vector<PGTATrackSample> m_samples;
+	std::unique_ptr<PGTATrackSample[]> m_samples;
 };

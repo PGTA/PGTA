@@ -13,6 +13,6 @@ struct PGTATrackSample
     uint32_t probability;
     float volumeMultiplier;
 
-    std::vector<PGTAUUID*> groups;
+    std::vector<PGTAUUID> groups;
     //const int16_t* audioData;
 };

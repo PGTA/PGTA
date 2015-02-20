@@ -6,6 +6,7 @@
 #include <public/schema/track.fbs.h>
 #include <flatbuffers/idl.h>
 #include <vector>
+#include <memory>
 
 static PGTATrack* LoadBinaryTrack(const uint8_t* src, const size_t length, PGTATrack* track);
 static PGTATrack* LoadAsciiTrack(const char* src, const size_t length, PGTATrack* track);
@@ -58,36 +59,35 @@ static PGTATrack* LoadAsciiTrack(const char* src, const size_t length, PGTATrack
 
 static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track* t)
 {
-    auto s = t->samples();
+    auto* s = t->samples();
 
     int len = s->size();
 
-    if (len == 0) { return nullptr; }
+    if (len == 0) 
+    { 
+        return nullptr; 
+    }
 
-    std::vector<PGTATrackSample> samples;
+    auto* samples = new PGTATrackSample[len];
     for (int i = 0; i < len; ++i)
     {
-        auto schemaSample = s->Get(i);
-        PGTATrackSample sample;
+        PGTATrackSample &sample = samples[i];
+        auto* schemaSample = s->Get(i);
         sample.sampleName = schemaSample->name()->c_str();
         sample.startTime = schemaSample->startTime();
         sample.frequency = schemaSample->frequency();
         sample.probability = (uint32_t)(schemaSample->probability());
+        sample.volumeMultiplier = schemaSample->volumeMultiplier();
 
         int numGroups = schemaSample->groupIds()->size();
+        sample.groups.resize(numGroups);
         for (int j = 0; j < numGroups; ++j)
         {
-            auto group = schemaSample->groupIds()->Get(j);
+            auto* group = schemaSample->groupIds()->Get(j);
 
-            int8_t groupIdBuffer[NUM_UUID_BYTES];
             if (group->uuid()->size() != NUM_UUID_BYTES) { continue; }
-            memcpy(groupIdBuffer, group->uuid()->Data(), NUM_UUID_BYTES);
-
-            PGTAUUID *groupId = new PGTAUUID(groupIdBuffer);
-            sample.groups.emplace_back(groupId);
+            memcpy(sample.groups[j].bytes, group->uuid()->Data(), sizeof(sample.groups[j].bytes) / sizeof(char));
         }
-
-        samples.emplace_back(sample);
     }
 
     track->setSamples(samples);

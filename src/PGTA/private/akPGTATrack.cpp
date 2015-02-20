@@ -9,7 +9,7 @@ PGTATrack::~PGTATrack()
 {
 }
 
-void PGTATrack::setSamples(std::vector<PGTATrackSample> &samples)
+void PGTATrack::setSamples(PGTATrackSample samples[])
 {
-    m_samples = std::move(samples);
+    m_samples = std::unique_ptr<PGTATrackSample[]>(samples);
 }
