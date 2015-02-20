@@ -2,17 +2,17 @@
 #pragma once
 
 #include <stdint.h>
-#include "akAudioSample.h"
 
 class AudioMixerImpl;
 
 namespace akAudioMixer
 {
+    class AudioSource;
     class MixControl;
 
     struct AudioMixerConfig
     {
-
+        float mixAheadSeconds;
     };
 
     struct AudioBuffer
@@ -27,10 +27,14 @@ namespace akAudioMixer
         using Impl = AudioMixerImpl;
         struct MixHandle
         {
+            explicit operator bool() const
+            {
+                return (id > 0);
+            }
             uint64_t id;
         };
 
-        MixHandle AddSample(AudioSample sample);
+        MixHandle AddSource(AudioSource* source);
         MixControl* GetMixControl(MixHandle handle);
 
         AudioBuffer Update(const uint32_t deltaNumSamples);

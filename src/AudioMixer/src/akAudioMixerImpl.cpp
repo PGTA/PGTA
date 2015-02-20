@@ -1,7 +1,7 @@
 
 #include "akAudioMixerImpl.h"
 
-AudioMixerImpl::MixHandle AudioMixerImpl::AddSample(AudioSample sample)
+AudioMixerImpl::MixHandle AudioMixerImpl::AddSource(akAudioMixer::AudioSource* source)
 {
     return MixHandle{};
 }

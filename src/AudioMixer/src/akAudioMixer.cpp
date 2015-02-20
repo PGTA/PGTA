@@ -5,9 +5,9 @@
 
 namespace akAudioMixer
 {
-    AudioMixer::MixHandle AudioMixer::AddSample(AudioSample sample)
+    AudioMixer::MixHandle AudioMixer::AddSource(AudioSource* source)
     {
-        return ToImpl(this)->AddSample(sample);
+        return ToImpl(this)->AddSource(source);
     }
 
     MixControl* AudioMixer::GetMixControl(AudioMixer::MixHandle handle)

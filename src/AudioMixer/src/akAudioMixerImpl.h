@@ -2,11 +2,12 @@
 #pragma once
 
 #include "AudioMixer/akAudioMixer.h"
+#include <memory>
 
 class AudioMixerImpl: public akAudioMixer::AudioMixer
 {
 public:
-    MixHandle AddSample(AudioSample sample);
+    MixHandle AddSource(akAudioMixer::AudioSource* source);
     akAudioMixer::MixControl* GetMixControl(MixHandle handle);
 
     akAudioMixer::AudioBuffer Update(const uint32_t deltaNumSamples);
