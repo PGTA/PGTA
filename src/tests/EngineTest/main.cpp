@@ -8,9 +8,8 @@
 
 #include "FileUtils.h"
 #include "utils.h"
-#include "AudioBuffer.h"
 
-int pgtaMain(SDL_AudioDeviceID audioDevice, AudioBuffer* audioOut)
+int pgtaMain(SDL_AudioDeviceID audioDevice)
 {
     PGTA::PGTADevice pgtaDevice;
     if (!pgtaDevice.Initialize())
@@ -52,12 +51,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, AudioBuffer* audioOut)
         {
             const PGTABuffer& buf = buffers[i];
             const int16_t* samples = reinterpret_cast<const int16_t*>(buf.samples);
-            SDL_LockAudioDevice(audioDevice);
-            if (audioOut->PushSamples(samples, buf.numSamples) < 0)
-            {
-                printf("PushSamples failed!\n");
-            }
-            SDL_UnlockAudioDevice(audioDevice);
+            SDL_QueueAudio(audioDevice, samples, buf.numSamples*2);
         }
 
         return (buffers != nullptr);
@@ -69,7 +63,6 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, AudioBuffer* audioOut)
 int main(int argc, char *argv[])
 {
     SDL_Init(SDL_INIT_EVERYTHING);
-    AudioBuffer audioBuffer;
 
     SDL_AudioSpec audioSpec;
     SDL_zero(audioSpec);
@@ -77,33 +70,13 @@ int main(int argc, char *argv[])
     audioSpec.format = AUDIO_S16;
     audioSpec.channels = 1;
     audioSpec.samples = 4096;
-    audioSpec.callback = [](void *userdata, Uint8* stream, int len)
-    {
-        AudioBuffer* buffer = reinterpret_cast<AudioBuffer*>(userdata);
-        int16_t* samples = reinterpret_cast<int16_t*>(stream);
-        const int samplesToWrite = len / sizeof(int16_t);
-        const int samplesWritten = buffer->PopSamples(samples, samplesToWrite);
-
-        // write silence for unfilled samples
-        if (samplesWritten < 0)
-        {
-            printf("PopSamples failed!\n");
-            memset(stream, 0, len);
-        }
-        else if (samplesWritten < samplesToWrite)
-        {
-            const int bytesWritten = samplesWritten * 2;
-            memset(stream + bytesWritten, 0, len - bytesWritten);
-        }
-    };
-    audioSpec.userdata = &audioBuffer;
     SDL_AudioDeviceID audioDevice = SDL_OpenAudioDevice(nullptr, false, &audioSpec, nullptr, 0);
 
     int ret = 0;
     if (audioDevice > 0)
     {
         SDL_PauseAudioDevice(audioDevice, 0);
-        ret = pgtaMain(audioDevice, &audioBuffer);
+        ret = pgtaMain(audioDevice);
         SDL_CloseAudioDevice(audioDevice);
     }
 
