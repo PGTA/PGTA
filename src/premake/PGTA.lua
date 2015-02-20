@@ -2,10 +2,11 @@
 -- Procedurally Generated Transitional Audio Build --
 
 function run_include(script, rel_dir)
-    local script_full = "../external/build-tools/premake_scripts/" .. script
-    local incl_prefix = iif(string.find(_ACTION, "vs20"), "$(ProjectDir)../../external/", "../../")
-    local files_prefix = "../../"
-    assert(loadfile(script_full))(incl_prefix, files_prefix, rel_dir)
+    local external_dir = path.getabsolute("../external")
+    local repo_dir = path.join(external_dir, rel_dir)
+    local script_full = external_dir.."/build-tools/premake_scripts/"..script
+    local output_dir = path.getabsolute("../premake/".._ACTION)
+    assert(loadfile(script_full))(repo_dir, output_dir)
 end
 
 solution "PGTA"
@@ -47,6 +48,10 @@ solution "PGTA"
 
     group "Externals"
         run_include("flatbuffers.lua", "flatbuffers")
+    group "Externals"
+        run_include("flatc.lua", "flatbuffers")
+    group "Externals"
+        run_include("sdl2.lua", "SDL2")
     group "PGTA"
         dofile "AudioMixer.lua"
     group "PGTA"

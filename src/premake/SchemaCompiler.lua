@@ -19,7 +19,7 @@ filter {}
 
 project "SchemaCompiler"
     kind "ConsoleApp"
-    dependson "flatc"
+    run_include("flatc_include.lua", "flatbuffers")
     files "../tools/SchemaCompiler/SchemaCompiler.cpp"
     postbuildcommands "{TOUCH} dummy.cpp"
 project "FlatbufCompiler"

@@ -1,16 +1,21 @@
 
 local testname = ...
 
-target_dir = path.getabsolute("../../bin/") .. "/"
-local sdl2_dir = (path.getabsolute("../../../SDKs/") .. "/SDL2-2.0.3/")
-
 project(testname)
     kind "ConsoleApp"
     debugdir "../.."
     debugcommand "%{cfg.buildtarget.directory}../../../bin/%{cfg.buildtarget.name}"
     includedirs { "../PGTA", "../AudioMixer/include", "../tests/Common" }
-    links { "PGTALib", "AudioMixer" }
-    defines "SDL_MAIN_HANDLED"
+    links
+    {
+        "PGTALib",
+        "AudioMixer"
+    }
+    defines
+    {
+        "SDL_MAIN_HANDLED",
+        "_REENTRANT"
+    }
     files
     {
        "../tests/"..testname.."/**.h",
@@ -23,22 +28,15 @@ project(testname)
         targetsuffix "_x32"
     filter "platforms:x64"
         targetsuffix "_x64"
-
-    filter "system:macosx or system:linux"
-        includedirs "/usr/local/include/SDL2/"
-        links "SDL2"
     filter {}
+
+    run_include("sdl2_include.lua", "SDL2")
 
     postbuildcommands
     {
         "{MKDIR} ../../../bin",
-        "{COPY} %{cfg.buildtarget.name} ../../../bin/"
+        "{COPY} %{cfg.buildtarget.name} ../../../bin/",
+        "{COPY} libSDL2* ../../../bin/"
     }
-
-    if (os.get() == "windows") then
-        -- include sdl2
-        copy_sdl_dll = true
-        dofile (sdl2_dir .. "premake5_include.lua")
-    end
 
 project "*"
