@@ -20,8 +20,8 @@ public:
 
 private:
     bool GetSamplesFromSource(akAudioMixer::AudioSource& source, int16_t* output, uint32_t count);
-    uint64_t CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,
-                              uint32_t deltaTime, uint64_t mixAheadAmount);
+    uint32_t CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,
+                              uint32_t deltaTime, uint32_t mixAheadAmount);
 
 private:
     akAudioMixer::AudioMixerConfig m_cfg;
@@ -29,7 +29,7 @@ private:
     std::vector<akAudioMixer::AudioSource> m_sources;
     std::vector<int16_t> m_mixBuffer;
 
-    uint64_t m_numMixAheadSamples;
     uint64_t m_mixerTime;
     uint64_t m_userTime;
+    uint32_t m_numMixAheadSamples;
 };

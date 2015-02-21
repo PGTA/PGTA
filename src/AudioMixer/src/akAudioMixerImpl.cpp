@@ -8,24 +8,24 @@ AudioMixerImpl::AudioMixerImpl():
     m_cfg(),
     m_sources(),
     m_mixBuffer(),
-    m_numMixAheadSamples(0),
     m_mixerTime(0),
-    m_userTime(0)
+    m_userTime(0),
+    m_numMixAheadSamples(0)
 {
 }
 
 bool AudioMixerImpl::Initialize(const akAudioMixer::AudioMixerConfig& cfg)
 {
-    uint64_t numMixAheadSamples = static_cast<uint64_t>(cfg.mixAheadSeconds * 44100);
+    uint32_t numMixAheadSamples = static_cast<size_t>(cfg.mixAheadSeconds * 44100);
 
     m_cfg = cfg;
     m_sources.clear();
     m_sources.reserve(64);
     // allocate double the number of mix ahead samples initially
     m_mixBuffer.reserve(numMixAheadSamples << 1);
-    m_numMixAheadSamples = numMixAheadSamples;
     m_mixerTime = 0;
     m_userTime = 0;
+    m_numMixAheadSamples = numMixAheadSamples;
     return true;
 }
 
@@ -44,7 +44,7 @@ akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
 {
     uint64_t userTime = m_userTime;
     uint64_t mixerTime = m_mixerTime;
-    uint64_t numSamplesToMix = CalcSamplesToMix(mixerTime, userTime, deltaNumSamples, m_numMixAheadSamples);
+    uint32_t numSamplesToMix = CalcSamplesToMix(mixerTime, userTime, deltaNumSamples, m_numMixAheadSamples);
 
     m_mixerTime = mixerTime + numSamplesToMix;
     m_userTime = userTime + deltaNumSamples;
@@ -94,13 +94,13 @@ bool AudioMixerImpl::GetSamplesFromSource(akAudioMixer::AudioSource& source, int
     return false;
 }
 
-uint64_t AudioMixerImpl::CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,
-                                          uint32_t deltaTime, uint64_t mixAheadAmount)
+uint32_t AudioMixerImpl::CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,
+                                          uint32_t deltaTime, uint32_t mixAheadAmount)
 {
     const uint64_t requiredMixerTime = userTime + deltaTime + mixAheadAmount;
     if (requiredMixerTime > mixerTime)
     {
-        return requiredMixerTime - mixerTime;
+        return static_cast<uint32_t>(requiredMixerTime - mixerTime);
     }
     return 0;
 }

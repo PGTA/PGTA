@@ -78,7 +78,7 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
     {
         const uint32_t deltaSamples = static_cast<uint32_t>(round(delta * 44100.0f));
         akAudioMixer::AudioBuffer output = mixer->Update(deltaSamples);
-        SDL_QueueAudio(audioDevice, output.samples, output.numSamples*2);
+        SDL_QueueAudio(audioDevice, output.samples, static_cast<Uint32>(output.numSamples*2));
         return (output.samples != nullptr) && (output.samples > 0);
     });
 

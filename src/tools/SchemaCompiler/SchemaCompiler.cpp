@@ -36,7 +36,7 @@ void convertFilename(const char* filenameIn, char* filenameOut)
     *filenameOut = '\0';
 }
 
-int trimFbsWhitespace(const char* fbsSrc, char* trimmedSrcOut, const int bufLen)
+size_t trimFbsWhitespace(const char* fbsSrc, char* trimmedSrcOut, const size_t bufLen)
 {
     const char* outBegin = trimmedSrcOut;
     const char* end = fbsSrc + bufLen;
@@ -94,7 +94,7 @@ int perform(const char* fbsPath, const char* headerOutPath)
     fputs(cppVarName, dstFp);
     fputs(CPP_MID, dstFp);
 
-    int len;
+    size_t len;
     char buf[256];
     char trimmedBuf[256];
     while (!feof(srcFp) && (len = fread(&buf, 1, sizeof(buf), srcFp)) > 0)
