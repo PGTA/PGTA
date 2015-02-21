@@ -5,6 +5,6 @@
 
 namespace utils
 {
-    void RunLoop(float msTime, std::function<bool(double, float)> loopFunc);
+    void RunLoop(float deltaSec, std::function<bool(double, float)> loopFunc);
     void FixWorkingDirectory();
 }
