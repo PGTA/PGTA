@@ -49,12 +49,11 @@ akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
     m_mixerTime = mixerTime + numSamplesToMix;
     m_userTime = userTime + deltaNumSamples;
 
-    if (m_sources.empty())
-    {
-        return akAudioMixer::AudioBuffer{};
-    }
-
     m_mixBuffer.resize(numSamplesToMix);
+    if (m_mixBuffer.capacity() > (m_mixBuffer.size() << 1))
+    {
+        m_mixBuffer.shrink_to_fit();
+    }
     int16_t* outputBuffer = m_mixBuffer.data();
 
     auto& sources = m_sources;
