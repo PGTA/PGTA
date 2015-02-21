@@ -54,9 +54,6 @@ akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
         return akAudioMixer::AudioBuffer{};
     }
 
-    std::cout << mixerTime << " " << userTime << " " << deltaNumSamples << " " << m_numMixAheadSamples << " "
-              << "Mixing " << numSamplesToMix << " samples" << std::endl;
-
     m_mixBuffer.resize(numSamplesToMix);
     int16_t* outputBuffer = m_mixBuffer.data();
 
@@ -94,7 +91,7 @@ bool AudioMixerImpl::GetSamplesFromSource(akAudioMixer::AudioSource& source, int
     }
 
     std::fill(output + numReceived, output + count, 0);
-    std::cout << (count - numReceived) << " silence samples" << std::endl;
+    std::cout << (count - numReceived) << " silence samples\n";
     return false;
 }
 

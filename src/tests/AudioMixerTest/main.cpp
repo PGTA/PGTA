@@ -19,7 +19,7 @@ public:
         assert(m_spec.freq == 44100);
         assert(m_spec.format == AUDIO_S16);
         assert(m_spec.channels == 1);
-        std::cout << filename << " has " << (m_audioLen >> 1) << " samples" << std::endl;
+        std::cout << filename << " has " << (m_audioLen >> 1) << " samples\n";
     }
 
     ~SDLWav()
@@ -73,7 +73,6 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
 
     utils::RunLoop(0.01f, [&](double absoluteTime, float delta)
     {
-        //std::cout << "abs: " << absoluteTime << " delta: " << delta << std::endl;
         const uint32_t deltaSamples = static_cast<uint32_t>(round(delta * 44100.0f));
         akAudioMixer::AudioBuffer output = mixer->Update(deltaSamples);
         SDL_QueueAudio(audioDevice, output.samples, output.numSamples*2);
@@ -91,6 +90,7 @@ static void quit(int param)
 
 int main(int argc, const char* argv[])
 {
+    std::cout.sync_with_stdio(false);
     signal(SIGINT, &quit);
     utils::FixWorkingDirectory();
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -103,17 +103,17 @@ int main(int argc, const char* argv[])
     audioSpec.samples = 4096;
     SDL_AudioDeviceID audioDevice = SDL_OpenAudioDevice(nullptr, false, &audioSpec, nullptr, 0);
 
-    std::cout << "Drivers:" << std::endl;
+    std::cout << "Drivers:\n";
     int numDrivers = SDL_GetNumAudioDrivers();
     for (int i = 0; i < numDrivers; ++i)
     {
-        std::cout << SDL_GetAudioDriver(i) << std::endl;
+        std::cout << SDL_GetAudioDriver(i) << "\n";
     }
-    std::cout << "Devices:" << std::endl;
+    std::cout << "Devices:\n";
     int numDevices = SDL_GetNumAudioDevices(0);
     for (int i = 0; i < numDevices; ++i)
     {
-        std::cout << SDL_GetAudioDeviceName(i, 0) << std::endl;
+        std::cout << SDL_GetAudioDeviceName(i, 0) << "\n";
     }
 
     SDLWav thunder("media/thunder2.wav");
