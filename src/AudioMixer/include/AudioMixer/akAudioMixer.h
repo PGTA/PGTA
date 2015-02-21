@@ -2,12 +2,12 @@
 #pragma once
 
 #include <stdint.h>
+#include "akAudioSource.h"
 
 class AudioMixerImpl;
 
 namespace akAudioMixer
 {
-    class AudioSource;
     class MixControl;
 
     struct AudioMixerConfig
@@ -34,7 +34,7 @@ namespace akAudioMixer
             uint64_t id;
         };
 
-        MixHandle AddSource(AudioSource* source);
+        MixHandle AddSource(AudioSource source);
         MixControl* GetMixControl(MixHandle handle);
 
         AudioBuffer Update(const uint32_t deltaNumSamples);

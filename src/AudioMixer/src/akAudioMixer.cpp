@@ -5,7 +5,7 @@
 
 namespace akAudioMixer
 {
-    AudioMixer::MixHandle AudioMixer::AddSource(AudioSource* source)
+    AudioMixer::MixHandle AudioMixer::AddSource(AudioSource source)
     {
         return ToImpl(this)->AddSource(source);
     }
@@ -27,7 +27,13 @@ namespace akAudioMixer
 
     AudioMixer* CreateAudioMixer(const AudioMixerConfig& cfg)
     {
-        return new AudioMixerImpl();
+        AudioMixerImpl* mixer = new AudioMixerImpl();
+        if (mixer && mixer->Initialize(cfg))
+        {
+            return mixer;
+        }
+        delete mixer;
+        return nullptr;
     }
 
     void FreeAudioMixer(AudioMixer*& mixer)

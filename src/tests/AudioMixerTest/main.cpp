@@ -3,6 +3,8 @@
 #include <SDL_audio.h>
 #include <akAudioMixer.h>
 #include <assert.h>
+#include <signal.h>
+#include <iostream>
 #include "utils.h"
 
 class SDLWav
@@ -14,6 +16,10 @@ public:
         m_spec()
     {
         SDL_LoadWAV(filename, &m_spec, &m_audioBuf, &m_audioLen);
+        assert(m_spec.freq == 44100);
+        assert(m_spec.format == AUDIO_S16);
+        assert(m_spec.channels == 1);
+        std::cout << filename << " has " << (m_audioLen >> 1) << " samples" << std::endl;
     }
 
     ~SDLWav()
@@ -31,7 +37,6 @@ public:
 
     const SDL_AudioSpec& GetSpec() const
     {
-        assert(m_spec.format == AUDIO_S16);
         return m_spec;
     }
 
@@ -43,7 +48,7 @@ public:
     uint32_t GetNumSamples() const
     {
         assert((m_audioLen % 2) == 0);
-        return (m_audioLen >> 2);
+        return (m_audioLen >> 1);
     }
 
 private:
@@ -52,10 +57,10 @@ private:
     SDL_AudioSpec m_spec;
 };
 
-int mixerMain(const SDLWav& wav)
+int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
 {
     akAudioMixer::AudioMixerConfig cfg;
-    cfg.mixAheadSeconds = 0.01f;
+    cfg.mixAheadSeconds = 1.0f;
     akAudioMixer::AudioMixer* mixer = akAudioMixer::CreateAudioMixer(cfg);
     if (!mixer)
     {
@@ -64,30 +69,62 @@ int mixerMain(const SDLWav& wav)
 
     akAudioMixer::AudioSource source;
     source.SetSource(wav.GetSamplePtr(), wav.GetNumSamples());
-    mixer->AddSource(&source);
+    mixer->AddSource(source);
 
-    utils::RunLoop(10.0f, [&](double absoluteTime, float delta)
+    utils::RunLoop(0.01f, [&](double absoluteTime, float delta)
     {
-        const uint32_t deltaSamples = static_cast<uint32_t>(round(delta / 100.0f * 44100.0f));
+        //std::cout << "abs: " << absoluteTime << " delta: " << delta << std::endl;
+        const uint32_t deltaSamples = static_cast<uint32_t>(round(delta * 44100.0f));
         akAudioMixer::AudioBuffer output = mixer->Update(deltaSamples);
-        return (output.samples != nullptr);
+        SDL_QueueAudio(audioDevice, output.samples, output.numSamples*2);
+        return (output.samples != nullptr) && (output.samples > 0);
     });
 
     akAudioMixer::FreeAudioMixer(mixer);
     return 0;
 }
 
+static void quit(int param)
+{
+    exit(1);
+}
+
 int main(int argc, const char* argv[])
 {
+    signal(SIGINT, &quit);
+    utils::FixWorkingDirectory();
     SDL_Init(SDL_INIT_EVERYTHING);
 
-    SDLWav thunder("media/thunder1.wav");
-    if (!thunder)
+    SDL_AudioSpec audioSpec;
+    SDL_zero(audioSpec);
+    audioSpec.freq = 44100;
+    audioSpec.format = AUDIO_S16;
+    audioSpec.channels = 1;
+    audioSpec.samples = 4096;
+    SDL_AudioDeviceID audioDevice = SDL_OpenAudioDevice(nullptr, false, &audioSpec, nullptr, 0);
+
+    std::cout << "Drivers:" << std::endl;
+    int numDrivers = SDL_GetNumAudioDrivers();
+    for (int i = 0; i < numDrivers; ++i)
     {
-        return -1;
+        std::cout << SDL_GetAudioDriver(i) << std::endl;
+    }
+    std::cout << "Devices:" << std::endl;
+    int numDevices = SDL_GetNumAudioDevices(0);
+    for (int i = 0; i < numDevices; ++i)
+    {
+        std::cout << SDL_GetAudioDeviceName(i, 0) << std::endl;
     }
 
-    int ret = mixerMain(thunder);
+    SDLWav thunder("media/thunder2.wav");
+
+    int ret = -1;
+    if (audioDevice > 0 && thunder)
+    {
+        SDL_PauseAudioDevice(audioDevice, 0);
+        ret = mixerMain(audioDevice, thunder);
+        SDL_CloseAudioDevice(audioDevice);
+    }
 
     SDL_Quit();
     return ret;

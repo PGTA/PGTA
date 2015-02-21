@@ -24,14 +24,14 @@ namespace akAudioMixer
 
         uint32_t PushSamples(const int16_t* samples, uint32_t numSamples)
         {
-            
+            return 0;
         }
 
         uint32_t PopSamples(int16_t* samples, uint32_t numSamples)
         {
-
+            return 0;
         }
-        
+
     private:
         int16_t* m_samples;
         uint32_t m_bufferSizeSamples;
