@@ -60,7 +60,10 @@ private:
 int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
 {
     akAudioMixer::AudioMixerConfig cfg;
-    cfg.mixAheadSeconds = 1.0f;
+    // mix ahead time needs to be dt at minimum,
+    // but larger in most cases to catch misbehaving timers
+    // which usually jump for 15-30 ms periodically
+    cfg.mixAheadSeconds = 0.05f;
     akAudioMixer::AudioMixer* mixer = akAudioMixer::CreateAudioMixer(cfg);
     if (!mixer)
     {
@@ -123,9 +126,11 @@ int main(int argc, const char* argv[])
     {
         SDL_PauseAudioDevice(audioDevice, 0);
         ret = mixerMain(audioDevice, thunder);
-        SDL_CloseAudioDevice(audioDevice);
+        SDL_PauseAudioDevice(audioDevice, 1);
+        getchar();
     }
 
+    SDL_CloseAudioDevice(audioDevice);
     SDL_Quit();
     return ret;
 }
