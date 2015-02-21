@@ -1,5 +1,6 @@
 
 #include "akAudioMixerImpl.h"
+#include <AudioMixer/akAudioSource.h>
 #include "akVectorUtils.h"
 #include <assert.h>
 #include <iostream>
@@ -29,9 +30,9 @@ bool AudioMixerImpl::Initialize(const akAudioMixer::AudioMixerConfig& cfg)
     return true;
 }
 
-AudioMixerImpl::MixHandle AudioMixerImpl::AddSource(akAudioMixer::AudioSource source)
+AudioMixerImpl::MixHandle AudioMixerImpl::AddSource(const akAudioMixer::AudioSource& source)
 {
-    m_sources.emplace_back(std::move(source));
+    m_sources.emplace_back(source);
     return MixHandle{};
 }
 

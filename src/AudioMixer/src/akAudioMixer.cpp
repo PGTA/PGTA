@@ -5,7 +5,7 @@
 
 namespace akAudioMixer
 {
-    AudioMixer::MixHandle AudioMixer::AddSource(AudioSource source)
+    AudioMixer::MixHandle AudioMixer::AddSource(const AudioSource& source)
     {
         return ToImpl(this)->AddSource(source);
     }

@@ -12,7 +12,7 @@ public:
 
     bool Initialize(const akAudioMixer::AudioMixerConfig& cfg);
 
-    MixHandle AddSource(akAudioMixer::AudioSource source);
+    MixHandle AddSource(const akAudioMixer::AudioSource& source);
     akAudioMixer::MixControl* GetMixControl(MixHandle handle);
 
     akAudioMixer::AudioBuffer Update(const uint32_t deltaNumSamples);
