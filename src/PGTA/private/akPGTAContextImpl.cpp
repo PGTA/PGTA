@@ -21,7 +21,6 @@ void PGTAContextImpl::Shutdown()
 
 PGTABuffer* PGTAContextImpl::Update(const float delta, int* numOutputBuffers)
 {
-    m_audioDevice.Update(delta);
     return nullptr;
 }
 
