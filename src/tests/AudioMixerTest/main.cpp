@@ -62,8 +62,8 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
     akAudioMixer::AudioMixerConfig cfg;
     // mix ahead time needs to be dt at minimum,
     // but larger in most cases to catch misbehaving timers
-    // which usually jump for 15-30 ms periodically
-    cfg.mixAheadSeconds = 0.05f;
+    // which can jump for 15-30 ms periodically
+    cfg.mixAheadSeconds = 0.1f;
     akAudioMixer::AudioMixer* mixer = akAudioMixer::CreateAudioMixer(cfg);
     if (!mixer)
     {
