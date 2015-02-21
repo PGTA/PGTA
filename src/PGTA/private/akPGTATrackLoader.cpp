@@ -72,34 +72,47 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
     for (int i = 0; i < len; ++i)
     {
         PGTATrackSample &sample = samples[i];
-        auto* schemaSample = s->Get(i);
-        
-        if (schemaSample == nullptr || strlen(schemaSample->name()->c_str()) == 0 ||
-            schemaSample->startTime() < 0 || schemaSample->frequency() < 0 ||
-            schemaSample->probability() <= 0 || schemaSample->volumeMultiplier() <= 0)
+        const auto* schemaSample = s->Get(i);
+        if (!schemaSample)
         {
             continue;
         }
 
-        sample.sampleName = schemaSample->name()->c_str();
+        const auto* name = schemaSample->name();
+        const float probability = schemaSample->probability();
+        const float volumeMultiplier = schemaSample->volumeMultiplier();
+
+        if (!name || name->size() == 0 ||
+            probability < 0.0f || volumeMultiplier < 0.0f)
+        {
+            continue;
+        }
+
+        sample.sampleName = name->c_str();
         sample.startTime = schemaSample->startTime();
         sample.frequency = schemaSample->frequency();
-        sample.probability = (uint32_t)(schemaSample->probability());
-        sample.volumeMultiplier = schemaSample->volumeMultiplier();
+        sample.probability = probability;
+        sample.volumeMultiplier = volumeMultiplier;
 
         bool hasInvalidGroup = false;
-        int numGroups = schemaSample->groupIds()->size();
+        const auto* groupIds = schemaSample->groupIds();
+        if (!groupIds || groupIds->size() == 0)
+        {
+            continue;
+        }
+
+        const int numGroups = groupIds->size();
         sample.groups.resize(numGroups);
         for (int j = 0; j < numGroups; ++j)
         {
-            auto* group = schemaSample->groupIds()->Get(j);
-
-            if (group->uuid()->size() != NUM_UUID_BYTES) 
-            { 
+            const auto* group = groupIds->Get(j);
+            const flatbuffers::Vector<int8_t>* uuid = nullptr;
+            if (!group || !(uuid = group->uuid()) || uuid->size() != NUM_UUID_BYTES)
+            {
                 hasInvalidGroup = true;
                 break;
             }
-            memcpy(sample.groups[j].bytes, group->uuid()->Data(), sizeof(sample.groups[j].bytes));
+            memcpy(sample.groups[j].bytes, uuid->Data(), sizeof(sample.groups[j].bytes));
         }
 
         if (!hasInvalidGroup)

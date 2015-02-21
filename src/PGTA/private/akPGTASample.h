@@ -4,13 +4,14 @@
 #include <private/akPGTAUUID.h>
 #include <stdint.h>
 #include <vector>
+#include <string>
 
 struct PGTATrackSample
 {
-    const char* sampleName;
+    std::string sampleName;
     uint64_t frequency;
     uint64_t startTime;
-    uint32_t probability;
+    float probability;
     float volumeMultiplier;
 
     std::vector<PGTAUUID> groups;
