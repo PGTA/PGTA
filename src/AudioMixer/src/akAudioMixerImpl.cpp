@@ -62,8 +62,7 @@ akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
     {
         if (!GetSamplesFromSource(sources[i], outputBuffer, numSamplesToMix))
         {
-            akUtils::FastRemove(sources, i);
-            --i;
+            i = akUtils::FastRemove(sources, i);
             --numSources;
             continue;
         }
