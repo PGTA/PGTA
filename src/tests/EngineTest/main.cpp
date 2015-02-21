@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     SDL_AudioDeviceID audioDevice = SDL_OpenAudioDevice(nullptr, false, &audioSpec, nullptr, 0);
 
     int ret = 0;
-    if (audioDevice > 0)
+    if (audioDevice > 1)
     {
         SDL_PauseAudioDevice(audioDevice, 0);
         ret = pgtaMain(audioDevice);
