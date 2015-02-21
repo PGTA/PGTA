@@ -48,9 +48,10 @@ akAudioMixer::MixControl* AudioMixerImpl::GetMixControl(AudioMixerImpl::MixHandl
 
 akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
 {
-    uint64_t userTime = m_userTime;
-    uint64_t mixerTime = m_mixerTime;
-    uint32_t numSamplesToMix = CalcSamplesToMix(mixerTime, userTime, deltaNumSamples, m_numMixAheadSamples);
+    const uint64_t userTime = m_userTime;
+    const uint64_t mixerTime = m_mixerTime;
+    const uint32_t numSamplesToMix =
+        CalcSamplesToMix(mixerTime, userTime, deltaNumSamples, m_numMixAheadSamples);
 
     m_mixerTime = mixerTime + numSamplesToMix;
     m_userTime = userTime + deltaNumSamples;
