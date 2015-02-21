@@ -68,7 +68,7 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
     int len = s->size();
     bool hasValidSamples = false;
 
-    auto* samples = new PGTATrackSample[len];
+    auto samples = std::make_unique<PGTATrackSample[]>(len);
     for (int i = 0; i < len; ++i)
     {
         PGTATrackSample &sample = samples[i];
@@ -113,6 +113,6 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
         return nullptr;
     }
 
-    track->setSamples(samples);
+    track->SetSamples(samples);
     return track;
 }

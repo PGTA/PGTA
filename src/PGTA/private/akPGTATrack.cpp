@@ -1,5 +1,6 @@
 
 #include <private/akPGTATrack.h>
+#include <private/akPGTASample.h>
 
 PGTATrack::PGTATrack()
 {
@@ -9,7 +10,7 @@ PGTATrack::~PGTATrack()
 {
 }
 
-void PGTATrack::setSamples(PGTATrackSample samples[])
+void PGTATrack::SetSamples(std::unique_ptr<PGTATrackSample[]>& samples)
 {
-    m_samples = std::unique_ptr<PGTATrackSample[]>(samples);
+    m_samples = std::move(samples);
 }
