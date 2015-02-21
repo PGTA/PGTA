@@ -64,6 +64,7 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
     // but larger in most cases to catch misbehaving timers
     // which can jump for 15-30 ms periodically
     cfg.mixAheadSeconds = 0.1f;
+    cfg.sampleFramesPerSecond = 44100;
     akAudioMixer::AudioMixer* mixer = akAudioMixer::CreateAudioMixer(cfg);
     if (!mixer)
     {

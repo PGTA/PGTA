@@ -13,6 +13,7 @@ namespace akAudioMixer
     struct AudioMixerConfig
     {
         float mixAheadSeconds;
+        uint32_t sampleFramesPerSecond;
     };
 
     struct AudioBuffer

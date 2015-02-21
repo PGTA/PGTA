@@ -22,6 +22,7 @@ private:
     bool GetSamplesFromSource(akAudioMixer::AudioSource& source, int16_t* output, uint32_t count);
     uint32_t CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,
                               uint32_t deltaTime, uint32_t mixAheadAmount);
+    static bool IsValidConfig(const akAudioMixer::AudioMixerConfig& cfg);
 
 private:
     akAudioMixer::AudioMixerConfig m_cfg;

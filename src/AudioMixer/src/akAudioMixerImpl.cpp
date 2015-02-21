@@ -17,7 +17,12 @@ AudioMixerImpl::AudioMixerImpl():
 
 bool AudioMixerImpl::Initialize(const akAudioMixer::AudioMixerConfig& cfg)
 {
-    uint32_t numMixAheadSamples = static_cast<size_t>(cfg.mixAheadSeconds * 44100);
+    if (!IsValidConfig(cfg))
+    {
+        return false;
+    }
+    const uint32_t numMixAheadSamples =
+        static_cast<uint32_t>(cfg.mixAheadSeconds * cfg.sampleFramesPerSecond);
 
     m_cfg = cfg;
     m_sources.clear();
@@ -103,4 +108,14 @@ uint32_t AudioMixerImpl::CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,
         return static_cast<uint32_t>(requiredMixerTime - mixerTime);
     }
     return 0;
+}
+
+bool AudioMixerImpl::IsValidConfig(const akAudioMixer::AudioMixerConfig& cfg)
+{
+    if (cfg.mixAheadSeconds > 0.5f ||
+        cfg.sampleFramesPerSecond != 44100)
+    {
+        return false;
+    }
+    return true;
 }
