@@ -20,29 +20,32 @@ namespace utils
         using DoubleTimePoint = time_point<high_resolution_clock, DoubleDuration>;
 
         const auto period = duration_cast<high_resolution_clock::duration>(duration<float>(deltaSec));
-        const auto startTime = high_resolution_clock::now();
-        auto curTime = startTime;
+
+        auto currentTime = high_resolution_clock::now();
         auto accumulator = high_resolution_clock::duration();
+        auto userTime = high_resolution_clock::duration();
+
+        const auto MAX_FRAME_DURATION = duration_cast<high_resolution_clock::duration>(milliseconds(250));
+
         bool keepLooping = true;
         while (keepLooping)
         {
             auto now = high_resolution_clock::now();
-            auto deltaTime = (now - curTime);
-            if (deltaTime >= period)
+            auto frameTime = (now - currentTime);
+            if (frameTime > MAX_FRAME_DURATION)
             {
-                if (deltaTime > milliseconds(250))
-                {
-                    deltaTime = milliseconds(250);
-                }
-                accumulator += deltaTime;
-                while (accumulator >= period)
-                {
-                    DoubleDuration curTimeDouble = duration_cast<DoubleDuration>(curTime - startTime);
-                    keepLooping = loopFunc(curTimeDouble.count(), deltaSec) && keepLooping;
-                    accumulator -= period;
-                    curTime += period;
-                }
+                frameTime = MAX_FRAME_DURATION;
             }
+            currentTime = now;
+            accumulator += frameTime;
+            while (accumulator >= period)
+            {
+                DoubleDuration curTimeDouble = duration_cast<DoubleDuration>(userTime);
+                keepLooping = loopFunc(curTimeDouble.count(), deltaSec) && keepLooping;
+                accumulator -= period;
+                userTime += period;
+            }
+
         }
     }
 
