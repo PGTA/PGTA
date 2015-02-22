@@ -57,7 +57,7 @@ akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
     m_userTime = userTime + deltaNumSamples;
 
     m_mixBuffer.resize(numSamplesToMix);
-    if (m_mixBuffer.capacity() > (m_mixBuffer.size() << 1))
+    if (m_mixBuffer.capacity() > (numSamplesToMix << 1))
     {
         m_mixBuffer.shrink_to_fit();
     }
