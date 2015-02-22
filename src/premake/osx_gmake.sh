@@ -9,7 +9,7 @@ runCommand()
 }
 
 runCommand './../external/build-tools/bin/premake/premake5_osx clean --file=PGTA.lua'
-runCommand './../external/build-tools/bin/premake/premake5_osx gmake --file=PGTA.lua'
+runCommand './../external/build-tools/bin/premake/premake5_osx gmake --file=PGTA.lua --compilationunit=1'
 
 pushd gmake/
 

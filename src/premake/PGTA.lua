@@ -1,6 +1,10 @@
 
 -- Procedurally Generated Transitional Audio Build --
 
+if (os.get() ~= "windows") then
+    include "compilationunit.lua"
+end
+
 function run_include(script, rel_dir)
     local external_dir = path.getabsolute("../external")
     local repo_dir = path.join(external_dir, rel_dir)
@@ -35,8 +39,11 @@ solution "PGTA"
         }
     filter { "action:not vs*" }
         buildoptions "-fPIC"
+        compilationunitdir(_ACTION.."/%{prj.name}Dir")
     filter { "action:not vs*", "language:C++" }
         buildoptions "-std=c++1y"
+    filter { "action:not vs*", "language:C" }
+        buildoptions "-std=c11"
 
     filter "Debug"
         defines { "DEBUG", "_DEBUG" }

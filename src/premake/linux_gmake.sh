@@ -9,7 +9,7 @@ runCommand()
 }
 
 runCommand './../external/build-tools/bin/premake/premake5_linux clean --file=PGTA.lua'
-runCommand './../external/build-tools/bin/premake/premake5_linux gmake --file=PGTA.lua'
+runCommand './../external/build-tools/bin/premake/premake5_linux gmake --file=PGTA.lua --compilationunit=1'
 
 pushd gmake/
 
