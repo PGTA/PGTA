@@ -122,13 +122,12 @@ int main(int argc, const char* argv[])
 
     SDLWav thunder("media/thunder2.wav");
 
-    int ret = -1;
-    while (audioDevice > 1 && thunder)
+    int ret = 0;
+    while (audioDevice > 1 && thunder && !ret)
     {
         SDL_PauseAudioDevice(audioDevice, 0);
         ret = mixerMain(audioDevice, thunder);
         SDL_PauseAudioDevice(audioDevice, 1);
-        getchar();
     }
 
     SDL_CloseAudioDevice(audioDevice);
