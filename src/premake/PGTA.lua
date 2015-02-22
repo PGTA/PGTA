@@ -1,9 +1,7 @@
 
 -- Procedurally Generated Transitional Audio Build --
 
-if (os.get() ~= "windows") then
-    include "compilationunit.lua"
-end
+include "compilationunit.lua"
 
 function run_include(script, rel_dir)
     local external_dir = path.getabsolute("../external")
