@@ -5,8 +5,6 @@
 #include <string.h>
 #include <memory>
 
-#define NUM_UUID_BYTES 16
-
 struct PGTAUUID
 {
     bool operator==(const PGTAUUID& other) const
@@ -30,5 +28,6 @@ struct PGTAUUID
         return *this;
     }
 
+    static const int NUM_UUID_BYTES = 16;
     int8_t bytes[NUM_UUID_BYTES];
 };

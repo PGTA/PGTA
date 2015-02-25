@@ -107,7 +107,8 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
         {
             const auto* group = groupIds->Get(j);
             const flatbuffers::Vector<int8_t>* uuid = nullptr;
-            if (!group || !(uuid = group->uuid()) || uuid->size() != NUM_UUID_BYTES)
+            if (!group || !(uuid = group->uuid()) ||
+                uuid->size() != PGTAUUID::NUM_UUID_BYTES)
             {
                 hasInvalidGroup = true;
                 break;
