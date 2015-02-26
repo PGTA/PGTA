@@ -71,9 +71,32 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
         return -1;
     }
 
-    akAudioMixer::AudioSource source;
-    source.SetSource(wav.GetSamplePtr(), wav.GetNumSamples());
-    mixer->AddSource(source);
+    {
+        akAudioMixer::AudioSource source;
+        source.SetSource(wav.GetSamplePtr(), wav.GetNumSamples());
+        mixer->AddSource(source);
+    }
+
+
+    SDLWav audio1("media/loon.wav");
+    SDLWav audio2("media/frogs.wav");
+    SDLWav audio3("media/parakeet.wav");
+    {
+        akAudioMixer::AudioSource source;
+        source.SetSource(audio1.GetSamplePtr(), audio1.GetNumSamples());
+        mixer->AddSource(source);
+    }
+    {
+        akAudioMixer::AudioSource source;
+        source.SetSource(audio2.GetSamplePtr(), audio2.GetNumSamples());
+        mixer->AddSource(source);
+    }
+    {
+        akAudioMixer::AudioSource source;
+        source.SetSource(audio3.GetSamplePtr(), audio3.GetNumSamples());
+        mixer->AddSource(source);
+    }
+
 
     utils::RunLoop(0.01f, [&](double absoluteTime, float delta)
     {

@@ -1,9 +1,6 @@
 
 #include "akAudioMixerImpl.h"
 #include <AudioMixer/akAudioSource.h>
-#include "akVectorUtils.h"
-#include <assert.h>
-#include <iostream>
 
 AudioMixerImpl::AudioMixerImpl():
     m_cfg(),
@@ -63,17 +60,7 @@ akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
     }
     int16_t* outputBuffer = m_mixBuffer.data();
 
-    auto& sources = m_sources;
-    std::size_t numSources = sources.size();
-    for (std::size_t i = 0; i < numSources; ++i)
-    {
-        if (!GetSamplesFromSource(sources[i], outputBuffer, numSamplesToMix))
-        {
-            i = akUtils::FastRemove(sources, i);
-            --numSources;
-            continue;
-        }
-    }
+    m_sourceMixer.Mix(m_sources, outputBuffer, numSamplesToMix);
 
     akAudioMixer::AudioBuffer output;
     output.samples = outputBuffer;
@@ -84,20 +71,6 @@ akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
 akAudioMixer::AudioBuffer AudioMixerImpl::GetOutputBuffer()
 {
     return akAudioMixer::AudioBuffer{};
-}
-
-bool AudioMixerImpl::GetSamplesFromSource(akAudioMixer::AudioSource& source, int16_t* output, uint32_t count)
-{
-    const uint32_t numReceived = source.PopSamples(output, count);
-    assert(numReceived <= count);
-    if (numReceived == count)
-    {
-        return true;
-    }
-
-    std::fill(output + numReceived, output + count, 0);
-    std::cout << (count - numReceived) << " silence samples\n";
-    return false;
 }
 
 uint32_t AudioMixerImpl::CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,
