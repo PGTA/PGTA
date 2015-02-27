@@ -1,7 +1,8 @@
 
 #include <private/akPGTATrackLoader.h>
 #include <private/akPGTATrack.h>
-#include <private/akPGTASample.h>
+#include <public/akPGTATypes.h>
+#include <public/akPGTAUUID.h>
 #include <public/schema/track_generated.h>
 #include <public/schema/track.fbs.h>
 #include <flatbuffers/idl.h>
@@ -64,6 +65,7 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
         return nullptr;
     }
 
+    uint16_t nextValidIdx = 0;
     auto* s = t->samples();
     int len = s->size();
     bool hasValidSamples = false;
@@ -71,8 +73,9 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
     auto samples = std::make_unique<PGTATrackSample[]>(len);
     for (int i = 0; i < len; ++i)
     {
-        PGTATrackSample &sample = samples[i];
+        PGTATrackSample &sample = samples[nextValidIdx];
         const auto* schemaSample = s->Get(i);
+        
         if (!schemaSample)
         {
             continue;
@@ -88,7 +91,22 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
             continue;
         }
 
-        sample.sampleName = name->c_str();
+        size_t length = strlen(name->c_str());
+        sample.sampleName = new char[length + 1];
+        strcpy(sample.sampleName, name->c_str());
+
+        const auto* defaultFile = schemaSample->defaultFile();
+        if (!defaultFile || defaultFile->size() == 0)
+        {
+            sample.defaultFile = nullptr;
+        }
+        else
+        {
+            length = strlen(schemaSample->defaultFile()->c_str());
+            sample.defaultFile = new char[length + 1];
+            strcpy(sample.defaultFile, schemaSample->defaultFile()->c_str());
+        }
+
         sample.startTime = schemaSample->startTime();
         sample.frequency = schemaSample->frequency();
         sample.probability = probability;
@@ -102,14 +120,15 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
         }
 
         const int numGroups = groupIds->size();
-        sample.groups.resize(numGroups);
+        sample.numGroups = numGroups;
+        sample.groups = new PGTAUUID[numGroups];
         for (int j = 0; j < numGroups; ++j)
         {
-            const auto* group = groupIds->Get(j);
+            auto* group = schemaSample->groupIds()->Get(j);
             const flatbuffers::Vector<int8_t>* uuid = nullptr;
             if (!group || !(uuid = group->uuid()) ||
-                uuid->size() != PGTAUUID::NUM_UUID_BYTES)
-            {
+                uuid->size() != PGTAUUID::UUID_NUM_BYTES)
+            { 
                 hasInvalidGroup = true;
                 break;
             }
@@ -119,14 +138,14 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
         if (!hasInvalidGroup)
         {
             hasValidSamples = true;
-        }
+            sample.id = nextValidIdx++;
+        }       
     }
 
     if (!hasValidSamples)
     {
         return nullptr;
     }
-
-    track->SetSamples(samples);
+    track->SetSamples(samples, nextValidIdx);
     return track;
 }

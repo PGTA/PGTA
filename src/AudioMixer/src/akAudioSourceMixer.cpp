@@ -1,6 +1,5 @@
 
 #include "akAudioSourceMixer.h"
-#include <AudioMixer/akAudioSource.h>
 #include "akVectorUtils.h"
 #include <limits>
 #include <algorithm>

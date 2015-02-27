@@ -9,7 +9,7 @@ struct PGTAUUID
 {
     bool operator==(const PGTAUUID& other) const
     {
-        return !memcmp(bytes, other.bytes, sizeof(bytes));
+        return memcmp(bytes, other.bytes, sizeof(bytes)) == 0 ? true : false;
     }
 
     bool operator!=(const PGTAUUID& other) const
@@ -28,6 +28,6 @@ struct PGTAUUID
         return *this;
     }
 
-    static const int NUM_UUID_BYTES = 16;
-    int8_t bytes[NUM_UUID_BYTES];
+    static const int UUID_NUM_BYTES = 16;
+    int8_t bytes[UUID_NUM_BYTES];
 };

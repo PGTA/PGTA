@@ -3,6 +3,8 @@
 #include <private/akPGTADeviceImpl.h>
 #include <private/akPGTAContextImpl.h>
 #include <private/akPGTATrack.h>
+#include <memory>
+#include <string.h>
 
 union PGTADeviceUnion
 {
@@ -86,9 +88,37 @@ void pgtaFreeTracks(HPGTADevice device, const int numTracks, HPGTATrack* tracksI
     temp.pgtaDevice->FreeTracks(numTracks, tracks.pgtaTracks);
 }
 
-PGTATrackData pgtaGetTrackData(HPGTATrack track)
+PGTATrackData* pgtaGetTrackData(HPGTATrack track)
 {
-    return PGTATrackData();
+    PGTATrackUnion trackUnion;
+    trackUnion.handle = track;
+
+    PGTATrack* tempTrack = trackUnion.pgtaTrack;
+    uint16_t numSamples = tempTrack->GetNumberSamples();
+    PGTATrackData* data = new PGTATrackData();
+    data->numSamples = numSamples;
+    data->samples = tempTrack->CopySampleData();
+    if (data->samples == nullptr)
+    {
+
+        return nullptr;
+    }
+    return data;
+}
+
+void pgtaFreeTrackData(PGTATrackData* trackData)
+{
+    int numSamples = trackData->numSamples;
+    for (int i = 0; i < numSamples; ++i)
+    {
+        PGTATrackSample &sample = trackData->samples[i];
+        delete sample.sampleName;
+        delete sample.defaultFile;
+        delete sample.groups;
+    }
+    delete trackData->samples;
+    delete trackData;
+    trackData = nullptr;
 }
 
 void pgtaBindTrackSamples()

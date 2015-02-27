@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <AudioMixer/akAudioSource.h>
 #include <stdint.h>
 #include <vector>
 
