@@ -124,11 +124,11 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
         sample.groups = new PGTAUUID[numGroups];
         for (int j = 0; j < numGroups; ++j)
         {
-            auto* group = schemaSample->groupIds()->Get(j);
+            const auto* group = groupIds->Get(j);
             const flatbuffers::Vector<int8_t>* uuid = nullptr;
             if (!group || !(uuid = group->uuid()) ||
                 uuid->size() != PGTAUUID::UUID_NUM_BYTES)
-            { 
+            {
                 hasInvalidGroup = true;
                 break;
             }

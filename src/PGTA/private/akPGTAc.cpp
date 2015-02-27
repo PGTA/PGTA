@@ -94,15 +94,14 @@ PGTATrackData* pgtaGetTrackData(HPGTATrack track)
     trackUnion.handle = track;
 
     PGTATrack* tempTrack = trackUnion.pgtaTrack;
-    uint16_t numSamples = tempTrack->GetNumberSamples();
     PGTATrackData* data = new PGTATrackData();
-    data->numSamples = numSamples;
+    data->numSamples = tempTrack->GetNumberSamples();
     data->samples = tempTrack->CopySampleData();
     if (data->samples == nullptr)
     {
-
         return nullptr;
     }
+
     return data;
 }
 

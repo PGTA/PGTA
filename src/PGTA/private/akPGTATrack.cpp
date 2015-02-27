@@ -19,10 +19,9 @@ void PGTATrack::SetSamples(std::unique_ptr<PGTATrackSample[]>& samples, uint16_t
 PGTATrackSample* PGTATrack::CopySampleData() const
 {
     PGTATrackSample* copySamples = new PGTATrackSample[m_numSamples];
-    memcpy(copySamples, m_samples.get(), sizeof(PGTATrackSample)* m_numSamples);
+    memcpy(copySamples, m_samples.get(), sizeof(PGTATrackSample) * m_numSamples);
     for (int i = 0; i < m_numSamples; ++i)
     {
-
         PGTATrackSample &sample = copySamples[i];
         PGTATrackSample &sourceSample = m_samples.get()[i];
 

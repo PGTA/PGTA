@@ -3,13 +3,13 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <memory>
+#include <memory.h>
 
 struct PGTAUUID
 {
     bool operator==(const PGTAUUID& other) const
     {
-        return memcmp(bytes, other.bytes, sizeof(bytes)) == 0 ? true : false;
+        return !memcmp(bytes, other.bytes, sizeof(bytes));
     }
 
     bool operator!=(const PGTAUUID& other) const
