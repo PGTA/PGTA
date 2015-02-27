@@ -2,7 +2,6 @@
 #include <private/akPGTATrackLoader.h>
 #include <private/akPGTATrack.h>
 #include <public/akPGTATypes.h>
-#include <public/akPGTAUUID.h>
 #include <public/schema/track_generated.h>
 #include <public/schema/track.fbs.h>
 #include <flatbuffers/idl.h>
@@ -127,7 +126,7 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
             const auto* group = groupIds->Get(j);
             const flatbuffers::Vector<int8_t>* uuid = nullptr;
             if (!group || !(uuid = group->uuid()) ||
-                uuid->size() != PGTAUUID::UUID_NUM_BYTES)
+                uuid->size() != UUID_NUM_BYTES)
             {
                 hasInvalidGroup = true;
                 break;
