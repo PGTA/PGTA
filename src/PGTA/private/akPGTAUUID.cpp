@@ -6,12 +6,12 @@ int IsUUIDEqualTo(const PGTAUUID* const first, const PGTAUUID* const second)
     return !memcmp(first->bytes, second->bytes, sizeof(first->bytes));
 }
 
-void SetUUID(PGTAUUID* const first, const PGTAUUID* const second)
+void SetUUID(PGTAUUID* const target, const PGTAUUID* const source)
 {
-    if (first == second)
+    if (target == source)
     {
         return;
     }
 
-    memcpy(first->bytes, second->bytes, sizeof(first->bytes));
+    memcpy(target->bytes, source->bytes, sizeof(target->bytes));
 }

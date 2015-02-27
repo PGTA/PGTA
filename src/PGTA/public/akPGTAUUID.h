@@ -12,4 +12,4 @@ typedef struct PGTAUUID
 
 int IsUUIDEqualTo(const PGTAUUID* const first, const PGTAUUID* const second);
 
-void SetUUID(PGTAUUID* const first, const PGTAUUID* const second);
+void SetUUID(PGTAUUID* const target, const PGTAUUID* const source);
