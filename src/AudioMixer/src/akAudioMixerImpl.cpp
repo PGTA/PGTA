@@ -70,7 +70,10 @@ akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
 
 akAudioMixer::AudioBuffer AudioMixerImpl::GetOutputBuffer()
 {
-    return akAudioMixer::AudioBuffer{};
+    akAudioMixer::AudioBuffer output;
+    output.samples = m_mixBuffer.data();
+    output.numSamples = m_mixBuffer.size();
+    return output;
 }
 
 uint32_t AudioMixerImpl::CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,
