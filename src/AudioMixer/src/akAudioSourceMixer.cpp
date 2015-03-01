@@ -26,7 +26,7 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
 
     float* const scratchBuf = m_scratchBuffer.data();
 
-    sources.ForEach([&](SourceMixPair& data) -> bool
+    sources.ForEach([=](SourceMixPair& data) -> bool
     {
         akAudioMixer::AudioSource& source = data.first;
         //akAudioMixer::MixControl& mixControl = data.second;
