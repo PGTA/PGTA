@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <iostream>
 
-_declspec(noinline)void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
+void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
                            int16_t* outputBuf, uint32_t numSamplesToMix)
 {
     m_mixBuffer.resize(numSamplesToMix);
