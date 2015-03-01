@@ -2,8 +2,11 @@
 #pragma once
 
 #include <AudioMixer/akAudioMixer.h>
+#include <AudioMixer/akMixControl.h>
 #include "akAudioSourceMixer.h"
+#include "akDataTable.h"
 #include <vector>
+#include <tuple>
 
 namespace akAudioMixer
 {
@@ -31,12 +34,15 @@ private:
 private:
     akAudioMixer::AudioMixerConfig m_cfg;
 
-    std::vector<akAudioMixer::AudioSource> m_sources;
     std::vector<int16_t> m_mixBuffer;
 
     uint64_t m_mixerTime;
     uint64_t m_userTime;
     uint32_t m_numMixAheadSamples;
+    uint32_t m_mixHandleIndexCounter;
 
     AudioSourceMixer m_sourceMixer;
+
+    using SourceMixPair = std::pair<akAudioMixer::AudioSource, akAudioMixer::MixControl>;
+    DataTable<SourceMixPair> m_sources;
 };

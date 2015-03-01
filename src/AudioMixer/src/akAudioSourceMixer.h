@@ -1,25 +1,24 @@
 
 #pragma once
 
-#include <AudioMixer/akAudioSource.h>
 #include <stdint.h>
 #include <vector>
-
-namespace akAudioMixer
-{
-    class AudioSource;
-}
+#include "akDataTable.h"
+#include <AudioMixer/akAudioSource.h>
+#include <AudioMixer/akMixControl.h>
 
 class AudioSourceMixer
 {
+    using SourceMixPair = std::pair<akAudioMixer::AudioSource, akAudioMixer::MixControl>;
 public:
-    void Mix(std::vector<akAudioMixer::AudioSource>& sources,
+    void Mix(DataTable<SourceMixPair>& sources,
              int16_t* outputBuf, uint32_t numSamplesToMix);
 
 private:
     bool GetSamplesFromSource(akAudioMixer::AudioSource& source,
-                              int32_t* output, uint32_t count);
+                              float* output, uint32_t count);
 
 private:
-    std::vector<int32_t> m_mixBuffer;
+    std::vector<float> m_mixBuffer;
+    std::vector<float> m_scratchBuffer;
 };

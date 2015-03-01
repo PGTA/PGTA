@@ -1,17 +1,13 @@
 
 #include "akAudioSourceMixer.h"
-#include "akVectorUtils.h"
-#include <limits>
+#include "akDataTable.h"
+#include <AudioMixer/akAudioSource.h>
+#include <AudioMixer/akMixControl.h>
 #include <algorithm>
 #include <assert.h>
 #include <iostream>
 
-template<typename T>
-T clamp(const T& n, const T& lower, const T& upper) {
-    return std::max(lower, std::min(n, upper));
-}
-
-void AudioSourceMixer::Mix(std::vector<akAudioMixer::AudioSource>& sources,
+_declspec(noinline)void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
                            int16_t* outputBuf, uint32_t numSamplesToMix)
 {
     m_mixBuffer.resize(numSamplesToMix);
@@ -19,41 +15,63 @@ void AudioSourceMixer::Mix(std::vector<akAudioMixer::AudioSource>& sources,
     {
         m_mixBuffer.shrink_to_fit();
     }
-
-    int32_t* mixBuf = m_mixBuffer.data();
-    std::fill_n(mixBuf, numSamplesToMix, 0);
-
-    std::size_t numSources = sources.size();
-    for (std::size_t i = 0; i < numSources; ++i)
+    m_scratchBuffer.resize(numSamplesToMix);
+    if (m_scratchBuffer.capacity() > (numSamplesToMix << 1))
     {
-        if (!GetSamplesFromSource(sources[i], mixBuf, numSamplesToMix))
-        {
-            i = akUtils::FastRemove(sources, i);
-            --numSources;
-            continue;
-        }
+        m_scratchBuffer.shrink_to_fit();
     }
 
-    std::transform(mixBuf, mixBuf + numSamplesToMix, outputBuf, [](int32_t n)
+    float* const mixBuf = m_mixBuffer.data();
+    std::fill(mixBuf, mixBuf + numSamplesToMix, 0.0f);
+
+    float* const scratchBuf = m_scratchBuffer.data();
+
+    sources.ForEach([&](SourceMixPair& data) -> bool
     {
-        using std::numeric_limits;
-        return clamp(n,
-            static_cast<int32_t>(numeric_limits<int16_t>::min()),
-            static_cast<int32_t>(numeric_limits<int16_t>::max()));
+        akAudioMixer::AudioSource& source = data.first;
+        //akAudioMixer::MixControl& mixControl = data.second;
+
+        const bool keep = GetSamplesFromSource(source, scratchBuf, numSamplesToMix);
+        for (uint_fast32_t i = 0; i < numSamplesToMix; ++i)
+        {
+            mixBuf[i] += scratchBuf[i];
+        }
+
+        // TODO: apply fx
+
+        return keep;
     });
+
+    for (uint_fast32_t i = 0; i < numSamplesToMix; ++i)
+    {
+        float inSample = mixBuf[i];
+        int16_t outSample;
+        // TODO: dithering
+        if (inSample >= 0.0f)
+        {
+            int32_t sample = static_cast<int32_t>(inSample * 32767.0f);
+            outSample = (sample <= 32767 ? static_cast<int16_t>(sample) : 32767);
+        }
+        else
+        {
+            int32_t sample = static_cast<int32_t>(inSample * 32768.0f);
+            outSample = (sample >= -32768 ? static_cast<int16_t>(sample) : -32768);
+        }
+        outputBuf[i] = outSample;
+    }
 }
 
 bool AudioSourceMixer::GetSamplesFromSource(akAudioMixer::AudioSource& source,
-                                            int32_t* output, uint32_t count)
+                                            float* output, uint32_t count)
 {
-    const uint32_t numReceived = source.PopAddSamples(output, count);
+    const uint32_t numReceived = source.PopSamples(output, count);
     assert(numReceived <= count);
     if (numReceived == count)
     {
         return true;
     }
 
-    //std::fill(output + numReceived, output + count, 0);
+    std::fill(output + numReceived, output + count, 0.0f);
     std::cout << (count - numReceived) << " silence samples\n";
     return false;
 }

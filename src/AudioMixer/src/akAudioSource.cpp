@@ -7,11 +7,7 @@ namespace akAudioMixer
 {
     uint32_t AudioSource::PopSamples(int16_t* samples, uint32_t numSamples)
     {
-        if (m_stream)
-        {
-            return m_stream->PopSamples(samples, numSamples);
-        }
-        else if (m_samples && m_numSamples > 0)
+        if (m_samples && (m_numSamples > 0) && samples && (numSamples > 0))
         {
             const int16_t* bufSamples = m_samples;
             const uint32_t numBufSamples = m_numSamples;
@@ -28,9 +24,9 @@ namespace akAudioMixer
         return 0;
     }
 
-    uint32_t AudioSource::PopAddSamples(int32_t* samples, uint32_t numSamples)
+    uint32_t AudioSource::PopSamples(float* samples, uint32_t numSamples)
     {
-        if (m_samples && m_numSamples > 0)
+        if (m_samples && (m_numSamples > 0) && samples && (numSamples > 0))
         {
             const int16_t* bufSamples = m_samples;
             const uint32_t numBufSamples = m_numSamples;
@@ -42,7 +38,8 @@ namespace akAudioMixer
             const int16_t* readEnd = bufSamples + curReadOffset + numSamples;
             while (readPtr != readEnd)
             {
-                *samples++ += *readPtr++;
+                const int16_t sample = *readPtr++;
+                *samples++ = ((sample >= 0) ? (sample / 32767.0f) : (sample / 32768.0f));
             }
 
             m_readOffset = curReadOffset + numSamples;

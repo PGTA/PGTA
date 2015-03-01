@@ -32,7 +32,7 @@ namespace akAudioMixer
             {
                 return (id > 0);
             }
-            uint64_t id;
+            uint32_t id;
         };
 
         MixHandle AddSource(const AudioSource& source);

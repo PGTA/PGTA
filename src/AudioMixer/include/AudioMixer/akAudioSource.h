@@ -44,7 +44,7 @@ namespace akAudioMixer
         }
 
         uint32_t PopSamples(int16_t* samples, uint32_t numSamples);
-        uint32_t PopAddSamples(int32_t* samples, uint32_t numSamples);
+        uint32_t PopSamples(float* samples, uint32_t numSamples);
 
     private:
         AudioStream* m_stream;

@@ -1,6 +1,7 @@
 
 #include "akAudioMixerImpl.h"
 #include <AudioMixer/akAudioSource.h>
+#include <AudioMixer/akMixControl.h>
 
 AudioMixerImpl::AudioMixerImpl():
     m_cfg(),
@@ -8,7 +9,8 @@ AudioMixerImpl::AudioMixerImpl():
     m_mixBuffer(),
     m_mixerTime(0),
     m_userTime(0),
-    m_numMixAheadSamples(0)
+    m_numMixAheadSamples(0),
+    m_mixHandleIndexCounter(0)
 {
 }
 
@@ -22,25 +24,38 @@ bool AudioMixerImpl::Initialize(const akAudioMixer::AudioMixerConfig& cfg)
         static_cast<uint32_t>(cfg.mixAheadSeconds * cfg.sampleFramesPerSecond);
 
     m_cfg = cfg;
-    m_sources.clear();
-    m_sources.reserve(64);
+    m_sources.Clear();
     // allocate double the number of mix ahead samples initially
     m_mixBuffer.reserve(numMixAheadSamples << 1);
     m_mixerTime = 0;
     m_userTime = 0;
     m_numMixAheadSamples = numMixAheadSamples;
+    m_mixHandleIndexCounter = 0;
     return true;
 }
 
 AudioMixerImpl::MixHandle AudioMixerImpl::AddSource(const akAudioMixer::AudioSource& source)
 {
-    m_sources.emplace_back(source);
-    return MixHandle{};
+    const uint32_t id = ++m_mixHandleIndexCounter;
+    SourceMixPair temp = std::make_pair(source, akAudioMixer::MixControl());
+    m_sources.AddData(id, &temp);
+    return MixHandle{id};
 }
 
 akAudioMixer::MixControl* AudioMixerImpl::GetMixControl(AudioMixerImpl::MixHandle handle)
 {
-    return nullptr;
+    if (!handle)
+    {
+        return nullptr;
+    }
+
+    SourceMixPair* source = m_sources.GetData(handle.id);
+    if (!source)
+    {
+        return nullptr;
+    }
+
+    return &source->second;
 }
 
 akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
