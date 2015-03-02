@@ -14,8 +14,9 @@ filter "files:**.fbs"
         runexe('flatc')..' -c -o "../../PGTA/public/schema" %{file.relpath}',
         runexe('SchemaCompiler')..' %{file.relpath}'
     }
-filter { "files:**.fbs", "system:not windows" }
-    buildoutputs { "%{file.name}.h", "%{file.basename}_generated.h" }
+    -- TODO: add *_generated.h to buildoutputs when
+    -- multiple output deps are supported by premake
+    buildoutputs { "%{file.abspath}.h" }
 filter {}
 
 project "SchemaCompiler"
