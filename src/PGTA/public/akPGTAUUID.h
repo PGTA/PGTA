@@ -3,13 +3,15 @@
 
 #include <stdint.h>
 
-static const int UUID_NUM_BYTES = 16;
-
-typedef struct PGTAUUID
+struct PGTAUUID
 {
-    int8_t bytes[16];
-} PGTAUUID;
+    const static int UUID_NUM_BYTES = 32;
+    char bytes[UUID_NUM_BYTES];
 
-int IsUUIDEqualTo(const PGTAUUID* const first, const PGTAUUID* const second);
-
-void SetUUID(PGTAUUID* const target, const PGTAUUID* const source);
+    bool operator==(const PGTAUUID& other) const;
+    bool operator!=(const PGTAUUID& other) const;
+    bool operator==(const char* other) const;
+    bool operator!=(const char* other) const;
+    PGTAUUID& operator=(const PGTAUUID& other);
+    bool operator<(const PGTAUUID& other) const;
+};

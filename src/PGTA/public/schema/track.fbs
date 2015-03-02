@@ -1,11 +1,6 @@
 file_identifier "PGTA";
 namespace PGTASchema;
 
-table UUID
-{
-    uuid:[byte];
-}
-
 table Sample
 {
     name:string;
@@ -14,19 +9,26 @@ table Sample
     frequency:long;
     probability:float;
     volumeMultiplier:float = 1;
-    groupIds:[UUID];
-
+    group:string;
 }
 
 table Group
 {
-    groupName:string;
-    uuid:UUID;
+    name:string;
+    uuid:string;
+}
+
+table Restriction
+{
+    group1:string;
+    group2:string;
 }
 
 table Track
 {
     samples:[Sample];
+    groups:[Group];
+    restrictions:[Restriction];
 }
 
 root_type Track;

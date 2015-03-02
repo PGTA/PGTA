@@ -1,17 +1,38 @@
 #include <public/akPGTAUUID.h>
 #include <string.h>
 
-int IsUUIDEqualTo(const PGTAUUID* const first, const PGTAUUID* const second)
+bool PGTAUUID::operator==(const PGTAUUID& other) const
 {
-    return !memcmp(first->bytes, second->bytes, sizeof(first->bytes));
+    return !memcmp(bytes, other.bytes, sizeof(bytes));
 }
 
-void SetUUID(PGTAUUID* const target, const PGTAUUID* const source)
+bool PGTAUUID::operator!=(const PGTAUUID& other) const
 {
-    if (target == source)
+    return !(*this == other);
+}
+
+bool PGTAUUID::operator==(const char* other) const
+{
+    return !memcmp(bytes, other, sizeof(bytes));
+}
+
+bool PGTAUUID::operator!=(const char* other) const
+{
+    return !(*this == other);
+}
+
+PGTAUUID& PGTAUUID::operator=(const PGTAUUID& other)
+{
+    if (this == &other)
     {
-        return;
+        return *this;
     }
 
-    memcpy(target->bytes, source->bytes, sizeof(target->bytes));
+    memcpy(bytes, other.bytes, sizeof(bytes));
+    return *this;
+}
+
+bool PGTAUUID::operator<(const PGTAUUID& other) const
+{
+    return memcmp(bytes, other.bytes, sizeof(bytes)) < 0 ? true : false;
 }

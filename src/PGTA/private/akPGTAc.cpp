@@ -94,30 +94,19 @@ PGTATrackData* pgtaGetTrackData(HPGTATrack track)
     trackUnion.handle = track;
 
     PGTATrack* tempTrack = trackUnion.pgtaTrack;
-    PGTATrackData* data = new PGTATrackData();
-    data->numSamples = tempTrack->GetNumberSamples();
-    data->samples = tempTrack->CopySampleData();
-    if (data->samples == nullptr)
-    {
-        return nullptr;
-    }
+    PGTATrackData* data = tempTrack->GetTrackData(trackUnion.handle);
 
     return data;
 }
 
 void pgtaFreeTrackData(PGTATrackData* trackData)
 {
-    int numSamples = trackData->numSamples;
-    for (int i = 0; i < numSamples; ++i)
-    {
-        PGTATrackSample &sample = trackData->samples[i];
-        delete sample.sampleName;
-        delete sample.defaultFile;
-        delete sample.groups;
-    }
-    delete trackData->samples;
-    delete trackData;
-    trackData = nullptr;
+
+    PGTATrackUnion trackUnion;
+    trackUnion.handle = trackData->trackHandle;
+    
+    PGTATrack* track = trackUnion.pgtaTrack;
+    track->FreeTrackData();
 }
 
 void pgtaBindTrackSamples()

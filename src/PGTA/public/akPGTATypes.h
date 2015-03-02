@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <public/akPGTAUUID.h>
 
 #define DECLARE_HANDLE(type) typedef struct J##type { int unused; }* type
 
@@ -33,24 +32,40 @@ typedef struct PGTAConfig
     uint16_t bufferSizeInSamples;
 } PGTAConfig;
 
-typedef struct PGTATrackSample
+typedef struct PGTAGroupData
+{
+    char* name;
+    char* uuid;
+} PGTAGroupData;
+
+typedef struct PGTARestrictionData
+{
+    char* group1UUID;
+    char* group2UUID;
+} PGTARestrictionData;
+
+typedef struct PGTASampleData
 {
     char* sampleName;
-    int16_t id;
     char* defaultFile;
     uint64_t frequency;
     uint64_t startTime;
     float probability;
     float volumeMultiplier;
-
-    uint16_t numGroups;
-    PGTAUUID* groups;
-} PGTATrackSample;
+    char* groupUUID;
+} PGTASampleData;
 
 typedef struct PGTATrackData
 {
+    HPGTATrack trackHandle;
     uint16_t numSamples;
-    PGTATrackSample* samples;
+    PGTASampleData* samples;
+
+    uint16_t numGroups;
+    PGTAGroupData* groups;
+
+    uint16_t numRestrictions;
+    PGTARestrictionData* restrictions;
 
 } PGTATrackData;
 
