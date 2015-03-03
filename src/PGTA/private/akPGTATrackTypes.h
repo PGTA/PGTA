@@ -1,7 +1,6 @@
 #pragma once
 
-#include <public/akPGTAUUID.h>
-#include <vector>
+#include <private/akPGTAUUID.h>
 
 struct PGTATrackGroup
 {

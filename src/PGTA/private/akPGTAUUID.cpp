@@ -1,4 +1,4 @@
-#include <public/akPGTAUUID.h>
+#include <private/akPGTAUUID.h>
 #include <string.h>
 
 bool PGTAUUID::operator==(const PGTAUUID& other) const
@@ -29,6 +29,12 @@ PGTAUUID& PGTAUUID::operator=(const PGTAUUID& other)
     }
 
     memcpy(bytes, other.bytes, sizeof(bytes));
+    return *this;
+}
+
+PGTAUUID& PGTAUUID::operator=(const char* other)
+{
+    memcpy(bytes, other, sizeof(bytes));
     return *this;
 }
 

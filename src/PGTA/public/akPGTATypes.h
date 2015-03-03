@@ -66,7 +66,6 @@ typedef struct PGTATrackData
 
     uint16_t numRestrictions;
     PGTARestrictionData* restrictions;
-
 } PGTATrackData;
 
 #undef DECLARE_HANDLE

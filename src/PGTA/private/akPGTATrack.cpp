@@ -1,27 +1,23 @@
 
 #include <private/akPGTATrack.h>
 #include <public/akPGTATypes.h>
-#include <algorithm>
 
-PGTATrack::PGTATrack()
+PGTATrack::PGTATrack() : m_dataReferences(0)
 {
-    m_dataReferences = 0;
 }
 
 PGTATrack::~PGTATrack()
 {
 }
 
-void PGTATrack::SetSamples(std::vector<PGTATrackSample>& samples, uint16_t numSamples)
+void PGTATrack::SetSamples(std::vector<PGTATrackSample>& samples)
 {
-    m_samples.resize(numSamples);
-    std::move(samples.begin(), samples.begin() + (numSamples), m_samples.begin());
+    m_samples = std::move(samples);
 }
 
-void PGTATrack::SetGroups(std::vector<PGTATrackGroup>& groups, uint16_t numGroups)
+void PGTATrack::SetGroups(std::vector<PGTATrackGroup>& groups)
 {
-    m_groups.resize(numGroups);
-    std::move(groups.begin(), groups.begin() + (numGroups), m_groups.begin());
+    m_groups = std::move(groups);
 }
 
 void PGTATrack::SetRestrictions(std::map<PGTAUUID, std::vector<PGTAUUID> >& restrictions, 
@@ -29,7 +25,6 @@ void PGTATrack::SetRestrictions(std::map<PGTAUUID, std::vector<PGTAUUID> >& rest
 {
     m_numRestrictions = numRestrictions;
     m_groupRestrictions = std::move(restrictions);
-
 }
 
 PGTARestrictionData* PGTATrack::CopyRestrictionData() const
@@ -79,10 +74,12 @@ PGTAGroupData* PGTATrack::CopyGroupData() const
     for (int i = 0; i < numGroups; ++i)
     {
         PGTAGroupData& group = copyGroups[i];
-        group.name = m_groups[i].name;
+        size_t nameLength = strlen(m_groups[i].name);
+        group.name = new char[nameLength + 1];
+        strcpy(group.name, m_groups[i].name);
         group.uuid = new char[PGTAUUID::UUID_NUM_BYTES + 1];
-        group.uuid[PGTAUUID::UUID_NUM_BYTES] = 0;
         memcpy(group.uuid, m_groups[i].uuid.bytes, PGTAUUID::UUID_NUM_BYTES);
+        group.uuid[PGTAUUID::UUID_NUM_BYTES] = 0;
     }
 
     return copyGroups;
@@ -122,10 +119,11 @@ PGTASampleData* PGTATrack::CopySampleData() const
         if (sourceSample.group != nullptr)
         {
             sample.groupUUID = new char[PGTAUUID::UUID_NUM_BYTES + 1];
-            memcpy(sample.groupUUID, sourceSample.group->bytes, sizeof(char) * PGTAUUID::UUID_NUM_BYTES);
+            memcpy(sample.groupUUID, sourceSample.group->bytes, PGTAUUID::UUID_NUM_BYTES);
             sample.groupUUID[PGTAUUID::UUID_NUM_BYTES] = 0;        
         }
     }
+
     return copySamples;
 }
 

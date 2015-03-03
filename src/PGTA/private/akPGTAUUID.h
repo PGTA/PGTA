@@ -13,5 +13,6 @@ struct PGTAUUID
     bool operator==(const char* other) const;
     bool operator!=(const char* other) const;
     PGTAUUID& operator=(const PGTAUUID& other);
+    PGTAUUID& operator=(const char* other);
     bool operator<(const PGTAUUID& other) const;
 };
