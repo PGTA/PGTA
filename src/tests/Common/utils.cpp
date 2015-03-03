@@ -51,17 +51,6 @@ namespace utils
 
     void FixWorkingDirectory()
     {
-        char temp[128] = {};
-        const char *dir = getcwd(temp, sizeof(temp));
-        const char *bin_pos = strstr(dir, "bin");
-        const char *build_pos = strstr(dir, "premake");
-        if (bin_pos)
-        {
-            chdir("..");
-        }
-        else if (build_pos)
-        {
-            chdir("../../..");
-        }
+        chdir("..");
     }
 }
