@@ -70,17 +70,16 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
     TriangleDither triDither;
     for (uint_fast32_t i = 0; i < numSamplesToMix; ++i)
     {
-        float inSample = mixBuf[i];
+        const float inSample = mixBuf[i];
         int16_t outSample;
-        // TODO: dithering
         if (inSample >= 0.0f)
         {
-            int32_t sample = static_cast<int32_t>(triDither(inSample * 32767.0f));
+            const int32_t sample = static_cast<int32_t>(triDither(inSample * 32767.0f));
             outSample = (sample <= 32767 ? static_cast<int16_t>(sample) : 32767);
         }
         else
         {
-            int32_t sample = static_cast<int32_t>(triDither(inSample * 32768.0f));
+            const int32_t sample = static_cast<int32_t>(triDither(inSample * 32768.0f));
             outSample = (sample >= -32768 ? static_cast<int16_t>(sample) : -32768);
         }
         outputBuf[i] = outSample;
