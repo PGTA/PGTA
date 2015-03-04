@@ -6,6 +6,31 @@
 #include <algorithm>
 #include <assert.h>
 #include <iostream>
+#include <random>
+
+class TriangleDither
+{
+public:
+    TriangleDither():
+        m_distribution(-0.5f, 0.5f),
+        m_generator(),
+        m_prevValue(0.0f)
+    {
+    }
+
+    float operator()(float n)
+    {
+        const float value = m_distribution(m_generator);
+        n = n + value - m_prevValue;
+        m_prevValue = value;
+        return n;
+    }
+
+private:
+    std::uniform_real_distribution<float> m_distribution;
+    std::mt19937 m_generator;
+    float m_prevValue;
+};
 
 void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
                            int16_t* outputBuf, uint32_t numSamplesToMix)
@@ -42,6 +67,7 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
         return keep;
     });
 
+    TriangleDither triDither;
     for (uint_fast32_t i = 0; i < numSamplesToMix; ++i)
     {
         float inSample = mixBuf[i];
@@ -49,12 +75,12 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
         // TODO: dithering
         if (inSample >= 0.0f)
         {
-            int32_t sample = static_cast<int32_t>(inSample * 32767.0f);
+            int32_t sample = static_cast<int32_t>(triDither(inSample * 32767.0f));
             outSample = (sample <= 32767 ? static_cast<int16_t>(sample) : 32767);
         }
         else
         {
-            int32_t sample = static_cast<int32_t>(inSample * 32768.0f);
+            int32_t sample = static_cast<int32_t>(triDither(inSample * 32768.0f));
             outSample = (sample >= -32768 ? static_cast<int16_t>(sample) : -32768);
         }
         outputBuf[i] = outSample;
