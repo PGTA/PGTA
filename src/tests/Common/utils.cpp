@@ -51,6 +51,11 @@ namespace utils
 
     void FixWorkingDirectory()
     {
-        chdir("..");
+        char temp[512] = {};
+        const char *dir = getcwd(temp, sizeof(temp));
+        if (strstr(dir, "bin"))
+        {
+            chdir("..");
+        }
     }
 }
