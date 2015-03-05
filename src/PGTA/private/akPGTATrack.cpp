@@ -1,6 +1,7 @@
 
 #include <private/akPGTATrack.h>
 #include <public/akPGTATypes.h>
+#include <string.h>
 
 PGTATrack::PGTATrack() : m_dataReferences(0)
 {
