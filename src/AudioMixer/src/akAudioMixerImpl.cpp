@@ -4,13 +4,14 @@
 #include <AudioMixer/akMixControl.h>
 
 AudioMixerImpl::AudioMixerImpl():
-    m_cfg(),
-    m_sources(),
-    m_mixBuffer(),
     m_mixerTime(0),
     m_userTime(0),
     m_numMixAheadSamples(0),
-    m_mixHandleIndexCounter(0)
+    m_mixHandleIndexCounter(0),
+    m_mixBuffer(),
+    m_sourceMixer(),
+    m_sources(),
+    m_cfg()
 {
 }
 
@@ -23,14 +24,16 @@ bool AudioMixerImpl::Initialize(const akAudioMixer::AudioMixerConfig& cfg)
     const uint32_t numMixAheadSamples =
         static_cast<uint32_t>(cfg.mixAheadSeconds * cfg.sampleFramesPerSecond);
 
-    m_cfg = cfg;
-    m_sources.Clear();
-    // allocate double the number of mix ahead samples initially
-    m_mixBuffer.reserve(numMixAheadSamples << 1);
     m_mixerTime = 0;
     m_userTime = 0;
     m_numMixAheadSamples = numMixAheadSamples;
     m_mixHandleIndexCounter = 0;
+
+    // allocate double the number of mix ahead samples initially
+    m_mixBuffer.reserve(numMixAheadSamples << 1);
+    m_sources.Clear();
+    m_cfg = cfg;
+
     return true;
 }
 

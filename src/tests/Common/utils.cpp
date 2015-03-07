@@ -17,7 +17,6 @@ namespace utils
     {
         using namespace std::chrono;
         using DoubleDuration = duration<double>;
-        using DoubleTimePoint = time_point<high_resolution_clock, DoubleDuration>;
 
         const auto period = duration_cast<high_resolution_clock::duration>(duration<float>(deltaSec));
 
