@@ -27,6 +27,7 @@ solution "PGTA"
         "NoEditAndContinue",
         "MultiProcessorCompile"
     }
+    warnings "Extra"
 
     filter "action:vs*"
         defines
