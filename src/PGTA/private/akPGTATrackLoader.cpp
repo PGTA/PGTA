@@ -8,20 +8,21 @@
 #include <vector>
 #include <map>
 
-using Samples = std::vector<PGTATrackSample>;
+using std::vector;
+
 using SchemaSamples = flatbuffers::Vector<flatbuffers::Offset<PGTASchema::Sample> >;
-using Groups = std::vector<PGTATrackGroup>;
 using SchemaGroups = flatbuffers::Vector<flatbuffers::Offset<PGTASchema::Group> >;
 using GroupRestrictions = std::map<std::string, std::vector<std::string> >;
 using SchemaRestritions = flatbuffers::Vector<flatbuffers::Offset<PGTASchema::Restriction> >;
 
 static PGTATrack* LoadBinaryTrack(const uint8_t* src, const size_t length, PGTATrack* track);
 static PGTATrack* LoadAsciiTrack(const char* src, const size_t length, PGTATrack* track);
-static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track* t);
-static Samples InitSamples(uint16_t numSamples, const SchemaSamples* schemaSamples);
-static Groups InitGroups(uint16_t numGroups, const SchemaGroups* schemaGroups);
-static GroupRestrictions InitGroupRestrictions(uint16_t numRestrictions, const SchemaRestritions* schemaRestricitons,
-    uint16_t& numValidRestrictions);
+static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track* schemaTrack);
+
+static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSample>* samples);
+static void InitGroups(const SchemaGroups& schemaGroups, vector<PGTATrackGroup>* groups);
+static uint16_t InitGroupRestrictions(const SchemaRestritions& schemaRestricitons,
+                                      GroupRestrictions* groupRestrictions);
 
 static const size_t MAX_TRACK_LEN = (1 << 16);
 
@@ -50,9 +51,13 @@ static PGTATrack* LoadBinaryTrack(const uint8_t* src, const size_t length, PGTAT
         return nullptr;
     }
 
-    const PGTASchema::Track* trackSchema = PGTASchema::GetTrack(src);
+    const PGTASchema::Track* schemaTrack = PGTASchema::GetTrack(src);
+    if (!schemaTrack)
+    {
+        return nullptr;
+    }
 
-    return InitTrackData(track, trackSchema);
+    return InitTrackData(track, schemaTrack);
 }
 
 static PGTATrack* LoadAsciiTrack(const char* src, const size_t length, PGTATrack* track)
@@ -63,164 +68,161 @@ static PGTATrack* LoadAsciiTrack(const char* src, const size_t length, PGTATrack
         return nullptr;
     }
 
-    const PGTASchema::Track* trackSchema = PGTASchema::GetTrack(parser.builder_.GetBufferPointer());
+    const PGTASchema::Track* schemaTrack = PGTASchema::GetTrack(parser.builder_.GetBufferPointer());
+    if (!schemaTrack)
+    {
+        return nullptr;
+    }
  
-    return InitTrackData(track, trackSchema);
+    return InitTrackData(track, schemaTrack);
 }
 
-Samples InitSamples(uint16_t numSamples, const SchemaSamples* schemaSamples)
+static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSample>* samples)
 {
-    Samples samples(numSamples);
-    uint16_t numValidSamples = 0;
+    assert(samples);
+    const auto numSamples = schemaSamples.size();
+    int16_t sampleId = 0;
+    samples->reserve(numSamples);
+
     for (int i = 0; i < numSamples; ++i)
     {
-        PGTATrackSample &sample = samples[numValidSamples];
-        const auto* schemaSample = schemaSamples->Get(i);
-
+        const PGTASchema::Sample* schemaSample = schemaSamples.Get(i);
         if (!schemaSample)
         {
             continue;
         }
 
         const flatbuffers::String* name = schemaSample->name();
+        const flatbuffers::String* defaultFile = schemaSample->defaultFile();
+        const flatbuffers::String* group = schemaSample->group();
+        const int64_t startTime = schemaSample->startTime();
+        const int64_t frequency = schemaSample->frequency();
         const float probability = schemaSample->probability();
         const float volumeMultiplier = schemaSample->volumeMultiplier();
 
-        if (!name || name->size() == 0 ||
-            probability < 0.0f || volumeMultiplier < 0.0f)
+        // TODO: sanity checks for schemaSample properties
+        if (!name || (name->size() == 0))
         {
             continue;
         }
 
-        sample.sampleName = name->c_str();
-
-        const flatbuffers::String* defaultFile = schemaSample->defaultFile();
-        if (!defaultFile || defaultFile->size() == 0)
+        PGTATrackSample sample{};
+        sample.sampleName.assign(name->c_str());
+        if (defaultFile && defaultFile->size() > 0)
         {
-            sample.defaultFile = nullptr;
+            sample.defaultFile.assign(defaultFile->c_str());
         }
-        else
+        if (group && group->size() > 0)
         {
-            sample.defaultFile = defaultFile->c_str();
+            sample.group.assign(group->c_str());
         }
-
-        sample.startTime = schemaSample->startTime();
-        sample.frequency = schemaSample->frequency();
+        sample.startTime = startTime;
+        sample.frequency = frequency;
         sample.probability = probability;
         sample.volumeMultiplier = volumeMultiplier;
+        sample.id = sampleId++;
 
-        const flatbuffers::String* group = schemaSample->group();
-        if (!group)
-        {
-            sample.group = std::string();
-            sample.id = numValidSamples++;
-            continue;
-        }
-        else
-        {
-            sample.group = std::string(group->c_str());
-        }
-
-        sample.id = numValidSamples++;
+        samples->emplace_back(std::move(sample));
     }
-
-    samples.resize(numValidSamples);
-    return samples;
+    samples->shrink_to_fit();
 }
 
-static Groups InitGroups(uint16_t numGroups, const SchemaGroups* schemaGroups)
+static void InitGroups(const SchemaGroups& schemaGroups, vector<PGTATrackGroup>* groups)
 {
-    Groups groups(numGroups);
-    uint16_t numValidGroups = 0;
+    assert(groups);
+    const auto numGroups = schemaGroups.size();
+    groups->reserve(numGroups);
+
     for (int i = 0; i < numGroups; ++i)
     {
-        PGTATrackGroup &group = groups[numValidGroups];
-        auto schemaGroup = schemaGroups->Get(i);
-        if (schemaGroup->uuid() == nullptr || schemaGroup->uuid()->size() != PGTAUUID::UUID_NUM_BYTES)
+        const PGTASchema::Group* schemaGroup = schemaGroups.Get(i);
+        if (!schemaGroup)
         {
             continue;
         }
 
-        group.uuid = std::string(schemaGroup->uuid()->c_str());
-        
-        group.name = std::string();
-        if (schemaGroup->name() != nullptr && schemaGroup->name()->size() > 0)
+        const flatbuffers::String* uuid = schemaGroup->uuid();
+        const flatbuffers::String* name = schemaGroup->name();
+        if (!uuid || uuid->size() != PGTAUUID::UUID_NUM_BYTES ||
+            !name || name->size() == 0)
         {
-            group.name = schemaGroup->name()->c_str();
+            // TODO: allow nameless groups?
+            continue;
         }
-        numValidGroups++;
-    }
 
-    groups.resize(numValidGroups);
-    return groups;
+        PGTATrackGroup group{};
+        group.name.assign(name->c_str());
+        group.uuid.assign(uuid->c_str());
+
+        groups->emplace_back(std::move(group));
+    }
+    groups->shrink_to_fit();
 }
 
-static GroupRestrictions InitGroupRestrictions(uint16_t numRestrictions, const SchemaRestritions* schemaRestricitons, 
-    uint16_t& numValidRestrictions)
+static uint16_t InitGroupRestrictions(const SchemaRestritions& schemaRestricitons,
+                                      GroupRestrictions* groupRestrictions)
 {
-    GroupRestrictions groupRestrictions;
-    numValidRestrictions = 0;
+    assert(groupRestrictions);
+    uint16_t numValidRestrictions = 0;
+
+    const auto numRestrictions = schemaRestricitons.size();
     for (int i = 0; i < numRestrictions; ++i)
     {
-        std::string uuid1, uuid2;
-        const flatbuffers::String* group1 = schemaRestricitons->Get(i)->group1();
-        if (!group1 || group1->size() != PGTAUUID::UUID_NUM_BYTES)
+        const PGTASchema::Restriction* schemaRestriction = schemaRestricitons.Get(i);
+        if (!schemaRestriction)
         {
             continue;
         }
 
-        const flatbuffers::String* group2 = schemaRestricitons->Get(i)->group2();
-        if (!group2 || group2->size() != PGTAUUID::UUID_NUM_BYTES)
+        const flatbuffers::String* group1 = schemaRestriction->group1();
+        const flatbuffers::String* group2 = schemaRestriction->group2();
+        if (!group1 || group1->size() != PGTAUUID::UUID_NUM_BYTES ||
+            !group2 || group2->size() != PGTAUUID::UUID_NUM_BYTES)
         {
             continue;
         }
 
-        uuid1 = group1->c_str();
-        uuid2 = group2->c_str();
+        std::string uuid1(group1->c_str());
+        std::string uuid2(group2->c_str());
 
-        groupRestrictions[uuid1].emplace_back(uuid2);
-        groupRestrictions[uuid2].emplace_back(uuid1);
-        numValidRestrictions++;
+        auto& groupList1 = (*groupRestrictions)[uuid1];
+        auto& groupList2 = (*groupRestrictions)[uuid2];
+        groupList1.emplace_back(std::move(uuid2));
+        groupList2.emplace_back(std::move(uuid1));
+
+        numValidRestrictions += 1;
     }
 
-    return groupRestrictions;
+    return numValidRestrictions;
 }
 
-static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track* t)
+static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track* schemaTrack)
 {
-    if (t == nullptr || t->samples() == nullptr || t->samples()->size() == 0)
+    const SchemaSamples* schemaSamples = schemaTrack->samples();
+    const SchemaGroups* schemaGroups = schemaTrack->groups();
+    const SchemaRestritions* schemaRestrictions = schemaTrack->restrictions();
+    if (!schemaSamples || schemaSamples->size() == 0 ||
+        !schemaGroups || schemaGroups->size() == 0 ||
+        !schemaRestrictions || schemaRestrictions->size() == 0)
     {
         return nullptr;
     }
 
-    const SchemaSamples* s = t->samples();
-    int numSamples = s->size();
-    
-    int numGroups = 0;
-    if (t->groups() != nullptr)
-    {
-        numGroups = t->groups()->size();
-    }
-
-    int numRestrictions = 0;
-    if (t->restrictions() != nullptr)
-    {
-        numRestrictions = t->restrictions()->size();
-    }
-
-    Samples &&samples = InitSamples(numSamples, s);;
-  
-    Groups &&groups = InitGroups(numGroups, t->groups());
-
-    uint16_t numValidRestrictions = 0;
-    GroupRestrictions &&groupRestrictions = InitGroupRestrictions(numRestrictions, t->restrictions(), numValidRestrictions);
-
-    if (samples.size() == 0)
+    vector<PGTATrackSample> samples;
+    InitSamples(*schemaSamples, &samples);
+    if (samples.empty())
     {
         return nullptr;
     }
     track->SetSamples(samples);
+
+    vector<PGTATrackGroup> groups;
+    InitGroups(*schemaGroups, &groups);
     track->SetGroups(groups);
+
+    GroupRestrictions groupRestrictions;
+    const uint16_t numValidRestrictions = InitGroupRestrictions(*schemaRestrictions,
+                                                                &groupRestrictions);
     track->SetRestrictions(groupRestrictions, numValidRestrictions);
     return track;
 }
