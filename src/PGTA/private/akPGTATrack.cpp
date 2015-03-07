@@ -3,7 +3,8 @@
 #include <public/akPGTATypes.h>
 #include <string.h>
 
-PGTATrack::PGTATrack() : m_dataReferences(0)
+PGTATrack::PGTATrack() : 
+    m_dataReferences(0)
 {
 }
 
@@ -21,30 +22,41 @@ void PGTATrack::SetGroups(std::vector<PGTATrackGroup>& groups)
     m_groups = std::move(groups);
 }
 
-void PGTATrack::SetRestrictions(std::map<PGTAUUID, std::vector<PGTAUUID> >& restrictions, 
+void PGTATrack::SetRestrictions(std::map<std::string, std::vector<std::string> >& restrictions, 
     const uint16_t numRestrictions)
 {
     m_numRestrictions = numRestrictions;
     m_groupRestrictions = std::move(restrictions);
 }
 
-PGTARestrictionData* PGTATrack::CopyRestrictionData() const
+std::vector<PGTARestrictionData> PGTATrack::CopyRestrictionData() const
 {
-    PGTARestrictionData* copyRestrictions = new PGTARestrictionData[m_numRestrictions];
+    int numRestrictions = GetNumRestrictions();
+    std::vector<PGTARestrictionData> copyRestrictions;
 
-    uint16_t numCopied = 0;
+    if (!m_trackData)
+    {
+        return copyRestrictions;
+    }
+
+    copyRestrictions.resize(numRestrictions);
+    m_trackData->cachedRestrictions.resize(numRestrictions);
+
+    uint16_t numCached = 0;
     for (auto &i : m_groupRestrictions)
     {
         for (auto &j : i.second)
         {
-            PGTARestrictionData& copyRestriction = copyRestrictions[numCopied];
+            PGTACachedRestrictionData& cachedRestriction = m_trackData->cachedRestrictions[numCached];
+            
+            // Is true if this restriction was already found in another group
             bool alreadyCopied = false;
-            for (int k = numCopied - 1; k >= 0; --k)
+            for (int k = numCached - 1; k >= 0; --k)
             {
-                char* copyUUID1 = copyRestrictions[k].group1UUID;
-                char* copyUUID2 = copyRestrictions[k].group2UUID;
-                if ((i.first == copyUUID1 && j == copyUUID2) ||
-                    (i.first == copyUUID2 && j == copyUUID1))
+                std::string UUID1 = m_trackData->cachedRestrictions[k].group1UUID;
+                std::string UUID2 = m_trackData->cachedRestrictions[k].group2UUID;
+                if ((i.first == UUID1 && j == UUID2) ||
+                    (i.first == UUID2 && j == UUID1))
                 {
                     alreadyCopied = true;
                     break;
@@ -53,14 +65,18 @@ PGTARestrictionData* PGTATrack::CopyRestrictionData() const
 
             if (!alreadyCopied)
             {
-                copyRestriction.group1UUID = new char[PGTAUUID::UUID_NUM_BYTES + 1];
-                copyRestriction.group2UUID = new char[PGTAUUID::UUID_NUM_BYTES + 1];
-                memcpy(copyRestriction.group1UUID, i.first.bytes, PGTAUUID::UUID_NUM_BYTES);
-                memcpy(copyRestriction.group2UUID, j.bytes, PGTAUUID::UUID_NUM_BYTES);
-                copyRestriction.group1UUID[PGTAUUID::UUID_NUM_BYTES] = 0;
-                copyRestriction.group2UUID[PGTAUUID::UUID_NUM_BYTES] = 0;
+                cachedRestriction.group1UUID = i.first.c_str();
+                cachedRestriction.group2UUID = j.c_str();
 
-                numCopied++;
+                copyRestrictions[numCached].group1UUID = cachedRestriction.group1UUID.data();
+                copyRestrictions[numCached].group2UUID = cachedRestriction.group2UUID.data();
+
+                numCached++;
+
+                if (numCached == numRestrictions)
+                {
+                    return copyRestrictions;
+                }
             }
         }
     }
@@ -68,93 +84,96 @@ PGTARestrictionData* PGTATrack::CopyRestrictionData() const
     return copyRestrictions;
 }
 
-PGTAGroupData* PGTATrack::CopyGroupData() const
+std::vector<PGTAGroupData> PGTATrack::CopyGroupData() const
 {
     int numGroups = GetNumGroups();
-    PGTAGroupData* copyGroups = new PGTAGroupData[numGroups];
+    std::vector<PGTAGroupData> copyGroups;
+
+    if (!m_trackData)
+    {
+        return copyGroups;
+    }
+
+    copyGroups.resize(numGroups);
+    m_trackData->cachedGroups.resize(numGroups);
+
     for (int i = 0; i < numGroups; ++i)
     {
+        PGTACachedGroupData& cachedGroup = m_trackData->cachedGroups[i];
         PGTAGroupData& group = copyGroups[i];
-        size_t nameLength = strlen(m_groups[i].name);
-        group.name = new char[nameLength + 1];
-        strcpy(group.name, m_groups[i].name);
-        group.uuid = new char[PGTAUUID::UUID_NUM_BYTES + 1];
-        memcpy(group.uuid, m_groups[i].uuid.bytes, PGTAUUID::UUID_NUM_BYTES);
-        group.uuid[PGTAUUID::UUID_NUM_BYTES] = 0;
+
+        cachedGroup.name = m_groups[i].name.c_str();
+        cachedGroup.uuid = m_groups[i].uuid.c_str();
+        
+        group.name = cachedGroup.name.c_str();
+        group.uuid = cachedGroup.uuid.c_str();
     }
 
     return copyGroups;
 }
 
-PGTASampleData* PGTATrack::CopySampleData() const
+std::vector<PGTASampleData> PGTATrack::CopySampleData() const
 {
     int numSamples = GetNumSamples();
-    PGTASampleData* copySamples = new PGTASampleData[numSamples];
+    std::vector<PGTASampleData> copySamples;
+
+    if (!m_trackData)
+    {
+        return copySamples;
+    }
+
+    copySamples.resize(numSamples);
+    m_trackData->cachedSamples.resize(numSamples);
+
     for (int i = 0; i < numSamples; ++i)
     {
+        PGTACachedSampleData& cachedsample = m_trackData->cachedSamples[i];
         PGTASampleData& sample = copySamples[i];
         const PGTATrackSample &sourceSample = m_samples[i];
+
+        cachedsample.sampleName = sourceSample.sampleName.c_str();
+        cachedsample.defaultFile = sourceSample.defaultFile.c_str();
+        cachedsample.groupUUID = sourceSample.group.c_str();
 
         sample.frequency = sourceSample.frequency;
         sample.probability = sourceSample.probability;
         sample.startTime = sourceSample.startTime;
         sample.volumeMultiplier = sourceSample.volumeMultiplier;
-
-        sample.sampleName = nullptr;
-        if (sourceSample.sampleName != nullptr)
-        {
-            size_t length = strlen(sourceSample.sampleName);
-            sample.sampleName = new char[length + 1];
-            strcpy(sample.sampleName, sourceSample.sampleName);
-        }
-
-        sample.defaultFile = nullptr;
-        if (sourceSample.defaultFile != nullptr)
-        {
-            size_t length = strlen(sourceSample.defaultFile);
-            sample.defaultFile = new char[length + 1];
-            strcpy(sample.defaultFile, sourceSample.defaultFile);
-        }
-
-        sample.groupUUID = nullptr;
-        if (sourceSample.group != nullptr)
-        {
-            sample.groupUUID = new char[PGTAUUID::UUID_NUM_BYTES + 1];
-            memcpy(sample.groupUUID, sourceSample.group->bytes, PGTAUUID::UUID_NUM_BYTES);
-            sample.groupUUID[PGTAUUID::UUID_NUM_BYTES] = 0;        
-        }
+        sample.sampleName = cachedsample.sampleName.c_str();
+        sample.defaultFile = cachedsample.defaultFile.c_str();
+        sample.groupUUID = cachedsample.groupUUID.c_str();
     }
 
     return copySamples;
 }
 
-PGTATrackData* PGTATrack::GetTrackData(HPGTATrack trackHandle)
+PGTATrackData PGTATrack::GetTrackData(HPGTATrack trackHandle)
 {
-    if (m_dataReferences > 0)
-    {
-        m_dataReferences++;
-        return m_trackData;
+    PGTATrackData trackData;
+    if (m_dataReferences == 0)
+    {      
+        m_trackData = std::make_unique<PGTACachedTrackData>();
+        
+        m_trackData->samples = std::move(CopySampleData());
+        m_trackData->groups = std::move(CopyGroupData());
+        m_trackData->restrictions = std::move(CopyRestrictionData());
+
+        m_trackData->trackHandle = trackHandle;
     }
-
-    m_trackData = new PGTATrackData();
-    m_trackData->samples = CopySampleData();
-    m_trackData->numSamples = GetNumSamples();
-
-    if (m_trackData->samples == nullptr)
-    {
-        delete m_trackData;
-        return nullptr;
-    }
-
-    m_trackData->trackHandle = trackHandle;
-    m_trackData->groups = CopyGroupData();
-    m_trackData->numGroups = GetNumGroups();
-
-    m_trackData->numRestrictions = GetNumRestrictions();
-    m_trackData->restrictions = CopyRestrictionData();
-
+    
     m_dataReferences++;
-    return m_trackData;
+
+    trackData.numSamples = m_trackData->samples.size();
+    trackData.samples = m_trackData->samples.data();
+
+    trackData.numGroups = m_trackData->groups.size();
+    trackData.groups = m_trackData->groups.data();
+
+    trackData.numRestrictions = m_trackData->restrictions.size();
+    trackData.restrictions = m_trackData->restrictions.data();
+
+    trackData.trackHandle = m_trackData->trackHandle;
+    return trackData;
 }
 
 void PGTATrack::FreeTrackData()
@@ -170,35 +189,4 @@ void PGTATrack::FreeTrackData()
     {
         return;
     }
-
-    int numSamples = m_trackData->numSamples;
-    for (int i = 0; i < numSamples; ++i)
-    {
-        PGTASampleData &sample = m_trackData->samples[i];
-        delete sample.sampleName;
-        delete sample.defaultFile;
-        delete sample.groupUUID;
-    }
-    delete m_trackData->samples;
-
-    int numGroups = m_trackData->numGroups;
-    for (int i = 0; i < numGroups; ++i)
-    {
-        PGTAGroupData& group = m_trackData->groups[i];
-        delete group.name;
-        delete group.uuid;
-    }
-    delete m_trackData->groups;
-
-    int numRestrictions = m_trackData->numRestrictions;
-    for (int i = 0; i < numRestrictions; ++i)
-    {
-        PGTARestrictionData& restriction = m_trackData->restrictions[i];
-        delete restriction.group1UUID;
-        delete restriction.group2UUID;
-    }
-    delete m_trackData->restrictions;
-
-    delete m_trackData;
-    m_trackData = nullptr;
 }

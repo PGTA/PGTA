@@ -20,7 +20,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
     // load track data to memory
     // "tracks/demo.track"
     std::string trackSource;
-    if (!ReadBinaryFileToString("tracks/rain_thunder.track", trackSource))
+    if (!ReadBinaryFileToString("tracks/test", trackSource))
     {
         return -1;
     }
@@ -32,6 +32,14 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
     {
         return -1;
     }
+
+    auto d = pgtaGetTrackData(demoTrack);
+    d = pgtaGetTrackData(demoTrack);
+    pgtaFreeTrackData(d);
+    pgtaFreeTrackData(d);
+
+    auto e = pgtaGetTrackData(demoTrack);
+    pgtaFreeTrackData(e);
 
     PGTAConfig config;
     config.audioDesc.samplesPerSecond = 44100;

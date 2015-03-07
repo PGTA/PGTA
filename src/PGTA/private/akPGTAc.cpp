@@ -88,22 +88,22 @@ void pgtaFreeTracks(HPGTADevice device, const int numTracks, HPGTATrack* tracksI
     temp.pgtaDevice->FreeTracks(numTracks, tracks.pgtaTracks);
 }
 
-PGTATrackData* pgtaGetTrackData(HPGTATrack track)
+PGTATrackData pgtaGetTrackData(HPGTATrack track)
 {
     PGTATrackUnion trackUnion;
     trackUnion.handle = track;
 
     PGTATrack* tempTrack = trackUnion.pgtaTrack;
-    PGTATrackData* data = tempTrack->GetTrackData(trackUnion.handle);
+    PGTATrackData data = tempTrack->GetTrackData(trackUnion.handle);
 
     return data;
 }
 
-void pgtaFreeTrackData(PGTATrackData* trackData)
+void pgtaFreeTrackData(PGTATrackData trackData)
 {
 
     PGTATrackUnion trackUnion;
-    trackUnion.handle = trackData->trackHandle;
+    trackUnion.handle = trackData.trackHandle;
     
     PGTATrack* track = trackUnion.pgtaTrack;
     track->FreeTrackData();

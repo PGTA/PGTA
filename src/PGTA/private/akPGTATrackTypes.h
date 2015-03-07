@@ -1,22 +1,58 @@
 #pragma once
 
 #include <private/akPGTAUUID.h>
+#include <public/akPGTATypes.h>
+#include <memory>
+#include <vector>
+#include <string>
 
 struct PGTATrackGroup
 {
-    char* name;
-    PGTAUUID uuid;
+    std::string name;
+    std::string uuid;
 };
 
 struct PGTATrackSample
 {
-    char* sampleName;
+    std::string sampleName;
     int16_t id;
-    char* defaultFile;
+    std::string defaultFile;
     uint64_t frequency;
     uint64_t startTime;
     float probability;
     float volumeMultiplier;
 
-    PGTAUUID* group;
+    std::string group;
+};
+
+struct PGTACachedGroupData
+{
+    std::string name;
+    std::string uuid;
+};
+
+struct PGTACachedRestrictionData
+{
+    std::string group1UUID;
+    std::string group2UUID;
+};
+
+struct PGTACachedSampleData
+{
+    std::string sampleName;
+    std::string defaultFile;
+    std::string groupUUID;
+};
+
+struct PGTACachedTrackData
+{
+    HPGTATrack trackHandle;
+
+    std::vector<PGTASampleData> samples;
+    std::vector<PGTAGroupData> groups;
+    std::vector<PGTARestrictionData> restrictions;
+    
+    std::vector<PGTACachedSampleData> cachedSamples;
+    std::vector<PGTACachedGroupData> cachedGroups;
+    std::vector<PGTACachedRestrictionData> cachedRestrictions;
 };

@@ -34,38 +34,38 @@ typedef struct PGTAConfig
 
 typedef struct PGTAGroupData
 {
-    char* name;
-    char* uuid;
+    const char* name;
+    const char* uuid;
 } PGTAGroupData;
 
 typedef struct PGTARestrictionData
 {
-    char* group1UUID;
-    char* group2UUID;
+    const char* group1UUID;
+    const char* group2UUID;
 } PGTARestrictionData;
 
 typedef struct PGTASampleData
 {
-    char* sampleName;
-    char* defaultFile;
+    const char* sampleName;
+    const char* defaultFile;
     uint64_t frequency;
     uint64_t startTime;
     float probability;
     float volumeMultiplier;
-    char* groupUUID;
+    const char* groupUUID;
 } PGTASampleData;
 
 typedef struct PGTATrackData
 {
     HPGTATrack trackHandle;
     uint16_t numSamples;
-    PGTASampleData* samples;
+    const PGTASampleData* samples;
 
     uint16_t numGroups;
-    PGTAGroupData* groups;
+    const PGTAGroupData* groups;
 
     uint16_t numRestrictions;
-    PGTARestrictionData* restrictions;
+    const PGTARestrictionData* restrictions;
 } PGTATrackData;
 
 #undef DECLARE_HANDLE
