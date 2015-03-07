@@ -29,7 +29,7 @@ void convertFilename(const char* filenameIn, char* filenameOut)
         }
         else
         {
-            *filenameOut++ = toupper(*filenameIn);
+            *filenameOut++ = static_cast<char>(toupper(*filenameIn));
         }
         filenameIn++;
     }
@@ -42,7 +42,7 @@ size_t trimFbsWhitespace(const char* fbsSrc, char* trimmedSrcOut, const size_t b
     const char* end = fbsSrc + bufLen;
     char c;
     bool inString = false;
-    while (fbsSrc < end && (c = *fbsSrc))
+    while (fbsSrc < end && ((c = *fbsSrc) != 0))
     {
         if (c == '\"')
         {

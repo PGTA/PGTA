@@ -98,7 +98,7 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
     }
 
 
-    utils::RunLoop(0.01f, [&](double absoluteTime, float delta)
+    utils::RunLoop(0.01f, [&](double /*absoluteTime*/, float delta)
     {
         const uint32_t deltaSamples = static_cast<uint32_t>(round(delta * 44100.0f));
         akAudioMixer::AudioBuffer output = mixer->Update(deltaSamples);
@@ -110,12 +110,12 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
     return 0;
 }
 
-static void quit(int param)
+static void quit(int /*param*/)
 {
     exit(1);
 }
 
-int main(int argc, const char* argv[])
+int main()
 {
     std::cout.sync_with_stdio(false);
     signal(SIGINT, &quit);

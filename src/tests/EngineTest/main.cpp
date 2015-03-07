@@ -51,7 +51,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
 
     //pgtaContext.BindTrack(demoTrack);
 
-    utils::RunLoop(10.0f, [&](double absoluteTime, float delta)
+    utils::RunLoop(10.0f, [&](double /*absoluteTime*/, float delta)
     {
         int32_t numBuffers = 0;
         const PGTABuffer* buffers = pgtaContext.Update(delta, &numBuffers);
@@ -68,7 +68,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
     return 0;
 }
 
-int main(int argc, char *argv[])
+int main()
 {
     SDL_Init(SDL_INIT_EVERYTHING);
 
