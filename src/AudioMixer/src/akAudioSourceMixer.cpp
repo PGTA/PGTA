@@ -35,7 +35,7 @@ private:
 };
 
 void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
-                           const MixInfoMap& sourceMixInfo,
+                           MixInfoMap& sourceMixInfo,
                            int16_t* outputBuf, uint32_t numSamplesToMix)
 {
     m_mixBuffer.resize(numSamplesToMix);
@@ -68,16 +68,31 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
             if (mixFxBits & (1 << static_cast<uint16_t>(MixEffects::MixEffect_Gain)))
             {
                 const uint64_t index = MixInfoHash(id, MixEffects::MixEffect_Gain);
-                const MixEffect& effect = sourceMixInfo.at(index);
-                ProcessGain(scratchBuf, numSamplesToMix, effect.gain);
-                mixFxBits &= ~(1 << static_cast<uint16_t>(MixEffects::MixEffect_Gain));
+                auto it = sourceMixInfo.find(index);
+                if (it != sourceMixInfo.end())
+                {
+                    ProcessGain(scratchBuf, numSamplesToMix, it->second.gain);
+                    mixFxBits &= ~(1 << static_cast<uint16_t>(MixEffects::MixEffect_Gain));
+                    if (!keep)
+                    {
+                        sourceMixInfo.erase(it);
+                    }
+                }
             }
             else if (mixFxBits & (1 << static_cast<uint16_t>(MixEffects::MixEffect_Fade)))
             {
                 const uint64_t index = MixInfoHash(id, MixEffects::MixEffect_Fade);
-                const MixEffect& effect = sourceMixInfo.at(index);
-                // TODO: process effect
-                mixFxBits &= ~(1 << static_cast<uint16_t>(MixEffects::MixEffect_Fade));
+                auto it = sourceMixInfo.find(index);
+                if (it != sourceMixInfo.end())
+                {
+                    // TODO: process effect
+                    // ProcessFade(scratchBuf, numSamplesToMix, it->second.fade);
+                    mixFxBits &= ~(1 << static_cast<uint16_t>(MixEffects::MixEffect_Fade));
+                    if (!keep)
+                    {
+                        sourceMixInfo.erase(it);
+                    }
+                }
             }
         }
 

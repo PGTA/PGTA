@@ -14,7 +14,7 @@ class AudioSourceMixer
     using MixInfoMap = std::map<uint64_t, akAudioMixer::MixEffect>;
 public:
     void Mix(DataTable<SourceMixPair>& sources,
-             const MixInfoMap& sourceMixInfo,
+             MixInfoMap& sourceMixInfo,
              int16_t* outputBuf, uint32_t numSamplesToMix);
 
 private:
