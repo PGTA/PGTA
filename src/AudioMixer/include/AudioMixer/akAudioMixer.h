@@ -30,7 +30,7 @@ namespace akAudioMixer
         using Impl = AudioMixerImpl;
         class MixHandle
         {
-            friend class Impl;
+            friend class AudioMixerImpl;
         public:
             explicit MixHandle(uint32_t id = 0):
                 m_id(id)
