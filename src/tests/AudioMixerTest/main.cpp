@@ -97,7 +97,10 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
     {
         akAudioMixer::AudioSource source;
         source.SetSource(audio2.GetSamplePtr(), audio2.GetNumSamples());
-        mixer->AddSource(source);
+        akAudioMixer::MixEffect effect;
+        effect.gain.type = akAudioMixer::MixEffects::MixEffect_Gain;
+        effect.gain.dBGain = 6.0f;
+        mixer->AddEffect(mixer->AddSource(source), effect);
     }
     {
         akAudioMixer::AudioSource source;
