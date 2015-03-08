@@ -23,6 +23,8 @@ public:
     MixHandle AddSource(const akAudioMixer::AudioSource& source);
     akAudioMixer::MixControl* GetMixControl(MixHandle handle);
 
+    uint64_t GetCurTime() const;
+
     akAudioMixer::AudioBuffer Update(const uint32_t deltaNumSamples);
     akAudioMixer::AudioBuffer GetOutputBuffer();
 
@@ -45,3 +47,8 @@ private:
 
     akAudioMixer::AudioMixerConfig m_cfg;
 };
+
+inline uint64_t AudioMixerImpl::GetCurTime() const
+{
+    return m_userTime;
+}

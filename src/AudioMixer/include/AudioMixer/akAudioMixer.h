@@ -38,6 +38,8 @@ namespace akAudioMixer
         MixHandle AddSource(const AudioSource& source);
         MixControl* GetMixControl(MixHandle handle);
 
+        uint64_t GetCurTime() const;
+
         AudioBuffer Update(const uint32_t deltaNumSamples);
         AudioBuffer GetOutputBuffer();
 

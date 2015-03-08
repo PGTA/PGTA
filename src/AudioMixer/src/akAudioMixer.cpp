@@ -15,6 +15,11 @@ namespace akAudioMixer
         return ToImpl(this)->GetMixControl(handle);
     }
 
+    uint64_t AudioMixer::GetCurTime() const
+    {
+        return ToImpl(this)->GetCurTime();
+    }
+
     AudioBuffer AudioMixer::Update(const uint32_t deltaNumSamples)
     {
         return ToImpl(this)->Update(deltaNumSamples);
