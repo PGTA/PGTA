@@ -79,7 +79,7 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
         if (mixControl)
         {
             akAudioMixer::MixEffect effect;
-            effect.gain.type = akAudioMixer::MixEffects::MixEffect_Gain;
+            effect.type = akAudioMixer::MixEffects::MixEffect_Gain;
             effect.gain.dBGain = -18.0f;
             mixControl.AddEffect(effect);
             //mixControl.RemoveEffect(akAudioMixer::MixEffects::MixEffect_Gain);
@@ -98,7 +98,7 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
         akAudioMixer::AudioSource source;
         source.SetSource(audio2.GetSamplePtr(), audio2.GetNumSamples());
         akAudioMixer::MixEffect effect;
-        effect.gain.type = akAudioMixer::MixEffects::MixEffect_Gain;
+        effect.type = akAudioMixer::MixEffects::MixEffect_Gain;
         effect.gain.dBGain = 6.0f;
         mixer->AddEffect(mixer->AddSource(source), effect);
     }

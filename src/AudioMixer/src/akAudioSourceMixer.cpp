@@ -57,11 +57,11 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
     sources.ForEach([=, &sourceMixInfo](SourceMixPair& data, uint_fast32_t id) -> bool
     {
         akAudioMixer::AudioSource& source = data.first;
-        uint16_t mixFxBits = data.second;
+        const uint16_t mixFxBits = data.second;
 
         const bool keep = GetSamplesFromSource(source, scratchBuf, numSamplesToMix);
 
-        while (mixFxBits > 0)
+        if (mixFxBits > 0)
         {
             using akAudioMixer::MixEffects;
             using akAudioMixer::MixEffect;
@@ -72,14 +72,13 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
                 if (it != sourceMixInfo.end())
                 {
                     ProcessGain(scratchBuf, numSamplesToMix, it->second.gain);
-                    mixFxBits &= ~(1 << static_cast<uint16_t>(MixEffects::MixEffect_Gain));
                     if (!keep)
                     {
                         sourceMixInfo.erase(it);
                     }
                 }
             }
-            else if (mixFxBits & (1 << static_cast<uint16_t>(MixEffects::MixEffect_Fade)))
+            if (mixFxBits & (1 << static_cast<uint16_t>(MixEffects::MixEffect_Fade)))
             {
                 const uint64_t index = MixInfoHash(id, MixEffects::MixEffect_Fade);
                 auto it = sourceMixInfo.find(index);
@@ -87,7 +86,6 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
                 {
                     // TODO: process effect
                     // ProcessFade(scratchBuf, numSamplesToMix, it->second.fade);
-                    mixFxBits &= ~(1 << static_cast<uint16_t>(MixEffects::MixEffect_Fade));
                     if (!keep)
                     {
                         sourceMixInfo.erase(it);
