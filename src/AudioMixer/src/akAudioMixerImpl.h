@@ -29,8 +29,8 @@ public:
     akAudioMixer::AudioBuffer GetOutputBuffer();
 
 private:
-    uint32_t CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,
-                              uint32_t deltaTime, uint32_t mixAheadAmount);
+    static uint32_t CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,
+                                     uint32_t deltaTime, uint32_t mixAheadAmount);
     static bool IsValidConfig(const akAudioMixer::AudioMixerConfig& cfg);
 
 private:
