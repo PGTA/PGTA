@@ -3,6 +3,8 @@
 #include "akDataTable.h"
 #include <AudioMixer/akAudioSource.h>
 #include <AudioMixer/akMixControl.h>
+#include "akMixInfoHash.h"
+#include "akDSPEffects.h"
 #include <algorithm>
 #include <assert.h>
 #include <iostream>
@@ -33,6 +35,7 @@ private:
 };
 
 void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
+                           const MixInfoMap& sourceMixInfo,
                            int16_t* outputBuf, uint32_t numSamplesToMix)
 {
     m_mixBuffer.resize(numSamplesToMix);
@@ -51,19 +54,37 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
 
     float* const scratchBuf = m_scratchBuffer.data();
 
-    sources.ForEach([=](SourceMixPair& data) -> bool
+    sources.ForEach([=, &sourceMixInfo](SourceMixPair& data, uint_fast32_t id) -> bool
     {
         akAudioMixer::AudioSource& source = data.first;
-        //akAudioMixer::MixControl& mixControl = data.second;
+        uint16_t mixFxBits = data.second;
 
         const bool keep = GetSamplesFromSource(source, scratchBuf, numSamplesToMix);
+
+        while (mixFxBits > 0)
+        {
+            using akAudioMixer::MixEffects;
+            using akAudioMixer::MixEffect;
+            if (mixFxBits & (1 << static_cast<uint16_t>(MixEffects::MixEffect_Gain)))
+            {
+                const uint64_t index = MixInfoHash(id, MixEffects::MixEffect_Gain);
+                const MixEffect& effect = sourceMixInfo.at(index);
+                ProcessGain(scratchBuf, numSamplesToMix, effect.gain);
+                mixFxBits &= ~(1 << static_cast<uint16_t>(MixEffects::MixEffect_Gain));
+            }
+            else if (mixFxBits & (1 << static_cast<uint16_t>(MixEffects::MixEffect_Fade)))
+            {
+                const uint64_t index = MixInfoHash(id, MixEffects::MixEffect_Fade);
+                const MixEffect& effect = sourceMixInfo.at(index);
+                // TODO: process effect
+                mixFxBits &= ~(1 << static_cast<uint16_t>(MixEffects::MixEffect_Fade));
+            }
+        }
+
         for (uint_fast32_t i = 0; i < numSamplesToMix; ++i)
         {
             mixBuf[i] += scratchBuf[i];
         }
-
-        // TODO: apply fx
-
         return keep;
     });
 

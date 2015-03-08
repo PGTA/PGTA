@@ -4,10 +4,16 @@
 #include <unordered_map>
 #include <vector>
 #include <assert.h>
+#include <stdint.h>
 
 template<typename T>
 class DataTable
 {
+    struct ElemType
+    {
+        T data;
+        uint_fast32_t id;
+    };
 public:
     // Add a mapping of id to data and
     // store the data by value.
@@ -19,11 +25,10 @@ public:
         uint_fast32_t index = static_cast<uint_fast32_t>(m_data.size());
 
         // add the data
-        m_data.emplace_back(std::move(*data));
+        m_data.emplace_back(ElemType{ std::move(*data), id });
 
         // map the id to an array index
         m_id_to_data.emplace(id, index);
-        m_data_to_id.emplace(index, id);
     }
 
     // Version of AddData that does
@@ -39,28 +44,25 @@ public:
     {
         assert(HasData(id));
 
-        uint_fast32_t removal_index = m_id_to_data[id];
-        //RemoveDataFromIndex(removal_index);
-        uint_fast32_t replacement_index = static_cast<uint_fast32_t>(m_data.size() - 1);
+        const uint_fast32_t removal_index = m_id_to_data[id];
+        const uint_fast32_t replacement_index = static_cast<uint_fast32_t>(m_data.size() - 1);
 
         if (replacement_index > removal_index)
         {
+            ElemType& replacementData = m_data[replacement_index];
+
+            // reset the id to data mapping
+            m_id_to_data[replacementData.id] = removal_index;
+
             // assign replacement data to removed data
-            m_data[removal_index] = std::move(m_data[replacement_index]);
-
-            uint_fast32_t replacement_id = m_data_to_id[replacement_index];
-
-            // swap the id to data mappings
-            m_id_to_data[replacement_id] = removal_index;
-            m_data_to_id[removal_index] = replacement_id;
+            m_data[removal_index] = std::move(replacementData);
         }
         else
         {
             assert(replacement_index == removal_index);
         }
 
-        // erase the mappings and data
-        m_data_to_id.erase(replacement_index);
+        // erase the mapping and remove the data
         m_id_to_data.erase(id);
         m_data.pop_back();
     }
@@ -77,13 +79,13 @@ public:
     T* GetData(uint_fast32_t id)
     {
         assert(HasData(id));
-        return &m_data[m_id_to_data[id]];
+        return &m_data[m_id_to_data[id]].data;
     }
 
     const T* PeekData(uint_fast32_t id)
     {
         assert(HasData(id));
-        return &m_data[m_id_to_data[id]];
+        return &m_data[m_id_to_data[id]].data;
     }
 
     // If id data exists, updates the internal data,
@@ -113,13 +115,14 @@ public:
     void ForEach(F func)
     {
         std::size_t numElems = m_data.size();
-        T* data = m_data.data();
+        ElemType* data = m_data.data();
         for (uint_fast32_t i = 0; i < numElems;)
         {
-            if (!func(data[i]))
+            ElemType& thisData = data[i];
+            if (!func(thisData.data, thisData.id))
             {
                 // TODO create remove from index func
-                RemoveData(m_data_to_id[i]);
+                RemoveData(thisData.id);
                 --numElems;
             }
             else
@@ -133,11 +136,9 @@ public:
     {
         m_data.clear();
         m_id_to_data.clear();
-        m_data_to_id.clear();
     }
 
 private:
-    std::vector<T> m_data;
+    std::vector<ElemType> m_data;
     std::unordered_map<uint_fast32_t, uint_fast32_t> m_id_to_data;
-    std::unordered_map<uint_fast32_t, uint_fast32_t> m_data_to_id;
 };

@@ -74,9 +74,17 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
     {
         akAudioMixer::AudioSource source;
         source.SetSource(wav.GetSamplePtr(), wav.GetNumSamples());
-        mixer->AddSource(source);
+        auto handle = mixer->AddSource(source);
+        akAudioMixer::MixControl mixControl = mixer->GetMixControl(handle);
+        if (mixControl)
+        {
+            akAudioMixer::MixEffect effect;
+            effect.gain.type = akAudioMixer::MixEffects::MixEffect_Gain;
+            effect.gain.dBGain = -18.0f;
+            mixControl.AddEffect(effect);
+            //mixControl.RemoveEffect(akAudioMixer::MixEffects::MixEffect_Gain);
+        }
     }
-
 
     SDLWav audio1("media/loon.wav");
     SDLWav audio2("media/frogs.wav");

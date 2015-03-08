@@ -8,9 +8,9 @@ namespace akAudioMixer
 {
     enum class MixEffects: uint16_t
     {
-        MixEffect_Gain = 0x1,
-        MixEffect_Fade = 0x2,
-        MixEffect_MaxEffects
+        MixEffect_Gain = 0,
+        MixEffect_Fade,
+        MixEffect_NumEffects
     };
 
     struct GainEffect
