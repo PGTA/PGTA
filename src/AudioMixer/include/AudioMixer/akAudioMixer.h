@@ -27,10 +27,10 @@ namespace akAudioMixer
     class AudioMixer
     {
     public:
-        using Impl = AudioMixerImpl;
+        using Impl = ::AudioMixerImpl;
         class MixHandle
         {
-            friend class AudioMixerImpl;
+            friend Impl;
         public:
             explicit MixHandle(uint32_t id = 0):
                 m_id(id)
