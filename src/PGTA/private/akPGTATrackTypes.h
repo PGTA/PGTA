@@ -14,8 +14,8 @@ struct PGTATrackGroup
 
 struct PGTATrackSample
 {
-    std::string sampleName;
     int16_t id;
+    std::string sampleName;
     std::string defaultFile;
     uint64_t frequency;
     uint64_t startTime;
@@ -23,6 +23,9 @@ struct PGTATrackSample
     float volumeMultiplier;
 
     std::string group;
+
+    uint32_t numSamples;
+    const int16_t* audioData;
 };
 
 struct PGTACachedGroupData

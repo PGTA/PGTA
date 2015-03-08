@@ -135,6 +135,7 @@ std::vector<PGTASampleData> PGTATrack::CopySampleData() const
         cachedsample.defaultFile = sourceSample.defaultFile.c_str();
         cachedsample.groupUUID = sourceSample.group.c_str();
 
+        sample.id = sourceSample.id;
         sample.frequency = sourceSample.frequency;
         sample.probability = sourceSample.probability;
         sample.startTime = sourceSample.startTime;
@@ -163,13 +164,13 @@ PGTATrackData PGTATrack::GetTrackData(HPGTATrack trackHandle)
     
     m_dataReferences++;
 
-    trackData.numSamples = m_trackData->samples.size();
+    trackData.numSamples = (uint16_t)m_trackData->samples.size();
     trackData.samples = m_trackData->samples.data();
 
-    trackData.numGroups = m_trackData->groups.size();
+    trackData.numGroups = (uint16_t)m_trackData->groups.size();
     trackData.groups = m_trackData->groups.data();
 
-    trackData.numRestrictions = m_trackData->restrictions.size();
+    trackData.numRestrictions = (uint16_t)m_trackData->restrictions.size();
     trackData.restrictions = m_trackData->restrictions.data();
 
     trackData.trackHandle = m_trackData->trackHandle;

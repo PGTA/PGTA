@@ -19,9 +19,11 @@ public:
     void SetGroups(std::vector<PGTATrackGroup>& groups);
     void SetRestrictions(std::map<std::string, std::vector<std::string> >& restrictions, const uint16_t numRestrictions);
     
-    uint16_t GetNumSamples() const { return m_samples.size(); }
-    uint16_t GetNumGroups() const { return m_groups.size(); }
+    uint16_t GetNumSamples() const { return (uint16_t)m_samples.size(); }
+    uint16_t GetNumGroups() const { return (uint16_t)m_groups.size(); }
     uint16_t GetNumRestrictions() const { return m_numRestrictions; }
+
+    const std::vector<PGTATrackSample>* GetSamples() const { return &m_samples; }
     
     PGTATrackData GetTrackData(const HPGTATrack trackHandle);
     void FreeTrackData();

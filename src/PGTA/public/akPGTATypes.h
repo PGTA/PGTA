@@ -46,6 +46,7 @@ typedef struct PGTARestrictionData
 
 typedef struct PGTASampleData
 {
+    int16_t id;
     const char* sampleName;
     const char* defaultFile;
     uint64_t frequency;

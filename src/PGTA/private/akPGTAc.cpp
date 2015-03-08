@@ -90,27 +90,58 @@ void pgtaFreeTracks(HPGTADevice device, const int numTracks, HPGTATrack* tracksI
 
 PGTATrackData pgtaGetTrackData(HPGTATrack track)
 {
-    PGTATrackUnion trackUnion;
-    trackUnion.handle = track;
+    PGTATrackData data;
 
-    PGTATrack* tempTrack = trackUnion.pgtaTrack;
-    PGTATrackData data = tempTrack->GetTrackData(trackUnion.handle);
+    if (!track)
+    {
+        return data;
+    }
+
+    PGTATrackUnion temp;
+    temp.handle = track;
+
+    data = temp.pgtaTrack->GetTrackData(temp.handle);
 
     return data;
 }
 
 void pgtaFreeTrackData(PGTATrackData trackData)
 {
+    PGTATrackUnion temp;
+    temp.handle = trackData.trackHandle;
 
-    PGTATrackUnion trackUnion;
-    trackUnion.handle = trackData.trackHandle;
-    
-    PGTATrack* track = trackUnion.pgtaTrack;
-    track->FreeTrackData();
+    if (!temp.pgtaTrack)
+    {
+        return;
+    }
+
+    temp.pgtaTrack->FreeTrackData();
 }
 
-void pgtaBindTrackSamples()
+void pgtaBindTrackSample(HPGTATrack track, const int32_t id, const int16_t* audioData,
+                         const size_t audioDataLength)
 {
+    if (!track)
+    {
+        return;
+    }
+
+    PGTATrackUnion temp;
+    temp.handle = track;
+
+    int numSamples = (int)temp.pgtaTrack->GetNumSamples();
+    auto* trackSamples = temp.pgtaTrack->GetSamples();
+    for (int i = 0; i < numSamples; ++i)
+    {
+        auto trackSample = trackSamples->at(i);
+        if (trackSample.id != id)
+        {
+            continue;
+        }
+
+        trackSample.numSamples = audioDataLength;
+        trackSample.audioData = audioData;
+    }
 }
 
 HPGTAContext pgtaCreateContext(HPGTADevice device, const PGTAConfig* config)

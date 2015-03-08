@@ -80,7 +80,7 @@ static PGTATrack* LoadAsciiTrack(const char* src, const size_t length, PGTATrack
 static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSample>* samples)
 {
     assert(samples);
-    const auto numSamples = schemaSamples.size();
+    const int numSamples = schemaSamples.size();
     int16_t sampleId = 0;
     samples->reserve(numSamples);
 
@@ -130,7 +130,7 @@ static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSamp
 static void InitGroups(const SchemaGroups& schemaGroups, vector<PGTATrackGroup>* groups)
 {
     assert(groups);
-    const auto numGroups = schemaGroups.size();
+    const int numGroups = schemaGroups.size();
     groups->reserve(numGroups);
 
     for (int i = 0; i < numGroups; ++i)
@@ -165,7 +165,7 @@ static uint16_t InitGroupRestrictions(const SchemaRestritions& schemaRestriciton
     assert(groupRestrictions);
     uint16_t numValidRestrictions = 0;
 
-    const auto numRestrictions = schemaRestricitons.size();
+    const int numRestrictions = schemaRestricitons.size();
     for (int i = 0; i < numRestrictions; ++i)
     {
         const PGTASchema::Restriction* schemaRestriction = schemaRestricitons.Get(i);
