@@ -40,25 +40,18 @@ bool AudioMixerImpl::Initialize(const akAudioMixer::AudioMixerConfig& cfg)
 AudioMixerImpl::MixHandle AudioMixerImpl::AddSource(const akAudioMixer::AudioSource& source)
 {
     const uint32_t id = ++m_mixHandleIndexCounter;
-    SourceMixPair temp = std::make_pair(source, akAudioMixer::MixControl());
+    SourceMixPair temp = std::make_pair(source, 0);
     m_sources.AddData(id, &temp);
-    return MixHandle{id};
+    return MixHandle(id);
 }
 
-akAudioMixer::MixControl* AudioMixerImpl::GetMixControl(AudioMixerImpl::MixHandle handle)
+akAudioMixer::MixControl AudioMixerImpl::GetMixControl(AudioMixerImpl::MixHandle handle)
 {
-    if (!handle)
+    if (!handle || !m_sources.HasData(handle.m_id))
     {
-        return nullptr;
+        return akAudioMixer::MixControl(nullptr, AudioMixerImpl::MixHandle());
     }
-
-    SourceMixPair* source = m_sources.GetData(handle.id);
-    if (!source)
-    {
-        return nullptr;
-    }
-
-    return &source->second;
+    return akAudioMixer::MixControl(this, handle);
 }
 
 akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
@@ -92,6 +85,38 @@ akAudioMixer::AudioBuffer AudioMixerImpl::GetOutputBuffer()
     output.samples = m_mixBuffer.data();
     output.numSamples = m_mixBuffer.size();
     return output;
+}
+
+void AudioMixerImpl::PauseSource(MixHandle handle, bool /*resume*/ /*= false*/)
+{
+    assert(false);
+    SourceMixPair* source = nullptr;
+    if (!handle || (source = m_sources.GetData(handle.m_id)) != nullptr)
+    {
+        return;
+    }
+}
+
+void AudioMixerImpl::AddEffect(MixHandle handle, const akAudioMixer::MixEffect& effect)
+{
+    SourceMixPair* source = nullptr;
+    if (!handle || (effect.type >= akAudioMixer::MixEffects::MixEffect_MaxEffects) ||
+        (source = m_sources.GetData(handle.m_id)) != nullptr)
+    {
+        return;
+    }
+    source->second |= static_cast<uint16_t>(effect.type);
+}
+
+void AudioMixerImpl::RemoveEffect(MixHandle handle, akAudioMixer::MixEffects type)
+{
+    SourceMixPair* source = nullptr;
+    if (!handle || (type >= akAudioMixer::MixEffects::MixEffect_MaxEffects) ||
+        (source = m_sources.GetData(handle.m_id)) != nullptr)
+    {
+        return;
+    }
+    source->second &= ~static_cast<uint16_t>(type);
 }
 
 uint32_t AudioMixerImpl::CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,

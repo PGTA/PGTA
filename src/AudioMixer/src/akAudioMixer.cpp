@@ -10,7 +10,7 @@ namespace akAudioMixer
         return ToImpl(this)->AddSource(source);
     }
 
-    MixControl* AudioMixer::GetMixControl(AudioMixer::MixHandle handle)
+    MixControl AudioMixer::GetMixControl(AudioMixer::MixHandle handle)
     {
         return ToImpl(this)->GetMixControl(handle);
     }
@@ -28,6 +28,21 @@ namespace akAudioMixer
     AudioBuffer AudioMixer::GetOutputBuffer()
     {
         return ToImpl(this)->GetOutputBuffer();
+    }
+
+    void AudioMixer::PauseSource(MixHandle handle, bool resume /*= false*/)
+    {
+        ToImpl(this)->PauseSource(handle, resume);
+    }
+
+    void AudioMixer::AddEffect(MixHandle handle, const akAudioMixer::MixEffect& effect)
+    {
+        ToImpl(this)->AddEffect(handle, effect);
+    }
+
+    void AudioMixer::RemoveEffect(MixHandle handle, akAudioMixer::MixEffects type)
+    {
+        ToImpl(this)->RemoveEffect(handle, type);
     }
 
     AudioMixer* CreateAudioMixer(const AudioMixerConfig& cfg)

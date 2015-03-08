@@ -9,7 +9,7 @@
 
 class AudioSourceMixer
 {
-    using SourceMixPair = std::pair<akAudioMixer::AudioSource, akAudioMixer::MixControl>;
+    using SourceMixPair = std::pair<akAudioMixer::AudioSource, uint16_t>;
 public:
     void Mix(DataTable<SourceMixPair>& sources,
              int16_t* outputBuf, uint32_t numSamplesToMix);

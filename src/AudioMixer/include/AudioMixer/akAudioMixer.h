@@ -9,6 +9,8 @@ namespace akAudioMixer
 {
     class AudioSource;
     class MixControl;
+    union MixEffect;
+    enum class MixEffects: uint16_t;
 
     struct AudioMixerConfig
     {
@@ -26,22 +28,35 @@ namespace akAudioMixer
     {
     public:
         using Impl = AudioMixerImpl;
-        struct MixHandle
+        class MixHandle
         {
+            friend class Impl;
+        public:
+            explicit MixHandle(uint32_t id = 0):
+                m_id(id)
+            {
+            }
+
             explicit operator bool() const
             {
-                return (id > 0);
+                return (m_id > 0);
             }
-            uint32_t id;
+
+        protected:
+            uint32_t m_id;
         };
 
         MixHandle AddSource(const AudioSource& source);
-        MixControl* GetMixControl(MixHandle handle);
+        MixControl GetMixControl(MixHandle handle);
 
         uint64_t GetCurTime() const;
 
         AudioBuffer Update(const uint32_t deltaNumSamples);
         AudioBuffer GetOutputBuffer();
+
+        void PauseSource(MixHandle handle, bool resume = false);
+        void AddEffect(MixHandle handle, const akAudioMixer::MixEffect& effect);
+        void RemoveEffect(MixHandle handle, akAudioMixer::MixEffects type);
 
     protected:
         AudioMixer() = default;

@@ -21,12 +21,18 @@ public:
     bool Initialize(const akAudioMixer::AudioMixerConfig& cfg);
 
     MixHandle AddSource(const akAudioMixer::AudioSource& source);
-    akAudioMixer::MixControl* GetMixControl(MixHandle handle);
+    akAudioMixer::MixControl GetMixControl(MixHandle handle);
 
     uint64_t GetCurTime() const;
 
     akAudioMixer::AudioBuffer Update(const uint32_t deltaNumSamples);
     akAudioMixer::AudioBuffer GetOutputBuffer();
+
+    // MixControl interface
+    void PauseSource(MixHandle handle, bool resume = false);
+    void AddEffect(MixHandle handle, const akAudioMixer::MixEffect& effect);
+    void RemoveEffect(MixHandle handle, akAudioMixer::MixEffects type);
+    //
 
 private:
     static uint32_t CalcSamplesToMix(uint64_t mixerTime, uint64_t userTime,
@@ -42,7 +48,7 @@ private:
     std::vector<int16_t> m_mixBuffer;
     AudioSourceMixer m_sourceMixer;
 
-    using SourceMixPair = std::pair<akAudioMixer::AudioSource, akAudioMixer::MixControl>;
+    using SourceMixPair = std::pair<akAudioMixer::AudioSource, uint16_t>;
     DataTable<SourceMixPair> m_sources;
 
     akAudioMixer::AudioMixerConfig m_cfg;
