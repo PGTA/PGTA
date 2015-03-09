@@ -1,13 +1,64 @@
 
-#include <iostream>
-#include <string.h>
 #include <SDL.h>
 #include <SDL_audio.h>
+#include <akAudioMixer.h>
+#include <assert.h>
+#include <signal.h>
+#include <iostream>
 #include <akPGTA.h>
-#include <queue>
-
-#include "FileUtils.h"
+#include <public/akPGTATypes.h>
 #include "utils.h"
+#include "FileUtils.h"
+
+class SDLWav
+{
+public:
+    SDLWav(const char* filename) :
+        m_audioBuf(nullptr),
+        m_audioLen(0),
+        m_spec()
+    {
+        SDL_LoadWAV(filename, &m_spec, &m_audioBuf, &m_audioLen);
+        assert(m_spec.freq == 44100);
+        assert(m_spec.format == AUDIO_S16);
+        assert(m_spec.channels == 1);
+        std::cout << filename << " has " << (m_audioLen >> 1) << " samples\n";
+    }
+
+    ~SDLWav()
+    {
+        if (m_audioBuf)
+        {
+            SDL_FreeWAV(m_audioBuf);
+        }
+    }
+
+    explicit operator bool() const
+    {
+        return (m_audioBuf != nullptr && m_audioLen > 0);
+    }
+
+    const SDL_AudioSpec& GetSpec() const
+    {
+        return m_spec;
+    }
+
+    const int16_t* GetSamplePtr() const
+    {
+        return reinterpret_cast<const int16_t*>(m_audioBuf);
+    }
+
+    uint32_t GetNumSamples() const
+    {
+        assert((m_audioLen % 2) == 0);
+        return (m_audioLen >> 1);
+    }
+
+private:
+    Uint8* m_audioBuf;
+    Uint32 m_audioLen;
+    SDL_AudioSpec m_spec;
+};
 
 int pgtaMain(SDL_AudioDeviceID audioDevice)
 {
@@ -33,38 +84,41 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
         return -1;
     }
 
-    auto d = pgtaGetTrackData(demoTrack);
-    d = pgtaGetTrackData(demoTrack);
-    pgtaFreeTrackData(d);
-    pgtaFreeTrackData(d);
+    auto data = pgtaGetTrackData(demoTrack);
+    int numSamples = data.numSamples;
+    std::vector<int16_t*> audioData(numSamples);
+    for (int i = 0; i < numSamples; ++i)
+    {
+        int16_t id = data.samples[i].id;
+        const char* file = data.samples[i].defaultFile;
+        SDLWav audio(file);
+        uint32_t audioLength = audio.GetNumSamples();
+        audioData[i] = new int16_t[audioLength];
+        memcpy(audioData[i], audio.GetSamplePtr() , audioLength);
 
-    auto e = pgtaGetTrackData(demoTrack);
-    pgtaFreeTrackData(e);
+        pgtaBindTrackSample(demoTrack, id, audioData[i], audioLength);
+    }
 
     PGTAConfig config;
     config.audioDesc.samplesPerSecond = 44100;
     config.audioDesc.bytesPerSample = 2;
     config.audioDesc.channels = 1;
-    config.numBuffers = 4;
-    config.bufferSizeInSamples = 8192;
+    config.mixAhead = 0.5f;
     PGTA::PGTAContext pgtaContext(pgtaDevice.CreateContext(config));
 
-    //pgtaContext.BindTrack(demoTrack);
+    pgtaContext.BindTrack(demoTrack);
 
-    utils::RunLoop(10.0f, [&](double /*absoluteTime*/, float delta)
+    utils::RunLoop(0.01f, [&](double /*absoluteTime*/, float delta)
     {
-        int32_t numBuffers = 0;
-        const PGTABuffer* buffers = pgtaContext.Update(delta, &numBuffers);
-        for (int32_t i = 0; i < numBuffers; ++i)
-        {
-            const PGTABuffer& buf = buffers[i];
-            const int16_t* samples = reinterpret_cast<const int16_t*>(buf.samples);
-            SDL_QueueAudio(audioDevice, samples, buf.numSamples*2);
-        }
-
-        return (buffers != nullptr);
+        const PGTABuffer* output = pgtaContext.Update(delta);
+        SDL_QueueAudio(audioDevice, output->samples, static_cast<Uint32>(output->numSamples * 2));
+        return (output->samples != nullptr) && (output->numSamples > 0);
     });
 
+    for (auto& i : audioData)
+    {
+        delete i;
+    }
     return 0;
 }
 
