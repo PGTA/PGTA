@@ -164,13 +164,13 @@ PGTATrackData PGTATrack::GetTrackData(HPGTATrack trackHandle)
     
     m_dataReferences++;
 
-    trackData.numSamples = (uint16_t)m_trackData->samples.size();
+    trackData.numSamples = static_cast<uint16_t>(m_trackData->samples.size());
     trackData.samples = m_trackData->samples.data();
 
-    trackData.numGroups = (uint16_t)m_trackData->groups.size();
+    trackData.numGroups = static_cast<uint16_t>(m_trackData->groups.size());
     trackData.groups = m_trackData->groups.data();
 
-    trackData.numRestrictions = (uint16_t)m_trackData->restrictions.size();
+    trackData.numRestrictions = static_cast<uint16_t>(m_trackData->restrictions.size());
     trackData.restrictions = m_trackData->restrictions.data();
 
     trackData.trackHandle = m_trackData->trackHandle;

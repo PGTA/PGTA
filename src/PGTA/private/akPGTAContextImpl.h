@@ -1,7 +1,9 @@
 
 #pragma once
 
+#include <private/akPGTATrack.h>
 #include <stdint.h>
+#include <vector>
 
 struct PGTABuffer;
 struct PGTAConfig;
@@ -15,9 +17,12 @@ public:
     bool Initialize(const PGTAConfig& config);
     void Shutdown();
 
-    PGTABuffer* Update(const float delta, int32_t* numOutputBuffers);
+    void BindTrack(const PGTATrack* track);
 
-    PGTABuffer* GetOutputBuffers(int32_t* numOutputBuffers);
+    PGTABuffer* Update(const float delta);
+
+    PGTABuffer* GetOutputBuffers() const;
 
 private:
+    std::vector<const PGTATrack*> m_tracks;
 };

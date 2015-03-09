@@ -90,19 +90,15 @@ void pgtaFreeTracks(HPGTADevice device, const int numTracks, HPGTATrack* tracksI
 
 PGTATrackData pgtaGetTrackData(HPGTATrack track)
 {
-    PGTATrackData data;
-
     if (!track)
     {
-        return data;
+        return PGTATrackData{};
     }
 
     PGTATrackUnion temp;
     temp.handle = track;
 
-    data = temp.pgtaTrack->GetTrackData(temp.handle);
-
-    return data;
+    return temp.pgtaTrack->GetTrackData(temp.handle);
 }
 
 void pgtaFreeTrackData(PGTATrackData trackData)
@@ -188,7 +184,7 @@ PGTABuffer* pgtaUpdate(HPGTAContext context, float delta, int32_t* numOutputBuff
 
     PGTAContextUnion temp;
     temp.handle = context;
-    return temp.pgtaContext->Update(delta, numOutputBuffers);
+    return temp.pgtaContext->Update(delta);
 }
 
 PGTABuffer* pgtaGetOutputBuffers(HPGTAContext context, int32_t* numOutputBuffers)
@@ -200,5 +196,5 @@ PGTABuffer* pgtaGetOutputBuffers(HPGTAContext context, int32_t* numOutputBuffers
 
     PGTAContextUnion temp;
     temp.handle = context;
-    return temp.pgtaContext->GetOutputBuffers(numOutputBuffers);
+    return temp.pgtaContext->GetOutputBuffers();
 }

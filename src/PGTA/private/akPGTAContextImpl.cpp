@@ -1,5 +1,6 @@
 
 #include <private/akPGTAContextImpl.h>
+#include <vector>
 
 PGTAContextImpl::PGTAContextImpl()
 {
@@ -19,12 +20,17 @@ void PGTAContextImpl::Shutdown()
 {
 }
 
-PGTABuffer* PGTAContextImpl::Update(const float delta, int* numOutputBuffers)
+void PGTAContextImpl::BindTrack(const PGTATrack* track)
+{
+    m_tracks.emplace_back(track);
+}
+
+PGTABuffer* PGTAContextImpl::Update(const float delta)
 {
     return nullptr;
 }
 
-PGTABuffer* PGTAContextImpl::GetOutputBuffers(int32_t* numOutputBuffers)
+PGTABuffer* PGTAContextImpl::GetOutputBuffers() const
 {
     return nullptr;
 }
