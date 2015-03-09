@@ -113,7 +113,13 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
 
     akAudioMixer::MixEffect rainGain;
     rainGain.type = akAudioMixer::MixEffects::MixEffect_Gain;
-    rainGain.gain.dBGain = 9.0f;
+    rainGain.gain.dBGain = 12.0f;
+
+    akAudioMixer::MixEffect rainFade;
+    rainFade.type = akAudioMixer::MixEffects::MixEffect_Fade;
+    rainFade.fade.fadeOverNumSamples = rainSampleLength >> 2;
+    rainFade.fade.dBInitial = -48.0f;
+    rainFade.fade.dBFinal = 0.0f;
 
     utils::RunLoop(0.01f, [&](double /*absoluteTime*/, float delta)
     {
@@ -135,7 +141,10 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
             {
                 akAudioMixer::AudioSource source;
                 source.SetSource(wav.GetSamplePtr(), wav.GetNumSamples());
-                mixer->AddEffect(mixer->AddSource(source), rainGain);
+                auto handle = mixer->AddSource(source);
+                assert(handle);
+                mixer->AddEffect(handle, rainGain);
+                mixer->AddEffect(handle, rainFade);
             }
             {
                 akAudioMixer::AudioBuffer output = mixer->Update(leftoverTime);

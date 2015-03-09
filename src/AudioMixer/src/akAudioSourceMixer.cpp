@@ -54,10 +54,10 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
 
     float* const __restrict scratchBuf = m_scratchBuffer.data();
 
-    sources.ForEach([=, &sourceMixInfo](SourceMixPair& data, uint_fast32_t id) -> bool
+    sources.ForEach([=, &sourceMixInfo](SourceMixPair& sourcePair, uint_fast32_t id) -> bool
     {
-        akAudioMixer::AudioSource& source = data.first;
-        const uint16_t mixFxBits = data.second;
+        akAudioMixer::AudioSource& source = sourcePair.first;
+        const uint16_t mixFxBits = sourcePair.second;
 
         const bool keep = GetSamplesFromSource(source, scratchBuf, numSamplesToMix);
 
@@ -65,30 +65,32 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
         {
             using akAudioMixer::MixEffects;
             using akAudioMixer::MixEffect;
-            if (mixFxBits & (1 << static_cast<uint16_t>(MixEffects::MixEffect_Gain)))
+            if (mixFxBits & MixEffectBit(MixEffects::MixEffect_Gain))
             {
                 const uint64_t index = MixInfoHash(id, MixEffects::MixEffect_Gain);
                 auto it = sourceMixInfo.find(index);
                 if (it != sourceMixInfo.end())
                 {
-                    ProcessGain(scratchBuf, numSamplesToMix, it->second.gain);
+                    ProcessGain(scratchBuf, numSamplesToMix, it->second.first.gain);
                     if (!keep)
                     {
                         sourceMixInfo.erase(it);
                     }
                 }
             }
-            if (mixFxBits & (1 << static_cast<uint16_t>(MixEffects::MixEffect_Fade)))
+            if (mixFxBits & MixEffectBit(MixEffects::MixEffect_Fade))
             {
                 const uint64_t index = MixInfoHash(id, MixEffects::MixEffect_Fade);
                 auto it = sourceMixInfo.find(index);
                 if (it != sourceMixInfo.end())
                 {
-                    // TODO: process effect
-                    // ProcessFade(scratchBuf, numSamplesToMix, it->second.fade);
-                    if (!keep)
+                    const bool done = !ProcessFade(scratchBuf, numSamplesToMix,
+                                                   it->second.first.fade,
+                                                   it->second.second.fade);
+                    if (done || !keep)
                     {
                         sourceMixInfo.erase(it);
+                        sourcePair.second &= ~MixEffectBit(MixEffects::MixEffect_Fade);
                     }
                 }
             }

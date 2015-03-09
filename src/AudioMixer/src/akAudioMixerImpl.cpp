@@ -110,9 +110,9 @@ void AudioMixerImpl::AddEffect(MixHandle handle, const akAudioMixer::MixEffect& 
         return;
     }
 
-    source->second |= (1 << static_cast<uint16_t>(effect.type));
+    source->second |= MixEffectBit(effect.type);
     const uint64_t mixInfoIndex = MixInfoHash(handle.m_id, effect.type);
-    m_sourceMixInfo[mixInfoIndex] = effect;
+    m_sourceMixInfo[mixInfoIndex] = std::make_pair(effect, MixStates{});
 }
 
 void AudioMixerImpl::RemoveEffect(MixHandle handle, akAudioMixer::MixEffects type)
@@ -125,7 +125,7 @@ void AudioMixerImpl::RemoveEffect(MixHandle handle, akAudioMixer::MixEffects typ
         return;
     }
 
-    source->second &= ~(1 << static_cast<uint16_t>(type));
+    source->second &= ~MixEffectBit(type);
     const uint64_t mixInfoIndex = MixInfoHash(handle.m_id, type);
     m_sourceMixInfo.erase(mixInfoIndex);
 }

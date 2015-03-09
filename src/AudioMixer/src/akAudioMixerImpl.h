@@ -5,6 +5,7 @@
 #include <AudioMixer/akMixControl.h>
 #include "akAudioSourceMixer.h"
 #include "akDataTable.h"
+#include "akDSPEffectsCommon.h"
 #include <vector>
 #include <tuple>
 #include <map>
@@ -52,7 +53,7 @@ private:
     using SourceMixPair = std::pair<akAudioMixer::AudioSource, uint16_t>;
     DataTable<SourceMixPair> m_sources;
 
-    using MixInfoMap = std::map<uint64_t, akAudioMixer::MixEffect>;
+    using MixInfoMap = std::map<uint64_t, std::pair<akAudioMixer::MixEffect, MixStates>>;
     MixInfoMap m_sourceMixInfo;
 
     akAudioMixer::AudioMixerConfig m_cfg;

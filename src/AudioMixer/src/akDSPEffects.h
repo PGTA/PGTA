@@ -2,14 +2,11 @@
 #pragma once
 
 #include <AudioMixer/akMixControl.h>
+#include "akDSPEffectsCommon.h"
+#include <algorithm>
 #include <stdint.h>
+#include <assert.h>
 #include <cmath>
-
-inline float dBToLinear(float dB)
-{
-    static const float DB_TO_LOG = std::log(10.0f) / 20.0f;
-    return std::exp(dB * DB_TO_LOG);
-}
 
 inline void ProcessGain(float* samples, uint32_t numSamples,
                         const akAudioMixer::GainEffect& params)
@@ -19,4 +16,33 @@ inline void ProcessGain(float* samples, uint32_t numSamples,
     {
         samples[i] *= linearGain;
     }
+}
+
+inline bool ProcessFade(float* samples, uint32_t numSamples,
+                        const akAudioMixer::FadeEffect& params,
+                        FadeState& fadeState)
+{
+    static auto lerp = [](float from, float to, float factor) -> float
+    {
+        // lerp: from*(1.0f-factor) + to*factor
+        // from*(1.0f-factor) == from - from*factor == -from*factor + from
+        // fma: x*y+z
+        return std::fma(to, factor, std::fma(-from, factor, from));
+    };
+
+    assert(fadeState.fadeSamplesSoFar < params.fadeOverNumSamples);
+
+    const uint32_t fadeSamplesOffset = fadeState.fadeSamplesSoFar;
+    const uint32_t fadeSamplesTotal = params.fadeOverNumSamples;
+    const float linearInitial = dBToLinear(params.dBInitial);
+    const float linearFinal = dBToLinear(params.dBFinal);
+
+    for (uint_fast32_t i = 0; i < numSamples; ++i)
+    {
+        const float lerpFactor =
+            static_cast<float>(fadeSamplesOffset + i) / fadeSamplesTotal;
+        samples[i] *= lerp(linearInitial, linearFinal, std::min(lerpFactor, 1.0f));
+    }
+    fadeState.fadeSamplesSoFar += numSamples;
+    return (fadeSamplesOffset + numSamples) < fadeSamplesTotal;
 }
