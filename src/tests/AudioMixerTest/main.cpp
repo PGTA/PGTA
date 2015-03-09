@@ -71,7 +71,7 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
         return -1;
     }
 
-    {
+    /*{
         akAudioMixer::AudioSource source;
         source.SetSource(wav.GetSamplePtr(), wav.GetNumSamples());
         auto handle = mixer->AddSource(source);
@@ -80,11 +80,11 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
         {
             akAudioMixer::MixEffect effect;
             effect.type = akAudioMixer::MixEffects::MixEffect_Gain;
-            effect.gain.dBGain = -18.0f;
+            effect.gain.dBGain = 18.0f;
             mixControl.AddEffect(effect);
             //mixControl.RemoveEffect(akAudioMixer::MixEffects::MixEffect_Gain);
         }
-    }
+    }*/
 
     SDLWav audio1("media/loon.wav");
     SDLWav audio2("media/frogs.wav");
@@ -108,13 +108,41 @@ int mixerMain(SDL_AudioDeviceID audioDevice, const SDLWav& wav)
         mixer->AddSource(source);
     }
 
+    const uint32_t rainSampleLength = wav.GetNumSamples();
+    uint32_t rainNextScheduleCountdown = 0;
+
+    akAudioMixer::MixEffect rainGain;
+    rainGain.type = akAudioMixer::MixEffects::MixEffect_Gain;
+    rainGain.gain.dBGain = 9.0f;
 
     utils::RunLoop(0.01f, [&](double /*absoluteTime*/, float delta)
     {
         const uint32_t deltaSamples = static_cast<uint32_t>(round(delta * 44100.0f));
-        akAudioMixer::AudioBuffer output = mixer->Update(deltaSamples);
-        SDL_QueueAudio(audioDevice, output.samples, static_cast<Uint32>(output.numSamples*2));
-        return (output.samples != nullptr) && (output.numSamples > 0);
+        if (rainNextScheduleCountdown >= deltaSamples)
+        {
+            akAudioMixer::AudioBuffer output = mixer->Update(deltaSamples);
+            SDL_QueueAudio(audioDevice, output.samples, static_cast<Uint32>(output.numSamples*2));
+            rainNextScheduleCountdown -= deltaSamples;
+        }
+        else
+        {
+            const uint32_t leftoverTime = deltaSamples - rainNextScheduleCountdown;
+            {
+                akAudioMixer::AudioBuffer output = mixer->Update(rainNextScheduleCountdown);
+                SDL_QueueAudio(audioDevice, output.samples, static_cast<Uint32>(output.numSamples*2));
+            }
+            rainNextScheduleCountdown = rainSampleLength - leftoverTime;
+            {
+                akAudioMixer::AudioSource source;
+                source.SetSource(wav.GetSamplePtr(), wav.GetNumSamples());
+                mixer->AddEffect(mixer->AddSource(source), rainGain);
+            }
+            {
+                akAudioMixer::AudioBuffer output = mixer->Update(leftoverTime);
+                SDL_QueueAudio(audioDevice, output.samples, static_cast<Uint32>(output.numSamples*2));
+            }
+        }
+        return true;
     });
 
     akAudioMixer::FreeAudioMixer(mixer);
@@ -154,7 +182,7 @@ int main()
         std::cout << SDL_GetAudioDeviceName(i, 0) << "\n";
     }
 
-    SDLWav thunder("media/thunder2.wav");
+    SDLWav thunder("media/rainloop.wav");
 
     int ret = 0;
     while (audioDevice > 1 && thunder && !ret)
