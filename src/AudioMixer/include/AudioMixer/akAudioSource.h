@@ -2,6 +2,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <assert.h>
 
 namespace akAudioMixer
 {
@@ -41,6 +42,12 @@ namespace akAudioMixer
             m_numSamples = numSamples;
             m_readOffset = 0;
             return true;
+        }
+
+        uint32_t NumSamplesLeft() const
+        {
+            assert(m_numSamples >= m_readOffset);
+            return (m_numSamples - m_readOffset);
         }
 
         uint32_t PopSamples(int16_t* samples, uint32_t numSamples);

@@ -124,12 +124,10 @@ bool AudioSourceMixer::GetSamplesFromSource(akAudioMixer::AudioSource& source,
 {
     const uint32_t numReceived = source.PopSamples(output, count);
     assert(numReceived <= count);
-    if (numReceived == count)
+    if (numReceived < count)
     {
-        return true;
+        std::fill(output + numReceived, output + count, 0.0f);
+        std::cout << (count - numReceived) << " silence samples\n";
     }
-
-    std::fill(output + numReceived, output + count, 0.0f);
-    std::cout << (count - numReceived) << " silence samples\n";
-    return false;
+    return (source.NumSamplesLeft() > 0);
 }
