@@ -35,11 +35,9 @@ namespace akAudioMixer
             numSamples = std::min(numSamples, samplesRemaining);
 
             const int16_t* readPtr = bufSamples + curReadOffset;
-            const int16_t* readEnd = bufSamples + curReadOffset + numSamples;
-            while (readPtr != readEnd)
+            for (uint32_t i = 0; i < numSamples; ++i)
             {
-                const int16_t sample = *readPtr++;
-                *samples++ = ((sample >= 0) ? (sample / 32767.0f) : (sample / 32768.0f));
+                samples[i] = static_cast<float>(readPtr[i]) / 32768.0f;
             }
 
             m_readOffset = curReadOffset + numSamples;

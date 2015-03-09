@@ -49,10 +49,10 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
         m_scratchBuffer.shrink_to_fit();
     }
 
-    float* const mixBuf = m_mixBuffer.data();
+    float* const __restrict mixBuf = m_mixBuffer.data();
     std::fill(mixBuf, mixBuf + numSamplesToMix, 0.0f);
 
-    float* const scratchBuf = m_scratchBuffer.data();
+    float* const __restrict scratchBuf = m_scratchBuffer.data();
 
     sources.ForEach([=, &sourceMixInfo](SourceMixPair& data, uint_fast32_t id) -> bool
     {
@@ -94,29 +94,26 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
             }
         }
 
-        for (uint_fast32_t i = 0; i < numSamplesToMix; ++i)
+        // VS won't vectorize the loop unless this is used
+        static auto AddInto = [](float* const __restrict dest,
+                                 float* const __restrict src,
+                                 const uint32_t numElems)
         {
-            mixBuf[i] += scratchBuf[i];
-        }
+            for (uint32_t i = 0; i < numElems; ++i)
+            {
+                dest[i] += src[i];
+            }
+        };
+
+        AddInto(mixBuf, scratchBuf, numSamplesToMix);
         return keep;
     });
 
     TriangleDither triDither;
     for (uint_fast32_t i = 0; i < numSamplesToMix; ++i)
     {
-        const float inSample = mixBuf[i];
-        int16_t outSample;
-        if (inSample >= 0.0f)
-        {
-            const int32_t sample = static_cast<int32_t>(triDither(inSample * 32767.0f));
-            outSample = (sample <= 32767 ? static_cast<int16_t>(sample) : 32767);
-        }
-        else
-        {
-            const int32_t sample = static_cast<int32_t>(triDither(inSample * 32768.0f));
-            outSample = (sample >= -32768 ? static_cast<int16_t>(sample) : -32768);
-        }
-        outputBuf[i] = outSample;
+        const int32_t expandedSample = static_cast<int32_t>(triDither(mixBuf[i] * 32768.0f));
+        outputBuf[i] = static_cast<int16_t>(std::max(-32768, std::min(expandedSample, 32767)));
     }
 }
 
