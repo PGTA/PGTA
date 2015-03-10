@@ -2,9 +2,11 @@
 
 #include <private/akPGTATrackTypes.h>
 #include <private/akPGTATrack.h>
+#include <private/akPGTASchedulerRNG.h>
 #include <akAudioMixer.h>
 #include <string>
 #include <vector>
+#include <memory>
 #include <utility>
 
 struct MixRequest
@@ -27,7 +29,7 @@ public:
     PGTABuffer Update(const float delta);
 private:
     PGTABuffer MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequest);
-    uint32_t ConvertTimeToSamples(float delta);
+    uint32_t ConvertTimeToSamples(const float delta);
 
     std::vector<std::pair<std::string, uint32_t>> m_groupsNextShcedule;
 
@@ -37,9 +39,10 @@ private:
 
     const PGTATrack* m_transTrack;
     std::vector<uint32_t> m_transNextSchedules;
-
+    std::unique_ptr<PGTASchedulerRNG> m_rng;
     std::map <std::string, std::pair<PGTATrack*, uint16_t>> m_groupReadyPools;
     std::vector<MixRequest> m_mixRequests;
+
     PGTAConfig m_config;
 
     akAudioMixer::AudioMixer* m_mixer;

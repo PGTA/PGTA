@@ -1,6 +1,8 @@
 #include <private/PGTAScheduler.h>
 #include <akAudioMixer.h>
 #include <algorithm>
+#include <random>
+#include <memory>
 #include <math.h>
 
 PGTAScheduler::PGTAScheduler() :
@@ -11,6 +13,7 @@ PGTAScheduler::PGTAScheduler() :
     m_transNextSchedules(),
     m_groupReadyPools(),
     m_mixRequests(),
+    m_rng(nullptr),
     m_config(),
     m_mixer(nullptr),
     m_bufferData()
@@ -50,6 +53,8 @@ bool PGTAScheduler::Initialize(const PGTAConfig& config)
         return false;
     }
 
+    m_rng = std::make_unique<PGTASchedulerRNG>();
+
     return true;
 }
 
@@ -75,7 +80,7 @@ void PGTAScheduler::SetPrimaryTrack(const PGTATrack* track)
     }
 }
 
-uint32_t PGTAScheduler::ConvertTimeToSamples(float delta)
+uint32_t PGTAScheduler::ConvertTimeToSamples(const float delta)
 {
     uint16_t channels = m_config.audioDesc.channels;
     uint16_t samplesPerSecond = m_config.audioDesc.samplesPerSecond;
@@ -87,7 +92,7 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
     //Currently only mixes for primary track
     std::sort(mixRequests.begin(), mixRequests.end());
 
-    uint32_t samplesMixed = 0;
+    uint64_t samplesMixed = 0;
     akAudioMixer::AudioBuffer output = m_mixer->Update(0);
     m_bufferData.resize(deltaSamples + output.numSamples);
     int numSamples = static_cast<int>(output.numSamples);
@@ -139,7 +144,11 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
 
 PGTABuffer PGTAScheduler::Update(const float delta)
 {
-    // Todo: Handle case where tracks have not been loaded yet
+
+    if (!m_primaryTrack)
+    {
+        return PGTABuffer{};
+    }
 
     m_mixRequests.resize(0);
     uint32_t deltaSamples = ConvertTimeToSamples(delta);
@@ -150,25 +159,29 @@ PGTABuffer PGTAScheduler::Update(const float delta)
     for (int i = 0; i < numTrackSamples; ++i)
     {
         const PGTATrackSample& sample = (*samples)[i];
+        
+        //Sample is a candidate for playing
         if (m_primaryNextSchedules[i] < deltaSamples)
         {
+            bool canPlay = m_rng->CanPlay(sample.probability);
             uint32_t delay = m_primaryNextSchedules[i];
-            //if (sample.group.empty())
-            //{
-                if (sample.frequency == 0.0f)
-                {
-                    m_primaryNextSchedules[i] = sample.numSamples + delay;
-                }
-                else
-                {
-                    m_primaryNextSchedules[i] = ConvertTimeToSamples(sample.frequency) + delay;
-                }
+           
+            if (sample.frequency == 0.0f)
+            {
+                m_primaryNextSchedules[i] = sample.numSamples + delay;
+            }
+            else
+            {
+                m_primaryNextSchedules[i] = ConvertTimeToSamples(sample.frequency) + delay;
+            }
 
+            if (canPlay)
+            {
                 MixRequest mixRequest;
                 mixRequest.sampleId = sample.id;
                 mixRequest.delay = delay;
                 m_mixRequests.emplace_back(mixRequest);
-           // }
+            }
         }
        
         m_primaryNextSchedules[i] -= deltaSamples;
