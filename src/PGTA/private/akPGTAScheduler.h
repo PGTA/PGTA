@@ -39,7 +39,7 @@ private:
 
     const PGTATrack* m_transTrack;
     std::vector<uint32_t> m_transNextSchedules;
-    std::unique_ptr<PGTASchedulerRNG> m_rng;
+    PGTASchedulerRNG m_rng;
     std::map <std::string, std::pair<PGTATrack*, uint16_t>> m_groupReadyPools;
     std::vector<MixRequest> m_mixRequests;
 

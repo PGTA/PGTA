@@ -1,4 +1,4 @@
-#include <private/PGTAScheduler.h>
+#include <private/akPGTAScheduler.h>
 #include <akAudioMixer.h>
 #include <algorithm>
 #include <random>
@@ -13,7 +13,7 @@ PGTAScheduler::PGTAScheduler() :
     m_transNextSchedules(),
     m_groupReadyPools(),
     m_mixRequests(),
-    m_rng(nullptr),
+    m_rng(),
     m_config(),
     m_mixer(nullptr),
     m_bufferData()
@@ -52,8 +52,6 @@ bool PGTAScheduler::Initialize(const PGTAConfig& config)
     {
         return false;
     }
-
-    m_rng = std::make_unique<PGTASchedulerRNG>();
 
     return true;
 }
@@ -163,7 +161,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
         //Sample is a candidate for playing
         if (m_primaryNextSchedules[i] < deltaSamples)
         {
-            bool canPlay = m_rng->CanPlay(sample.probability);
+            bool canPlay = m_rng.CanPlay(sample.probability);
             uint32_t delay = m_primaryNextSchedules[i];
            
             if (sample.frequency == 0.0f)

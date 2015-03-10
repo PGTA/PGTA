@@ -13,5 +13,5 @@ PGTASchedulerRNG::~PGTASchedulerRNG()
 
 bool PGTASchedulerRNG::CanPlay(const float probability)
 {
-    return probability > m_distribution(m_generator);
+    return probability >= m_distribution(m_generator);
 }
