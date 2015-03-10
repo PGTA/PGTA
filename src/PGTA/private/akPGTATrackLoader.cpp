@@ -201,9 +201,7 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
     const SchemaSamples* schemaSamples = schemaTrack->samples();
     const SchemaGroups* schemaGroups = schemaTrack->groups();
     const SchemaRestritions* schemaRestrictions = schemaTrack->restrictions();
-    if (!schemaSamples || schemaSamples->size() == 0 ||
-        !schemaGroups || schemaGroups->size() == 0 ||
-        !schemaRestrictions || schemaRestrictions->size() == 0)
+    if (!schemaSamples || schemaSamples->size() == 0)
     {
         return nullptr;
     }
