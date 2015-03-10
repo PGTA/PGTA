@@ -41,6 +41,7 @@ int32_t PGTADeviceImpl::CreateTracks(const int32_t numTracks, const char** track
                                      const size_t* trackSourceLengths, PGTATrack** tracksOut)
 {
     std::unique_ptr<PGTATrack> track;
+    int32_t numCreatedTracks = numTracks;
     for (int32_t i = 0; i < numTracks; ++i)
     {
         const char* source = trackSourcesIn[i];
@@ -51,13 +52,16 @@ int32_t PGTADeviceImpl::CreateTracks(const int32_t numTracks, const char** track
         if (!PGTATrackLoader::LoadTrack(source, length, newTrack))
         {
             // error
+            tracksOut[i] = nullptr;
+            --numCreatedTracks;
+            continue;
         }
 
         tracksOut[i] = newTrack;
         m_tracks.emplace(newTrack);
         track.release();
     }
-    return numTracks;
+    return numCreatedTracks;
 }
 
 void PGTADeviceImpl::FreeTracks(const int32_t numTracks, PGTATrack** tracksIn)
