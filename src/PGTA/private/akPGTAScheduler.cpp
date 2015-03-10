@@ -153,7 +153,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
     uint32_t deltaSamples = ConvertTimeToSamples(delta);
 
     // Decrement the group schedule times
-    for (std::pair<std::string, uint32_t> groupNextSchedule : m_groupsNextShcedule)
+    for (std::pair<const std::string, uint32_t>& groupNextSchedule : m_groupsNextShcedule)
     {
         uint32_t remainingSamples = groupNextSchedule.second;
         if (remainingSamples > deltaSamples)
