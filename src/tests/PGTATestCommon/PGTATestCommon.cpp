@@ -109,9 +109,9 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName, std::a
     pgtaContext.BindTrack(demoTrack);
     utils::RunLoop(0.01f, [&](double /*absoluteTime*/, float delta)
     {
-        const PGTABuffer* output = pgtaContext.Update(delta);
-        SDL_QueueAudio(audioDevice, output->samples, static_cast<Uint32>(output->numSamples * 2));
-        return (output->samples != nullptr) && (output->numSamples > 0) && playbackControl.load() == 0;
+        const PGTABuffer output = pgtaContext.Update(delta);
+        SDL_QueueAudio(audioDevice, output.samples, static_cast<Uint32>(output.numSamples * 2));
+        return (output.samples != nullptr) && (output.numSamples > 0) && playbackControl.load() == 0;
     });
     return 0;
 }
