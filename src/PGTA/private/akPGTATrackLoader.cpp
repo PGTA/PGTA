@@ -16,7 +16,7 @@ using GroupRestrictions = std::map<std::string, std::vector<std::string> >;
 using SchemaRestritions = flatbuffers::Vector<flatbuffers::Offset<PGTASchema::Restriction> >;
 
 static PGTATrack* LoadBinaryTrack(const uint8_t* src, const size_t length, PGTATrack* track);
-static PGTATrack* LoadAsciiTrack(const char* src, const size_t length, PGTATrack* track);
+static PGTATrack* LoadAsciiTrack(const char* src, PGTATrack* track);
 static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track* schemaTrack);
 
 static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSample>* samples);
@@ -39,7 +39,7 @@ PGTATrack* PGTATrackLoader::LoadTrack(const char* src, const size_t length, PGTA
     }
     else
     {
-        return LoadAsciiTrack(src, length, track);
+        return LoadAsciiTrack(src, track);
     }
 }
 
@@ -60,7 +60,7 @@ static PGTATrack* LoadBinaryTrack(const uint8_t* src, const size_t length, PGTAT
     return InitTrackData(track, schemaTrack);
 }
 
-static PGTATrack* LoadAsciiTrack(const char* src, const size_t length, PGTATrack* track)
+static PGTATrack* LoadAsciiTrack(const char* src, PGTATrack* track)
 {
     flatbuffers::Parser parser;
     if (!parser.Parse(PGTASchemaHeader::TRACK_FBS) || !parser.Parse(src))

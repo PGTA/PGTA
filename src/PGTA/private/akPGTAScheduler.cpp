@@ -4,15 +4,27 @@
 #include <math.h>
 
 PGTAScheduler::PGTAScheduler() :
-    m_primaryWeight(1.0f)
+    m_primaryTrack(nullptr),
+    m_primaryWeight(1.0f),
+    m_primaryNextSchedules(),
+    m_transTrack(nullptr),
+    m_transNextSchedules(),
+    m_groupReadyPools(),
+    m_config(),
+    m_mixer(nullptr),
+    m_bufferData()
 {
 }
 
 PGTAScheduler::~PGTAScheduler()
 {
+    if (m_mixer)
+    {
+        akAudioMixer::FreeAudioMixer(m_mixer);
+    }
 }
 
-static bool compareByDelay(const MixRequest& a, const MixRequest& b)
+static bool CompareByDelay(const MixRequest& a, const MixRequest& b)
 {
     return a.delay < b.delay;
 }
@@ -24,7 +36,11 @@ bool PGTAScheduler::Initialize(const PGTAConfig& config)
     akAudioMixer::AudioMixerConfig mixerConfig;
     mixerConfig.mixAheadSeconds = config.mixAhead;
     mixerConfig.sampleFramesPerSecond = config.audioDesc.samplesPerSecond;
-    m_mixer = akAudioMixer::CreateAudioMixer(mixerConfig);
+    if (!m_mixer)
+    {
+        m_mixer = akAudioMixer::CreateAudioMixer(mixerConfig);
+    }
+
     if (!m_mixer)
     {
         return false;
@@ -40,19 +56,19 @@ void PGTAScheduler::SetPrimaryTrack(const PGTATrack* track)
         return;
     }
 
-    m_transNextShedules.resize(0);
+    m_transNextSchedules.resize(0);
     m_transTrack = nullptr;
 
     m_primaryWeight = 1.0f;
     m_primaryTrack = track;
 
-    auto* samples = track->GetSamples();
+    const std::vector<PGTATrackSample> * samples = track->GetSamples();
     int numSamples = static_cast<int>(track->GetNumSamples());
-    m_primaryNextShedules.resize(numSamples);
+    m_primaryNextSchedules.resize(numSamples);
     for (int i = 0; i < numSamples; ++i)
     {
-        auto sample = (*samples)[i];
-        m_primaryNextShedules[i] = ConvertTimeToSamples(sample.startTime);
+        PGTATrackSample sample = (*samples)[i];
+        m_primaryNextSchedules[i] = ConvertTimeToSamples(sample.startTime);
     }
 }
 
@@ -66,12 +82,13 @@ uint32_t PGTAScheduler::ConvertTimeToSamples(float delta)
 PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequests)
 {
     //Currently only mixes for primary track
-    std::sort(mixRequests.begin(), mixRequests.end(), compareByDelay);
+    std::sort(mixRequests.begin(), mixRequests.end(), CompareByDelay);
 
     uint32_t samplesMixed = 0;
     akAudioMixer::AudioBuffer output = m_mixer->Update(0);
     m_bufferData.resize(deltaSamples + output.numSamples);
-    for (int i = 0; i < output.numSamples; ++i)
+    int numSamples = static_cast<int>(output.numSamples);
+    for (int i = 0; i < numSamples; ++i)
     {
         m_bufferData[i] = output.samples[i];
     }
@@ -80,20 +97,22 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
 
     uint32_t totalDelay = 0;
     int numRequests = static_cast<int>(mixRequests.size());
+
     for (int reqNum = 0; reqNum < numRequests; ++reqNum)
     {
         uint32_t delay = mixRequests[reqNum].delay - totalDelay;
         totalDelay += delay;
         output = m_mixer->Update(delay);
 
-        for (int sampleIdx = 0; sampleIdx < output.numSamples; ++sampleIdx)
+        numSamples = static_cast<int>(output.numSamples);
+        for (int sampleIdx = 0; sampleIdx < numSamples; ++sampleIdx)
         {
             m_bufferData[sampleIdx + samplesMixed] = output.samples[sampleIdx];
         }
         samplesMixed += output.numSamples;
 
         akAudioMixer::AudioSource source;
-        auto idx = mixRequests[reqNum].sampleId;
+        uint16_t idx = mixRequests[reqNum].sampleId;
         PGTATrackSample sample = m_primaryTrack->GetSamples()->at(idx);
         source.SetSource(sample.audioData, sample.numSamples);
         m_mixer->AddSource(source);
@@ -101,7 +120,8 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
 
     output = m_mixer->Update(deltaSamples - totalDelay);
 
-    for (int sampleIdx = 0; sampleIdx < output.numSamples; ++sampleIdx)
+    numSamples = static_cast<int>(output.numSamples);
+    for (int sampleIdx = 0; sampleIdx < numSamples; ++sampleIdx)
     {
         m_bufferData[sampleIdx + samplesMixed] = output.samples[sampleIdx];
     }
@@ -122,30 +142,30 @@ PGTABuffer PGTAScheduler::Update(const float delta)
     uint32_t deltaSamples = ConvertTimeToSamples(delta);
 
     int numTrackSamples = m_primaryTrack->GetNumSamples();
-    auto* samples = m_primaryTrack->GetSamples();
+    const std::vector<PGTATrackSample>* samples = m_primaryTrack->GetSamples();
 
     for (int i = 0; i < numTrackSamples; ++i)
     {
-        auto& sample = (*samples)[i];
-        if (m_primaryNextShedules[i] < deltaSamples)
+        const PGTATrackSample& sample = (*samples)[i];
+        if (m_primaryNextSchedules[i] < deltaSamples)
         {
-            uint32_t delay = m_primaryNextShedules[i];
-            if (sample.group.empty())
-            {
+            uint32_t delay = m_primaryNextSchedules[i];
+            //if (sample.group.empty())
+            //{
                 if (sample.frequency == 0.0f)
                 {
-                    m_primaryNextShedules[i] = sample.numSamples + delay;
+                    m_primaryNextSchedules[i] = sample.numSamples + delay;
                 }
                 else
                 {
-                    m_primaryNextShedules[i] = ConvertTimeToSamples(sample.frequency) + delay;
+                    m_primaryNextSchedules[i] = ConvertTimeToSamples(sample.frequency) + delay;
                 }
 
                 mixRequests.emplace_back(MixRequest{ sample.id, delay });
-            }
+           // }
         }
        
-        m_primaryNextShedules[i] -= deltaSamples;
+        m_primaryNextSchedules[i] -= deltaSamples;
 
     }
 

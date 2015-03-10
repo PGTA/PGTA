@@ -38,10 +38,10 @@ void PGTAContextImpl::BindTrack(const PGTATrack* track)
     m_scheduler->SetPrimaryTrack(track);
 }
 
-PGTABuffer PGTAContextImpl::Update(const float delta)
+PGTABuffer* PGTAContextImpl::Update(const float delta)
 {
     m_outputBuffer = m_scheduler->Update(delta);
-    return m_outputBuffer;
+    return &m_outputBuffer;
 }
 
 PGTABuffer PGTAContextImpl::GetOutputBuffer() const

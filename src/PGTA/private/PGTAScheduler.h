@@ -9,9 +9,9 @@
 
 struct MixRequest
 {
-    // Which track
-    uint16_t sampleId;
+    // TODO: Add track
     uint32_t delay;
+    uint16_t sampleId;
 };
 
 class PGTAScheduler
@@ -24,23 +24,22 @@ public:
     void SetPrimaryTrack(const PGTATrack* track);
     PGTABuffer Update(const float delta);
 private:
-    
-    std::vector<std::pair<std::string, uint32_t> > m_groupsNextShcedule;
+    PGTABuffer MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequest);
+    uint32_t ConvertTimeToSamples(float delta);
+
+    std::vector<std::pair<std::string, uint32_t>> m_groupsNextShcedule;
 
     const PGTATrack* m_primaryTrack;
     float m_primaryWeight;
-    std::vector<uint32_t> m_primaryNextShedules;
+    std::vector<uint32_t> m_primaryNextSchedules;
 
     const PGTATrack* m_transTrack;
-    std::vector<uint32_t> m_transNextShedules;
+    std::vector<uint32_t> m_transNextSchedules;
 
-    std::map < std::string, std::pair<PGTATrack*, uint16_t> > m_groupReadyPools;
+    std::map <std::string, std::pair<PGTATrack*, uint16_t>> m_groupReadyPools;
     PGTAConfig m_config;
 
     akAudioMixer::AudioMixer* m_mixer;
     
     std::vector<int16_t> m_bufferData;
-
-    PGTABuffer MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequest);
-    uint32_t ConvertTimeToSamples(float delta);
 };

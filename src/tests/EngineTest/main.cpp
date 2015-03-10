@@ -118,7 +118,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
 
     for (auto& i : audioData)
     {
-        delete i;
+        delete[] i;
     }
     return 0;
 }

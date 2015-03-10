@@ -21,7 +21,7 @@ public:
 
     void BindTrack(const PGTATrack* track);
 
-    PGTABuffer Update(const float delta);
+    PGTABuffer* Update(const float delta);
 
     PGTABuffer GetOutputBuffer() const;
 
