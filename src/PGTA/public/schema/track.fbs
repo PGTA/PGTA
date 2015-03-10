@@ -5,8 +5,8 @@ table Sample
 {
     name:string;
     defaultFile:string;
-    startTime:long = 0;
-    frequency:long;
+    startTime:int = 0;
+    frequency:int;
     probability:float;
     volumeMultiplier:float = 1;
     group:string;

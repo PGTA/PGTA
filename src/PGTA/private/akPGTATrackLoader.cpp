@@ -95,8 +95,8 @@ static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSamp
         const flatbuffers::String* name = schemaSample->name();
         const flatbuffers::String* defaultFile = schemaSample->defaultFile();
         const flatbuffers::String* group = schemaSample->group();
-        const int64_t startTime = schemaSample->startTime();
-        const int64_t frequency = schemaSample->frequency();
+        const int32_t startTime = schemaSample->startTime();
+        const int32_t frequency = schemaSample->frequency();
         const float probability = schemaSample->probability();
         const float volumeMultiplier = schemaSample->volumeMultiplier();
 
@@ -116,8 +116,8 @@ static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSamp
         {
             sample.group.assign(group->c_str());
         }
-        sample.startTime = startTime;
-        sample.frequency = frequency;
+        sample.startTime = static_cast<uint32_t>(startTime);
+        sample.frequency = static_cast<uint32_t>(frequency);
         sample.probability = probability;
         sample.volumeMultiplier = volumeMultiplier;
         sample.id = sampleId++;

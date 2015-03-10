@@ -17,8 +17,8 @@ struct PGTATrackSample
     int16_t id;
     std::string sampleName;
     std::string defaultFile;
-    uint64_t frequency;
-    uint64_t startTime;
+    uint32_t frequency;
+    uint32_t startTime;
     float probability;
     float volumeMultiplier;
 

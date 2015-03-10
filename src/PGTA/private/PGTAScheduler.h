@@ -12,6 +12,8 @@ struct MixRequest
     // TODO: Add track
     uint32_t delay;
     uint16_t sampleId;
+
+    bool operator<(const MixRequest& other) const;
 };
 
 class PGTAScheduler

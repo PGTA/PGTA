@@ -25,9 +25,9 @@ PGTAScheduler::~PGTAScheduler()
     }
 }
 
-static bool CompareByDelay(const MixRequest& a, const MixRequest& b)
+bool MixRequest::operator<(const MixRequest& other) const
 {
-    return a.delay < b.delay;
+    return this->delay < other.delay;
 }
 
 bool PGTAScheduler::Initialize(const PGTAConfig& config)
@@ -37,10 +37,13 @@ bool PGTAScheduler::Initialize(const PGTAConfig& config)
     akAudioMixer::AudioMixerConfig mixerConfig;
     mixerConfig.mixAheadSeconds = config.mixAhead;
     mixerConfig.sampleFramesPerSecond = config.audioDesc.samplesPerSecond;
-    if (!m_mixer)
+    if (m_mixer)
     {
-        m_mixer = akAudioMixer::CreateAudioMixer(mixerConfig);
+        akAudioMixer::FreeAudioMixer(m_mixer);
     }
+    
+    m_mixer = akAudioMixer::CreateAudioMixer(mixerConfig);
+
 
     if (!m_mixer)
     {
@@ -82,7 +85,7 @@ uint32_t PGTAScheduler::ConvertTimeToSamples(float delta)
 PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequests)
 {
     //Currently only mixes for primary track
-    std::sort(mixRequests.begin(), mixRequests.end(), CompareByDelay);
+    std::sort(mixRequests.begin(), mixRequests.end());
 
     uint32_t samplesMixed = 0;
     akAudioMixer::AudioBuffer output = m_mixer->Update(0);
