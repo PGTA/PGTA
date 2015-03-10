@@ -65,9 +65,11 @@ solution "PGTA"
     group "BuildTools"
         dofile "SchemaCompiler.lua"
     group "Tests"
-        assert(loadfile("Test.lua"))("AudioMixerTest")
+        assert(loadfile("Test.lua"))("AudioMixerTest", "ConsoleApp")
     group "Tests"
-        assert(loadfile("Test.lua"))("EngineTest")
+        assert(loadfile("Test.lua"))("EngineTest", "ConsoleApp")
     group "Tests"
         assert(loadfile("TestC.lua"))("CInterfaceTest")
+    group "Tests"
+        assert(loadfile("Test.lua"))("PGTATestCommon", "StaticLib")
     group ""

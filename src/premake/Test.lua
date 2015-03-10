@@ -1,8 +1,8 @@
 
-local testname = ...
+local testname, testkind = ...
 
 project(testname)
-    kind "ConsoleApp"
+    kind(testkind)
     debugdir "../.."
     debugcommand "%{cfg.buildtarget.directory}../../../bin/%{cfg.buildtarget.name}"
     includedirs { "../PGTA", "../AudioMixer/include", "../tests/Common" }
