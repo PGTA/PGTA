@@ -2,7 +2,9 @@
 #pragma once
 
 #include <private/akPGTATrack.h>
+#include <private/PGTAScheduler.h>
 #include <stdint.h>
+#include <memory>
 #include <vector>
 
 struct PGTABuffer;
@@ -21,8 +23,10 @@ public:
 
     PGTABuffer* Update(const float delta);
 
-    PGTABuffer* GetOutputBuffers() const;
+    PGTABuffer* GetOutputBuffer() const;
 
 private:
-    std::vector<const PGTATrack*> m_tracks;
+    //std::unique_ptr<PGTAScheduler> m_scheduler;
+    PGTAConfig m_config;
+
 };

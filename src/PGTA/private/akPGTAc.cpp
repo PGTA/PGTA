@@ -1,4 +1,3 @@
-
 #include <public/akPGTAc.h>
 #include <private/akPGTADeviceImpl.h>
 #include <private/akPGTAContextImpl.h>
@@ -126,17 +125,17 @@ void pgtaBindTrackSample(HPGTATrack track, const int32_t id, const int16_t* audi
     temp.handle = track;
 
     int numSamples = (int)temp.pgtaTrack->GetNumSamples();
-    auto* trackSamples = temp.pgtaTrack->GetSamples();
+    auto* trackSamples = temp.pgtaTrack->GetSamplesForBinding();
     for (int i = 0; i < numSamples; ++i)
     {
-        auto trackSample = trackSamples->at(i);
+        PGTATrackSample& trackSample = trackSamples->at(i);
         if (trackSample.id != id)
         {
             continue;
         }
 
-        trackSample.numSamples = audioDataLength;
         trackSample.audioData = audioData;
+        trackSample.numSamples = static_cast<uint32_t>(audioDataLength);
     }
 }
 
@@ -173,9 +172,21 @@ void pgtaDestroyContext(HPGTADevice device, HPGTAContext context)
 
 void pgtaBindTrack(HPGTAContext context, HPGTATrack track)
 {
+    if (!context || !track)
+    {
+        return;
+    }
+
+    PGTAContextUnion tempContext;
+    tempContext.handle = context;
+
+    PGTATrackUnion tempTrack;
+    tempTrack.handle = track;
+
+    tempContext.pgtaContext->BindTrack(tempTrack.pgtaTrack);
 }
 
-PGTABuffer* pgtaUpdate(HPGTAContext context, float delta, int32_t* numOutputBuffers)
+PGTABuffer* pgtaUpdate(HPGTAContext context, float delta)
 {
     if (!context || delta <= 0.0f)
     {
@@ -187,7 +198,7 @@ PGTABuffer* pgtaUpdate(HPGTAContext context, float delta, int32_t* numOutputBuff
     return temp.pgtaContext->Update(delta);
 }
 
-PGTABuffer* pgtaGetOutputBuffers(HPGTAContext context, int32_t* numOutputBuffers)
+PGTABuffer* pgtaGetOutputBuffer(HPGTAContext context)
 {
     if (!context)
     {
@@ -196,5 +207,6 @@ PGTABuffer* pgtaGetOutputBuffers(HPGTAContext context, int32_t* numOutputBuffers
 
     PGTAContextUnion temp;
     temp.handle = context;
-    return temp.pgtaContext->GetOutputBuffers();
+    return temp.pgtaContext->GetOutputBuffer();
 }
+

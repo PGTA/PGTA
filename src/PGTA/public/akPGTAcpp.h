@@ -40,8 +40,9 @@ namespace PGTA
         inline PGTAContext(const PGTAContext& other);
         inline ~PGTAContext();
         
-        inline PGTABuffer* Update(const float delta, int* numOutputBuffers);
-        inline PGTABuffer* GetOutputBuffers(int32_t* numOutputBuffers);
+        inline PGTABuffer* Update(const float delta);
+        inline PGTABuffer* GetOutputBuffer();
+        inline void BindTrack(HPGTATrack track);
 
     protected:
         friend PGTAContext PGTADevice::CreateContext(const PGTAConfig &config);
@@ -51,6 +52,11 @@ namespace PGTA
     private:
         HPGTAContext m_pgtaContext;
     };
+
+    void    BindTrackSample(HPGTATrack track, const int32_t id, const int16_t* audioData, const size_t audioDataLength)
+    {
+        pgtaBindTrackSample(track, id, audioData, audioDataLength);
+    }
 }
 
 #include <public/akPGTADevice.inl>

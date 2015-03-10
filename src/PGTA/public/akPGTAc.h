@@ -33,8 +33,8 @@ PGTA_API HPGTAContext   pgtaCreateContext(HPGTADevice device, const PGTAConfig* 
 PGTA_API void           pgtaDestroyContext(HPGTADevice device, HPGTAContext context);
 
 PGTA_API void           pgtaBindTrack(HPGTAContext context, HPGTATrack track);
-PGTA_API PGTABuffer*    pgtaUpdate(HPGTAContext context, const float delta, int32_t* numOutputBuffers);
-PGTA_API PGTABuffer*    pgtaGetOutputBuffers(HPGTAContext context, int32_t* numOutputBuffers);
+PGTA_API PGTABuffer*    pgtaUpdate(HPGTAContext context, const float delta);
+PGTA_API PGTABuffer*    pgtaGetOutputBuffer(HPGTAContext context);
 
 #ifdef __cplusplus
 } // extern "C"

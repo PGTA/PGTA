@@ -19,13 +19,18 @@ namespace PGTA
     {
     }
 
-    PGTABuffer* PGTAContext::Update(const float delta, int32_t* numOutputBuffers)
+    PGTABuffer* PGTAContext::Update(const float delta)
     {
-        return pgtaUpdate(m_pgtaContext, delta, numOutputBuffers);
+        return pgtaUpdate(m_pgtaContext, delta);
     }
 
-    PGTABuffer* PGTAContext::GetOutputBuffers(int32_t* numOutputBuffers)
+    PGTABuffer* PGTAContext::GetOutputBuffer()
     {
-        return pgtaGetOutputBuffers(m_pgtaContext, numOutputBuffers);
+        return pgtaGetOutputBuffer(m_pgtaContext);
+    }
+
+    void PGTAContext::BindTrack(HPGTATrack track)
+    {
+        return pgtaBindTrack(m_pgtaContext, track);
     }
 }

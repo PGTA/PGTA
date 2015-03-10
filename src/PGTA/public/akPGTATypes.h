@@ -20,7 +20,7 @@ typedef struct PGTAAudioDesc
 typedef struct PGTABuffer
 {
     const PGTAAudioDesc* audioDesc;
-    const char* samples;
+    const int16_t* samples;
     int32_t numSamples;
 } PGTABuffer;
 
@@ -28,8 +28,7 @@ typedef struct PGTAConfig
 {
     PGTAAudioDesc audioDesc;
 
-    uint16_t numBuffers;
-    uint16_t bufferSizeInSamples;
+    float mixAhead;
 } PGTAConfig;
 
 typedef struct PGTAGroupData
