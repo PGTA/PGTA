@@ -128,6 +128,7 @@ void PGTATestCommon::PlayTrack(std::string trackName, std::atomic<int> &playback
     audioSpec.samples = 4096;
     SDL_AudioDeviceID audioDevice = SDL_OpenAudioDevice(nullptr, false, &audioSpec, nullptr, 0);
 
+    int ret = 0;
     if (audioDevice > 1)
     {
         SDL_PauseAudioDevice(audioDevice, 0);
@@ -135,6 +136,7 @@ void PGTATestCommon::PlayTrack(std::string trackName, std::atomic<int> &playback
         SDL_PauseAudioDevice(audioDevice, 1);
         SDL_CloseAudioDevice(audioDevice);
     }
+    (void)ret;
 
     SDL_Quit();
 }

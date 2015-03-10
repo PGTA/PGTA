@@ -91,7 +91,7 @@ PGTATrackData pgtaGetTrackData(HPGTATrack track)
 {
     if (!track)
     {
-        return PGTATrackData{};
+        return PGTATrackData();
     }
 
     PGTATrackUnion temp;
@@ -190,7 +190,7 @@ PGTABuffer pgtaUpdate(HPGTAContext context, float delta)
 {
     if (!context || delta <= 0.0f)
     {
-        return PGTABuffer{};
+        return PGTABuffer();
     }
 
     PGTAContextUnion temp;
@@ -202,7 +202,7 @@ PGTABuffer pgtaGetOutputBuffer(HPGTAContext context)
 {
     if (!context)
     {
-        return PGTABuffer{};
+        return PGTABuffer();
     }
 
     PGTAContextUnion temp;

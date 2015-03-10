@@ -106,7 +106,7 @@ static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSamp
             continue;
         }
 
-        PGTATrackSample sample{};
+        PGTATrackSample sample = PGTATrackSample();
         sample.sampleName.assign(name->c_str());
         if (defaultFile && defaultFile->size() > 0)
         {
@@ -150,7 +150,7 @@ static void InitGroups(const SchemaGroups& schemaGroups, vector<PGTATrackGroup>*
             continue;
         }
 
-        PGTATrackGroup group{};
+        PGTATrackGroup group = PGTATrackGroup();
         group.name.assign(name->c_str());
         group.uuid.assign(uuid->c_str());
 
