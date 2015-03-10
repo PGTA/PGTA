@@ -111,9 +111,9 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
 
     utils::RunLoop(0.01f, [&](double /*absoluteTime*/, float delta)
     {
-        const PGTABuffer* output = pgtaContext.Update(delta);
-        SDL_QueueAudio(audioDevice, output->samples, static_cast<Uint32>(output->numSamples * 2));
-        return (output->samples != nullptr) && (output->numSamples > 0);
+        const PGTABuffer output = pgtaContext.Update(delta);
+        SDL_QueueAudio(audioDevice, output.samples, static_cast<Uint32>(output.numSamples * 2));
+        return (output.samples != nullptr) && (output.numSamples > 0);
     });
 
     for (auto& i : audioData)
