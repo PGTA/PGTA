@@ -145,11 +145,22 @@ PGTABuffer PGTAScheduler::Update(const float delta)
 
     if (!m_primaryTrack)
     {
-        return PGTABuffer{};
+        return PGTABuffer();
     }
+
 
     m_mixRequests.resize(0);
     uint32_t deltaSamples = ConvertTimeToSamples(delta);
+
+    // Decrement the group schedule times
+    for (std::pair<std::string, uint32_t> groupNextSchedule : m_groupsNextShcedule)
+    {
+        uint32_t remainingSamples = groupNextSchedule.second;
+        if (remainingSamples > deltaSamples)
+        {
+            groupNextSchedule.second -= deltaSamples;
+        }
+    }
 
     int numTrackSamples = m_primaryTrack->GetNumSamples();
     const std::vector<PGTATrackSample>* samples = m_primaryTrack->GetSamples();
@@ -158,7 +169,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
     {
         const PGTATrackSample& sample = (*samples)[i];
         
-        //Sample is a candidate for playing
+        // Sample is a candidate for playing
         if (m_primaryNextSchedules[i] < deltaSamples)
         {
             bool canPlay = m_rng.CanPlay(sample.probability);
@@ -173,7 +184,26 @@ PGTABuffer PGTAScheduler::Update(const float delta)
                 m_primaryNextSchedules[i] = ConvertTimeToSamples(sample.frequency) + delay;
             }
 
-            if (canPlay)
+            bool groupIsPlaying = false;
+            bool isInGroup = !sample.group.empty();
+            if (isInGroup)
+            {
+                std::string group = sample.group;
+                std::map<std::string, uint32_t>::iterator iter = m_groupsNextShcedule.find(group);
+                if (iter != m_groupsNextShcedule.end() && !(iter->second < delay))
+                {
+                    groupIsPlaying = true;
+                }
+
+                //TODO: Check restrictions before scheduling the sample/group
+                if (!groupIsPlaying)
+                {
+                    std::pair<std::string, uint32_t> groupNextSchedule(group, m_primaryNextSchedules[i]);
+                    m_groupsNextShcedule.insert(groupNextSchedule);
+                }
+            }
+
+            if (canPlay && (!isInGroup || !groupIsPlaying))
             {
                 MixRequest mixRequest;
                 mixRequest.sampleId = sample.id;

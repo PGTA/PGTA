@@ -31,7 +31,7 @@ private:
     PGTABuffer MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequest);
     uint32_t ConvertTimeToSamples(const float delta);
 
-    std::vector<std::pair<std::string, uint32_t>> m_groupsNextShcedule;
+    std::map<std::string, uint32_t> m_groupsNextShcedule;
 
     const PGTATrack* m_primaryTrack;
     float m_primaryWeight;
@@ -40,7 +40,7 @@ private:
     const PGTATrack* m_transTrack;
     std::vector<uint32_t> m_transNextSchedules;
     PGTASchedulerRNG m_rng;
-    std::map <std::string, std::pair<PGTATrack*, uint16_t>> m_groupReadyPools;
+    std::map<std::string, std::pair<PGTATrack*, uint16_t>> m_groupReadyPools;
     std::vector<MixRequest> m_mixRequests;
 
     PGTAConfig m_config;
