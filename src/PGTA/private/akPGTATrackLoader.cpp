@@ -214,13 +214,18 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
     }
     track->SetSamples(samples);
 
-    vector<PGTATrackGroup> groups;
-    InitGroups(*schemaGroups, &groups);
-    track->SetGroups(groups);
-
-    GroupRestrictions groupRestrictions;
-    const uint16_t numValidRestrictions = InitGroupRestrictions(*schemaRestrictions,
-                                                                &groupRestrictions);
-    track->SetRestrictions(groupRestrictions, numValidRestrictions);
+    if (schemaGroups)
+    {
+        vector<PGTATrackGroup> groups;
+        InitGroups(*schemaGroups, &groups);
+        track->SetGroups(groups);
+    }
+    if (schemaRestrictions)
+    {
+        GroupRestrictions groupRestrictions;
+        const uint16_t numValidRestrictions =
+            InitGroupRestrictions(*schemaRestrictions, &groupRestrictions);
+        track->SetRestrictions(groupRestrictions, numValidRestrictions);
+    }
     return track;
 }
