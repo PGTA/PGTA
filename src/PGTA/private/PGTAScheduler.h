@@ -37,6 +37,7 @@ private:
     std::vector<uint32_t> m_transNextSchedules;
 
     std::map <std::string, std::pair<PGTATrack*, uint16_t>> m_groupReadyPools;
+    std::vector<MixRequest> m_mixRequests;
     PGTAConfig m_config;
 
     akAudioMixer::AudioMixer* m_mixer;

@@ -40,8 +40,8 @@ namespace PGTA
         inline PGTAContext(const PGTAContext& other);
         inline ~PGTAContext();
         
-        inline PGTABuffer* Update(const float delta);
-        inline PGTABuffer* GetOutputBuffer();
+        inline PGTABuffer Update(const float delta);
+        inline PGTABuffer GetOutputBuffer();
         inline void BindTrack(HPGTATrack track);
 
     protected:

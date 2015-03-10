@@ -19,12 +19,12 @@ namespace PGTA
     {
     }
 
-    PGTABuffer* PGTAContext::Update(const float delta)
+    PGTABuffer PGTAContext::Update(const float delta)
     {
         return pgtaUpdate(m_pgtaContext, delta);
     }
 
-    PGTABuffer* PGTAContext::GetOutputBuffer()
+    PGTABuffer PGTAContext::GetOutputBuffer()
     {
         return pgtaGetOutputBuffer(m_pgtaContext);
     }

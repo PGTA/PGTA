@@ -10,6 +10,7 @@ PGTAScheduler::PGTAScheduler() :
     m_transTrack(nullptr),
     m_transNextSchedules(),
     m_groupReadyPools(),
+    m_mixRequests(),
     m_config(),
     m_mixer(nullptr),
     m_bufferData()
@@ -62,13 +63,12 @@ void PGTAScheduler::SetPrimaryTrack(const PGTATrack* track)
     m_primaryWeight = 1.0f;
     m_primaryTrack = track;
 
-    const std::vector<PGTATrackSample> * samples = track->GetSamples();
+    const PGTATrackSample* samples = track->GetSamples()->data();
     int numSamples = static_cast<int>(track->GetNumSamples());
     m_primaryNextSchedules.resize(numSamples);
     for (int i = 0; i < numSamples; ++i)
     {
-        PGTATrackSample sample = (*samples)[i];
-        m_primaryNextSchedules[i] = ConvertTimeToSamples(sample.startTime);
+        m_primaryNextSchedules[i] = ConvertTimeToSamples(samples[i].startTime);
     }
 }
 
@@ -138,7 +138,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
 {
     // Todo: Handle case where tracks have not been loaded yet
 
-    std::vector<MixRequest> mixRequests;
+    m_mixRequests.resize(0);
     uint32_t deltaSamples = ConvertTimeToSamples(delta);
 
     int numTrackSamples = m_primaryTrack->GetNumSamples();
@@ -161,7 +161,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
                     m_primaryNextSchedules[i] = ConvertTimeToSamples(sample.frequency) + delay;
                 }
 
-                mixRequests.emplace_back(MixRequest{ sample.id, delay });
+                m_mixRequests.emplace_back(MixRequest{ sample.id, delay });
            // }
         }
        
@@ -169,5 +169,5 @@ PGTABuffer PGTAScheduler::Update(const float delta)
 
     }
 
-    return MixScheduleRequests(deltaSamples, mixRequests);
+    return MixScheduleRequests(deltaSamples, m_mixRequests);
 }

@@ -186,11 +186,11 @@ void pgtaBindTrack(HPGTAContext context, HPGTATrack track)
     tempContext.pgtaContext->BindTrack(tempTrack.pgtaTrack);
 }
 
-PGTABuffer* pgtaUpdate(HPGTAContext context, float delta)
+PGTABuffer pgtaUpdate(HPGTAContext context, float delta)
 {
     if (!context || delta <= 0.0f)
     {
-        return nullptr;
+        return PGTABuffer{};
     }
 
     PGTAContextUnion temp;
@@ -198,15 +198,15 @@ PGTABuffer* pgtaUpdate(HPGTAContext context, float delta)
     return temp.pgtaContext->Update(delta);
 }
 
-PGTABuffer* pgtaGetOutputBuffer(HPGTAContext context)
+PGTABuffer pgtaGetOutputBuffer(HPGTAContext context)
 {
     if (!context)
     {
-        return nullptr;
+        return PGTABuffer{};
     }
 
     PGTAContextUnion temp;
     temp.handle = context;
-    return &temp.pgtaContext->GetOutputBuffer();
+    return temp.pgtaContext->GetOutputBuffer();
 }
 
