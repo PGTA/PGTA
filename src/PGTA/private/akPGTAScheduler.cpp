@@ -161,7 +161,10 @@ PGTABuffer PGTAScheduler::Update(const float delta)
                     m_primaryNextSchedules[i] = ConvertTimeToSamples(sample.frequency) + delay;
                 }
 
-                m_mixRequests.emplace_back(MixRequest{ sample.id, delay });
+                MixRequest mixRequest;
+                mixRequest.sampleId = sample.id;
+                mixRequest.delay = delay;
+                m_mixRequests.emplace_back(mixRequest);
            // }
         }
        
