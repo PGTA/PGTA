@@ -15,12 +15,12 @@ PGTAContextImpl::~PGTAContextImpl()
 bool PGTAContextImpl::Initialize(const PGTAConfig& config)
 {
     m_config = config;
-    //m_scheduler = std::make_unique<PGTAScheduler>();
+    m_scheduler = std::make_unique<PGTAScheduler>();
 
-    /*if (!m_scheduler->Initialize(config))
+    if (!m_scheduler->Initialize(config))
     {
         return false;
-    }*/
+    }
     return true;
 }
 
@@ -30,21 +30,21 @@ void PGTAContextImpl::Shutdown()
 
 void PGTAContextImpl::BindTrack(const PGTATrack* track)
 {
-    /*if (!m_scheduler)
+    if (!m_scheduler)
     {
         return;
     }
 
-    m_scheduler->SetPrimaryTrack(track);*/
+    m_scheduler->SetPrimaryTrack(track);
 }
 
-PGTABuffer* PGTAContextImpl::Update(const float delta)
+PGTABuffer PGTAContextImpl::Update(const float delta)
 {
-    return nullptr;
-    //return m_scheduler->Update(delta);
+    m_outputBuffer = m_scheduler->Update(delta);
+    return m_outputBuffer;
 }
 
-PGTABuffer* PGTAContextImpl::GetOutputBuffer() const
+PGTABuffer PGTAContextImpl::GetOutputBuffer() const
 {
-    return nullptr;
+    return m_outputBuffer;
 }

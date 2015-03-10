@@ -2,7 +2,7 @@
 #pragma once
 
 #include <private/akPGTATrack.h>
-//#include <private/PGTAScheduler.h>
+#include <private/PGTAScheduler.h>
 #include <stdint.h>
 #include <memory>
 #include <vector>
@@ -21,12 +21,13 @@ public:
 
     void BindTrack(const PGTATrack* track);
 
-    PGTABuffer* Update(const float delta);
+    PGTABuffer Update(const float delta);
 
-    PGTABuffer* GetOutputBuffer() const;
+    PGTABuffer GetOutputBuffer() const;
 
 private:
-    //std::unique_ptr<PGTAScheduler> m_scheduler;
+    PGTABuffer m_outputBuffer;
+    std::unique_ptr<PGTAScheduler> m_scheduler;
     PGTAConfig m_config;
 
 };

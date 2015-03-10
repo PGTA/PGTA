@@ -84,17 +84,18 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
         return -1;
     }
 
-    auto data = pgtaGetTrackData(demoTrack);
-    int numSamples = data.numSamples;
+    auto trackData = pgtaGetTrackData(demoTrack);
+    int numSamples = trackData.numSamples;
     std::vector<int16_t*> audioData(numSamples);
     for (int i = 0; i < numSamples; ++i)
     {
-        int16_t id = data.samples[i].id;
-        const char* file = data.samples[i].defaultFile;
+        auto& data = audioData[i];
+        int16_t id = trackData.samples[i].id;
+        const char* file = trackData.samples[i].defaultFile;
         SDLWav audio(file);
         uint32_t audioLength = audio.GetNumSamples();
-        audioData[i] = new int16_t[audioLength];
-        memcpy(audioData[i], audio.GetSamplePtr() , audioLength);
+        data = new int16_t[audioLength];
+        memcpy(data, audio.GetSamplePtr() , audioLength * sizeof data[0]);
 
         pgtaBindTrackSample(demoTrack, id, audioData[i], audioLength);
     }
@@ -103,7 +104,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
     config.audioDesc.samplesPerSecond = 44100;
     config.audioDesc.bytesPerSample = 2;
     config.audioDesc.channels = 1;
-    config.mixAhead = 0.5f;
+    config.mixAhead = 0.1f;
     PGTA::PGTAContext pgtaContext(pgtaDevice.CreateContext(config));
 
     pgtaContext.BindTrack(demoTrack);

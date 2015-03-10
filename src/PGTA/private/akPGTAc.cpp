@@ -195,7 +195,7 @@ PGTABuffer* pgtaUpdate(HPGTAContext context, float delta)
 
     PGTAContextUnion temp;
     temp.handle = context;
-    return temp.pgtaContext->Update(delta);
+    return &temp.pgtaContext->Update(delta);
 }
 
 PGTABuffer* pgtaGetOutputBuffer(HPGTAContext context)
@@ -207,6 +207,6 @@ PGTABuffer* pgtaGetOutputBuffer(HPGTAContext context)
 
     PGTAContextUnion temp;
     temp.handle = context;
-    return temp.pgtaContext->GetOutputBuffer();
+    return &temp.pgtaContext->GetOutputBuffer();
 }
 
