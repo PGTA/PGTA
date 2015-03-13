@@ -85,7 +85,7 @@ int32_t PGTAScheduler::ConvertTimeToSamples(const float delta)
 {
     uint16_t channels = m_config.audioDesc.channels;
     uint32_t samplesPerSecond = m_config.audioDesc.samplesPerSecond;
-    return static_cast<uint32_t>(round(delta * channels * samplesPerSecond));
+    return static_cast<int32_t>(round(delta * channels * samplesPerSecond));
 }
 
 PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequests)
@@ -152,8 +152,8 @@ PGTABuffer PGTAScheduler::Update(const float delta)
     }
 
 
-    m_mixRequests.resize(0);
-    m_endingGroups.resize(0);
+    m_mixRequests.clear();
+    m_endingGroups.clear();
     
     uint32_t deltaSamples = ConvertTimeToSamples(delta);
 
@@ -190,7 +190,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
             if (sample.period == 0.0f)
             {
                 primaryNextSchedule.samplesOffPeriod += sample.numSamples;
-                primaryNextSchedule.samplesUntilPlay = sample.numSamples + playDelay;;
+                primaryNextSchedule.samplesUntilPlay = sample.numSamples + playDelay;
             }
             else
             {
@@ -206,7 +206,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
             {
                 // Check if group is playing for the full delta duration
                 groupConflict = std::find_if(m_groupsNextSchedule.begin(), m_groupsNextSchedule.end(),
-                    [&](const std::pair<std::string, uint32_t> p) 
+                    [&sample](const std::pair<std::string, uint32_t>& p) 
                     {
                         return p.first == sample.group;
                     }) != m_groupsNextSchedule.end();
@@ -215,7 +215,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
                 {
                     // Check if the group ends before the sample would be scheduled to play
                     auto iter = std::find_if(m_groupsNextSchedule.begin(), m_groupsNextSchedule.end(),
-                        [&](const std::pair<std::string, uint32_t> p)
+                        [&sample](const std::pair<std::string, uint32_t>& p)
                     {
                         return p.first == sample.group;
                     });

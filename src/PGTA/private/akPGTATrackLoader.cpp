@@ -7,7 +7,6 @@
 #include <flatbuffers/idl.h>
 #include <vector>
 #include <map>
-#include <utility>
 
 using std::vector;
 
