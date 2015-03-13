@@ -18,6 +18,12 @@ struct MixRequest
     bool operator<(const MixRequest& other) const;
 };
 
+struct ScheduleData
+{
+    uint32_t samplesUntilPlay;
+    int32_t samplesOffPeriod;
+};
+
 class PGTAScheduler
 {
 public:
@@ -29,16 +35,17 @@ public:
     PGTABuffer Update(const float delta);
 private:
     PGTABuffer MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequest);
-    uint32_t ConvertTimeToSamples(const float delta);
+    int32_t ConvertTimeToSamples(const float delta);
 
-    std::map<std::string, uint32_t> m_groupsNextShcedule;
+    std::vector<std::pair<std::string, uint32_t>> m_groupsNextSchedule;
+    std::vector<std::pair<std::string, uint32_t>> m_endingGroups;
 
     const PGTATrack* m_primaryTrack;
     float m_primaryWeight;
-    std::vector<uint32_t> m_primaryNextSchedules;
+    std::vector<ScheduleData> m_primaryNextSchedules;
 
     const PGTATrack* m_transTrack;
-    std::vector<uint32_t> m_transNextSchedules;
+    std::vector<ScheduleData> m_transNextSchedules;
     PGTASchedulerRNG m_rng;
     std::map<std::string, std::pair<PGTATrack*, uint16_t>> m_groupReadyPools;
     std::vector<MixRequest> m_mixRequests;

@@ -48,8 +48,9 @@ typedef struct PGTASampleData
     int16_t id;
     const char* sampleName;
     const char* defaultFile;
-    uint64_t frequency;
-    uint64_t startTime;
+    float period;
+    float periodDeviation;
+    float startTime;
     float probability;
     float volumeMultiplier;
     const char* groupUUID;

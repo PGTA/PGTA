@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <random>
 #include <memory>
+#include <vector>
 #include <math.h>
 
 PGTAScheduler::PGTAScheduler() :
@@ -74,14 +75,16 @@ void PGTAScheduler::SetPrimaryTrack(const PGTATrack* track)
     m_primaryNextSchedules.resize(numSamples);
     for (int i = 0; i < numSamples; ++i)
     {
-        m_primaryNextSchedules[i] = ConvertTimeToSamples(samples[i].startTime);
+        uint32_t startTime = ConvertTimeToSamples(samples[i].startTime);
+        m_primaryNextSchedules[i].samplesUntilPlay = startTime;
+        m_primaryNextSchedules[i].samplesOffPeriod = startTime;
     }
 }
 
-uint32_t PGTAScheduler::ConvertTimeToSamples(const float delta)
+int32_t PGTAScheduler::ConvertTimeToSamples(const float delta)
 {
     uint16_t channels = m_config.audioDesc.channels;
-    uint16_t samplesPerSecond = m_config.audioDesc.samplesPerSecond;
+    uint32_t samplesPerSecond = m_config.audioDesc.samplesPerSecond;
     return static_cast<uint32_t>(round(delta * channels * samplesPerSecond));
 }
 
@@ -150,15 +153,23 @@ PGTABuffer PGTAScheduler::Update(const float delta)
 
 
     m_mixRequests.resize(0);
+    m_endingGroups.resize(0);
+    
     uint32_t deltaSamples = ConvertTimeToSamples(delta);
 
     // Decrement the group schedule times
-    for (std::pair<const std::string, uint32_t>& groupNextSchedule : m_groupsNextShcedule)
+    for (auto iter = m_groupsNextSchedule.begin(); iter != m_groupsNextSchedule.end();)
     {
-        uint32_t remainingSamples = groupNextSchedule.second;
+        uint32_t remainingSamples = iter->second;
         if (remainingSamples > deltaSamples)
         {
-            groupNextSchedule.second -= deltaSamples;
+            iter->second -= deltaSamples;
+            ++iter;
+        }
+        else
+        {
+            m_endingGroups.emplace_back(*iter);
+            iter = m_groupsNextSchedule.erase(iter);
         }
     }
 
@@ -170,49 +181,71 @@ PGTABuffer PGTAScheduler::Update(const float delta)
         const PGTATrackSample& sample = (*samples)[i];
         
         // Sample is a candidate for playing
-        if (m_primaryNextSchedules[i] < deltaSamples)
+        ScheduleData& primaryNextSchedule = m_primaryNextSchedules[i];
+        uint32_t playDelay = primaryNextSchedule.samplesUntilPlay;
+        if (playDelay < deltaSamples)
         {
             bool canPlay = m_rng.CanPlay(sample.probability);
-            uint32_t delay = m_primaryNextSchedules[i];
            
-            if (sample.frequency == 0.0f)
+            if (sample.period == 0.0f)
             {
-                m_primaryNextSchedules[i] = sample.numSamples + delay;
+                primaryNextSchedule.samplesOffPeriod += sample.numSamples;
+                primaryNextSchedule.samplesUntilPlay = sample.numSamples + playDelay;;
             }
             else
             {
-                m_primaryNextSchedules[i] = ConvertTimeToSamples(sample.frequency) + delay;
+                uint32_t samplesPerPeriod = ConvertTimeToSamples(sample.period);
+                int32_t deviation = ConvertTimeToSamples(m_rng.GetDeviation(sample.periodDeviation));
+                primaryNextSchedule.samplesOffPeriod += samplesPerPeriod;
+                primaryNextSchedule.samplesUntilPlay = primaryNextSchedule.samplesOffPeriod + deviation;
             }
 
-            bool groupIsPlaying = false;
+            bool groupConflict = false;
             bool isInGroup = !sample.group.empty();
             if (isInGroup)
             {
-                std::string group = sample.group;
-                std::map<std::string, uint32_t>::iterator iter = m_groupsNextShcedule.find(group);
-                if (iter != m_groupsNextShcedule.end() && !(iter->second < delay))
+                // Check if group is playing for the full delta duration
+                groupConflict = std::find_if(m_groupsNextSchedule.begin(), m_groupsNextSchedule.end(),
+                    [&](const std::pair<std::string, uint32_t> p) 
+                    {
+                        return p.first == sample.group;
+                    }) != m_groupsNextSchedule.end();
+                
+                if (!groupConflict)
                 {
-                    groupIsPlaying = true;
+                    // Check if the group ends before the sample would be scheduled to play
+                    auto iter = std::find_if(m_groupsNextSchedule.begin(), m_groupsNextSchedule.end(),
+                        [&](const std::pair<std::string, uint32_t> p)
+                    {
+                        return p.first == sample.group;
+                    });
+
+                    if (iter != m_groupsNextSchedule.end() && iter->second > primaryNextSchedule.samplesUntilPlay)
+                    {
+                        groupConflict = true;
+                    }
                 }
 
                 //TODO: Check restrictions before scheduling the sample/group
-                if (!groupIsPlaying)
+
+                if (!groupConflict)
                 {
-                    std::pair<std::string, uint32_t> groupNextSchedule(group, m_primaryNextSchedules[i]);
-                    m_groupsNextShcedule.insert(groupNextSchedule);
+                    std::pair<const std::string, uint32_t> groupNextSchedule(sample.group, primaryNextSchedule.samplesUntilPlay);
+                    m_groupsNextSchedule.emplace_back(std::move(groupNextSchedule));
                 }
             }
 
-            if (canPlay && (!isInGroup || !groupIsPlaying))
+            if (canPlay && (!isInGroup || !groupConflict))
             {
                 MixRequest mixRequest;
                 mixRequest.sampleId = sample.id;
-                mixRequest.delay = delay;
+                mixRequest.delay = playDelay;
                 m_mixRequests.emplace_back(mixRequest);
             }
         }
        
-        m_primaryNextSchedules[i] -= deltaSamples;
+        m_primaryNextSchedules[i].samplesUntilPlay -= deltaSamples;
+        m_primaryNextSchedules[i].samplesOffPeriod -= deltaSamples;
 
     }
 

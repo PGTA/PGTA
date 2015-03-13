@@ -7,6 +7,7 @@
 #include <flatbuffers/idl.h>
 #include <vector>
 #include <map>
+#include <utility>
 
 using std::vector;
 
@@ -95,8 +96,9 @@ static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSamp
         const flatbuffers::String* name = schemaSample->name();
         const flatbuffers::String* defaultFile = schemaSample->defaultFile();
         const flatbuffers::String* group = schemaSample->group();
-        const int32_t startTime = schemaSample->startTime();
-        const int32_t frequency = schemaSample->frequency();
+        const float startTime = schemaSample->startTime();
+        const float period = schemaSample->period();
+        const float periodDeviation = schemaSample->periodDeviation();
         const float probability = schemaSample->probability();
         const float volumeMultiplier = schemaSample->volumeMultiplier();
 
@@ -116,8 +118,9 @@ static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSamp
         {
             sample.group.assign(group->c_str());
         }
-        sample.startTime = static_cast<uint32_t>(startTime);
-        sample.frequency = static_cast<uint32_t>(frequency);
+        sample.startTime = startTime;
+        sample.period = period;
+        sample.periodDeviation = periodDeviation;
         sample.probability = probability;
         sample.volumeMultiplier = volumeMultiplier;
         sample.id = sampleId++;
