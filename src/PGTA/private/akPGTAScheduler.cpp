@@ -154,6 +154,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
 
     m_mixRequests.clear();
     m_endingGroups.clear();
+    m_groupReadyPools.clear();
     
     uint32_t deltaSamples = ConvertTimeToSamples(delta);
 
@@ -227,26 +228,52 @@ PGTABuffer PGTAScheduler::Update(const float delta)
                 }
 
                 //TODO: Check restrictions before scheduling the sample/group
-
-                if (!groupConflict)
-                {
-                    std::pair<const std::string, uint32_t> groupNextSchedule(sample.group, primaryNextSchedule.samplesUntilPlay);
-                    m_groupsNextSchedule.emplace_back(std::move(groupNextSchedule));
-                }
             }
 
-            if (canPlay && (!isInGroup || !groupConflict))
+            if (canPlay && !isInGroup)
             {
                 MixRequest mixRequest;
                 mixRequest.sampleId = sample.id;
                 mixRequest.delay = playDelay;
                 m_mixRequests.emplace_back(mixRequest);
             }
+            else if (canPlay && isInGroup && !groupConflict)
+            {
+                MixRequest pooledRequest;
+                pooledRequest.sampleId = sample.id;
+                pooledRequest.delay = playDelay;
+
+                //Samples in the same group are added to a pool of mix requests to pick from
+                auto iter = m_groupReadyPools.find(sample.group);
+                if (iter != m_groupReadyPools.end())
+                {
+                    iter->second.emplace_back(pooledRequest);
+                }
+                else
+                {
+                    m_groupReadyPools.emplace(sample.group, std::vector<MixRequest>{pooledRequest});
+                }
+            }
         }
        
         m_primaryNextSchedules[i].samplesUntilPlay -= deltaSamples;
         m_primaryNextSchedules[i].samplesOffPeriod -= deltaSamples;
 
+    }
+
+    // Select one sample from each pool of samples to have a mix request created
+    for (std::pair<const std::string, std::vector<MixRequest>>& pool : m_groupReadyPools)
+    {
+        uint16_t numSamplesInPool = static_cast<uint16_t>(pool.second.size());
+        if (numSamplesInPool == 0)
+        {
+            continue;
+        }
+
+        uint16_t idx = m_rng.SelectFromReadyPool(numSamplesInPool);
+        m_mixRequests.emplace_back(pool.second[idx]);
+        uint32_t samplesUntilGroupEnds = (*m_primaryTrack->GetSamples())[idx].numSamples + pool.second[idx].delay - deltaSamples;
+        m_groupsNextSchedule.emplace_back(std::pair<const std::string, uint32_t>(pool.first, samplesUntilGroupEnds));
     }
 
     return MixScheduleRequests(deltaSamples, m_mixRequests);
