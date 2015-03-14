@@ -2,6 +2,7 @@
 #include <private/akPGTATrackLoader.h>
 #include <private/akPGTATrack.h>
 #include <private/akPGTATrackTypes.h>
+#include <private/akPGTAConst.h>
 #include <public/schema/track_generated.h>
 #include <public/schema/track.fbs.h>
 #include <flatbuffers/idl.h>
@@ -99,7 +100,7 @@ static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSamp
         const float period = schemaSample->period();
         const float periodDeviation = schemaSample->periodDeviation();
         const float probability = schemaSample->probability();
-        const float volumeMultiplier = schemaSample->volumeMultiplier();
+        const float volume = schemaSample->volume();
 
         // TODO: sanity checks for schemaSample properties
         if (!name || (name->size() == 0))
@@ -121,7 +122,7 @@ static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSamp
         sample.period = period;
         sample.periodDeviation = periodDeviation;
         sample.probability = probability;
-        sample.volumeMultiplier = volumeMultiplier;
+        sample.volume = volume;
         sample.id = sampleId++;
 
         samples->emplace_back(std::move(sample));
@@ -145,7 +146,7 @@ static void InitGroups(const SchemaGroups& schemaGroups, vector<PGTATrackGroup>*
 
         const flatbuffers::String* uuid = schemaGroup->uuid();
         const flatbuffers::String* name = schemaGroup->name();
-        if (!uuid || uuid->size() != PGTAUUID::UUID_NUM_BYTES ||
+        if (!uuid || uuid->size() != PGTAConst::UUID_NUM_BYTES ||
             !name || name->size() == 0)
         {
             // TODO: allow nameless groups?
@@ -178,8 +179,8 @@ static uint16_t InitGroupRestrictions(const SchemaRestritions& schemaRestriciton
 
         const flatbuffers::String* group1 = schemaRestriction->group1();
         const flatbuffers::String* group2 = schemaRestriction->group2();
-        if (!group1 || group1->size() != PGTAUUID::UUID_NUM_BYTES ||
-            !group2 || group2->size() != PGTAUUID::UUID_NUM_BYTES)
+        if (!group1 || group1->size() != PGTAConst::UUID_NUM_BYTES ||
+            !group2 || group2->size() != PGTAConst::UUID_NUM_BYTES)
         {
             continue;
         }

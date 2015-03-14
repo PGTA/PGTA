@@ -52,7 +52,7 @@ typedef struct PGTASampleData
     float periodDeviation;
     float startTime;
     float probability;
-    float volumeMultiplier;
+    float volume;
     const char* groupUUID;
 } PGTASampleData;
 

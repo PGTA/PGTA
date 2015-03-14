@@ -21,7 +21,7 @@ struct PGTATrackSample
     float periodDeviation;
     float startTime;
     float probability;
-    float volumeMultiplier;
+    float volume;
 
     std::string group;
 

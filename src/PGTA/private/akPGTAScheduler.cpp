@@ -1,4 +1,5 @@
 #include <private/akPGTAScheduler.h>
+#include <private/akPGTAConst.h>
 #include <akAudioMixer.h>
 #include <algorithm>
 #include <random>
@@ -120,11 +121,31 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
         }
         samplesMixed += output.numSamples;
 
-        akAudioMixer::AudioSource source;
         uint16_t idx = mixRequests[reqNum].sampleId;
-        PGTATrackSample sample = m_primaryTrack->GetSamples()->at(idx);
+        const PGTATrackSample& sample = m_primaryTrack->GetSamples()->at(idx);
+        float gain = sample.volume;
+
+        if (sample.volume <= PGTAConst::MIN_GAIN)
+        {
+            continue;
+        }
+        else if (sample.volume > PGTAConst::MAX_GAIN)
+        {
+            gain = PGTAConst::MAX_GAIN;
+        }
+
+        akAudioMixer::AudioSource source;
         source.SetSource(sample.audioData, sample.numSamples);
-        m_mixer->AddSource(source);
+
+        akAudioMixer::AudioMixer::MixHandle handle = m_mixer->AddSource(source);
+        akAudioMixer::MixControl mixControl = m_mixer->GetMixControl(handle);
+        if (mixControl)
+        {
+            akAudioMixer::MixEffect effect;
+            effect.type = akAudioMixer::MixEffects::MixEffect_Gain;
+            effect.gain.dBGain = gain;
+            mixControl.AddEffect(effect);
+        }
     }
 
     output = m_mixer->Update(deltaSamples - totalDelay);

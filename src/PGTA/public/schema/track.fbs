@@ -9,7 +9,7 @@ table Sample
     period:float;
     periodDeviation: float = 0;
     probability:float;
-    volumeMultiplier:float = 1;
+    volume:float = 0;
     group:string;
 }
 
