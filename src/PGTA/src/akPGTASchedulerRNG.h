@@ -3,6 +3,7 @@
 
 #include <random>
 #include <cstdint>
+#include <vector>
 
 class PGTASchedulerRNG
 {
@@ -12,7 +13,7 @@ public:
 
     bool CanPlay(const float probability);
     float GetDeviation(const float maxDeviation);
-    uint16_t SelectFromReadyPool(const uint16_t poolSize);
+    void ShuffleSchedulerOrder(std::vector<uint16_t>& scheduleOrder);
 private:
     std::uniform_real_distribution<float> m_probabilityDistribution;
     std::uniform_real_distribution<float> m_deviationDistribution;

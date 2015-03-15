@@ -25,7 +25,7 @@ public:
 
     const std::vector<PGTATrackSample>* GetSamples() const { return &m_samples; }
     const std::vector<PGTATrackGroup>* GetGroups() const { return &m_groups; }
-    const std::map<std::string, std::vector<std::string> > * GetRestrictions() const { return &m_groupRestrictions; }
+    const std::map<std::string, std::vector<std::string>>* GetRestrictions() const { return &m_groupRestrictions; }
     std::vector<PGTATrackSample>* GetSamplesForBinding() { return &m_samples; }
     
     PGTATrackData GetTrackData(const HPGTATrack trackHandle);

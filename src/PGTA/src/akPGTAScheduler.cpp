@@ -3,8 +3,9 @@
 #include "akPGTAConst.h"
 #include <akAudioMixer.h>
 #include <algorithm>
-#include <random>
+#include <map>
 #include <memory>
+#include <random>
 #include <vector>
 #include <math.h>
 
@@ -17,7 +18,8 @@ PGTAScheduler::PGTAScheduler():
     m_transTrack(nullptr),
     m_transNextSchedules(),
     m_rng(),
-    m_groupReadyPools(),
+    m_pooledRequests(),
+    m_poolSchedulerOrder(),
     m_mixRequests(),
     m_config(),
     m_mixer(nullptr),
@@ -169,16 +171,15 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
 
 PGTABuffer PGTAScheduler::Update(const float delta)
 {
-
     if (!m_primaryTrack)
     {
         return PGTABuffer();
     }
 
-
     m_mixRequests.clear();
     m_endingGroups.clear();
-    m_groupReadyPools.clear();
+    m_pooledRequests.clear();
+    m_poolSchedulerOrder.clear();
     
     uint32_t deltaSamples = ConvertTimeToSamples(delta);
 
@@ -200,6 +201,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
 
     int numTrackSamples = m_primaryTrack->GetNumSamples();
     const std::vector<PGTATrackSample>* samples = m_primaryTrack->GetSamples();
+    uint16_t numPooledSamples = 0;
 
     for (int i = 0; i < numTrackSamples; ++i)
     {
@@ -230,34 +232,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
                 primaryNextSchedule.samplesUntilPlay = primaryNextSchedule.samplesOffPeriod + deviation;
             }
 
-            bool groupConflict = false;
             bool isInGroup = !sample.group.empty();
-            if (isInGroup && canPlay)
-            {
-                // Check if group is playing for the full delta duration
-                groupConflict = std::find_if(m_groupsNextSchedule.begin(), m_groupsNextSchedule.end(),
-                    [&sample](const std::pair<std::string, uint32_t>& p) 
-                    {
-                        return p.first == sample.group;
-                    }) != m_groupsNextSchedule.end();
-                
-                if (!groupConflict)
-                {
-                    // Check if the group ends before the sample would be scheduled to play
-                    auto iter = std::find_if(m_groupsNextSchedule.begin(), m_groupsNextSchedule.end(),
-                        [&sample](const std::pair<std::string, uint32_t>& p)
-                    {
-                        return p.first == sample.group;
-                    });
-
-                    if (iter != m_groupsNextSchedule.end() && iter->second > primaryNextSchedule.samplesUntilPlay)
-                    {
-                        groupConflict = true;
-                    }
-                }
-
-                //TODO: Check restrictions before scheduling the sample/group
-            }
 
             if (canPlay && !isInGroup)
             {
@@ -266,22 +241,15 @@ PGTABuffer PGTAScheduler::Update(const float delta)
                 mixRequest.delay = playDelay;
                 m_mixRequests.emplace_back(mixRequest);
             }
-            else if (canPlay && isInGroup && !groupConflict)
+            else if (canPlay && isInGroup)
             {
                 MixRequest pooledRequest;
                 pooledRequest.sampleId = sample.id;
                 pooledRequest.delay = playDelay;
 
-                //Samples in the same group are added to a pool of mix requests to pick from
-                auto iter = m_groupReadyPools.find(sample.group);
-                if (iter != m_groupReadyPools.end())
-                {
-                    iter->second.emplace_back(pooledRequest);
-                }
-                else
-                {
-                    m_groupReadyPools.emplace(sample.group, std::vector<MixRequest>{pooledRequest});
-                }
+                m_pooledRequests.emplace_back(std::pair<std::string, MixRequest>(sample.group, pooledRequest));
+                m_poolSchedulerOrder.emplace_back(numPooledSamples);
+                ++numPooledSamples;
             }
         }
        
@@ -290,19 +258,70 @@ PGTABuffer PGTAScheduler::Update(const float delta)
 
     }
 
-    // Select one sample from each pool of samples to have a mix request created
-    for (std::pair<const std::string, std::vector<MixRequest>>& pool : m_groupReadyPools)
+    // Shuffle the scheduler order to avoid sample play starvation
+    m_rng.ShuffleSchedulerOrder(m_poolSchedulerOrder);
+
+    for (uint16_t index : m_poolSchedulerOrder)
     {
-        uint16_t numSamplesInPool = static_cast<uint16_t>(pool.second.size());
-        if (numSamplesInPool == 0)
+        bool groupConflict = false;
+        std::pair<const std::string, MixRequest>& pooledRequest = m_pooledRequests[index];
+        const std::string& group = pooledRequest.first;
+
+        // Check if the group is already playing
+        auto iter = std::find_if(m_groupsNextSchedule.begin(), m_groupsNextSchedule.end(),
+            [&group](const std::pair<std::string, uint32_t>& p)
+        {
+            return p.first == group;
+        });
+
+        if (iter != m_groupsNextSchedule.end())
+        {
+            continue;
+        }
+       
+        // Check if the group ends before the sample would be scheduled to play
+        if (iter != m_groupsNextSchedule.end() && iter->second > pooledRequest.second.delay)
         {
             continue;
         }
 
-        uint16_t idx = m_rng.SelectFromReadyPool(numSamplesInPool);
-        m_mixRequests.emplace_back(pool.second[idx]);
-        uint32_t samplesUntilGroupEnds = (*m_primaryTrack->GetSamples())[idx].numSamples + pool.second[idx].delay - deltaSamples;
-        m_groupsNextSchedule.emplace_back(std::pair<const std::string, uint32_t>(pool.first, samplesUntilGroupEnds));
+        // Check if there are any group conflicts due to restrictions
+        auto restrictions = m_primaryTrack->GetRestrictions()->find(group);
+        if (restrictions != m_primaryTrack->GetRestrictions()->end())
+        {
+            for (const std::string& restriction : (restrictions->second))
+            {
+                auto resIter = std::find_if(m_groupsNextSchedule.begin(), m_groupsNextSchedule.end(),
+                    [&restriction](const std::pair<std::string, uint32_t>& p)
+                {
+                    return p.first == restriction;
+                });
+
+                if (resIter != m_groupsNextSchedule.end())
+                {
+                    groupConflict = true;
+                    break;
+                }
+
+                // Check if the group ends before the sample would be scheduled to play
+                if (resIter != m_groupsNextSchedule.end() && resIter->second > pooledRequest.second.delay)
+                {
+                    groupConflict = true;
+                    break;
+                }
+            }
+        }
+
+        if (groupConflict)
+        {
+            continue;
+        }
+
+        // Add the mix request for the sample
+        m_mixRequests.emplace_back(pooledRequest.second);
+        uint32_t samplesUntilGroupEnds = (*m_primaryTrack->GetSamples())[pooledRequest.second.sampleId].numSamples +
+            pooledRequest.second.delay - deltaSamples;
+        m_groupsNextSchedule.emplace_back(std::pair<const std::string, uint32_t>(m_pooledRequests[index].first, samplesUntilGroupEnds));
     }
 
     return MixScheduleRequests(deltaSamples, m_mixRequests);

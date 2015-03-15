@@ -2,6 +2,7 @@
 #include "akPGTASchedulerRNG.h"
 #include <ctime>
 #include <random>
+#include <algorithm>
 
 PGTASchedulerRNG::PGTASchedulerRNG() :
     m_probabilityDistribution(0.0f, 1.0f),
@@ -24,7 +25,7 @@ bool PGTASchedulerRNG::CanPlay(const float probability)
     return probability >= m_probabilityDistribution(m_generator);
 }
 
-uint16_t PGTASchedulerRNG::SelectFromReadyPool(const uint16_t poolSize)
+void PGTASchedulerRNG::ShuffleSchedulerOrder(std::vector<uint16_t>& scheduleOrder)
 {
-    return std::uniform_int_distribution<uint16_t>{0, static_cast<uint16_t>(poolSize - 1)}(m_generator);
+    std::shuffle(scheduleOrder.begin(), scheduleOrder.end(), m_generator);
 }

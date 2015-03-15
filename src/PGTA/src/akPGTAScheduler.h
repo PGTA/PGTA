@@ -51,7 +51,8 @@ private:
     std::vector<ScheduleData> m_transNextSchedules;
     
     PGTASchedulerRNG m_rng;
-    std::map<std::string, std::vector<MixRequest>> m_groupReadyPools;
+    std::vector<std::pair<const std::string, MixRequest>> m_pooledRequests;
+    std::vector<uint16_t> m_poolSchedulerOrder;
     std::vector<MixRequest> m_mixRequests;
 
     PGTAConfig m_config;
