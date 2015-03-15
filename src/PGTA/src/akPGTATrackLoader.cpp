@@ -1,10 +1,10 @@
 
-#include <private/akPGTATrackLoader.h>
-#include <private/akPGTATrack.h>
-#include <private/akPGTATrackTypes.h>
-#include <private/akPGTAConst.h>
-#include <public/schema/track_generated.h>
-#include <public/schema/track.fbs.h>
+#include "akPGTATrackLoader.h"
+#include "akPGTATrack.h"
+#include "akPGTATrackTypes.h"
+#include "akPGTAConst.h"
+#include <PGTA/schema/track_generated.h>
+#include <PGTA/schema/track.fbs.h>
 #include <flatbuffers/idl.h>
 #include <vector>
 #include <map>

@@ -5,7 +5,12 @@ project(testname)
     kind(testkind)
     debugdir "../.."
     debugcommand "%{cfg.buildtarget.directory}../../../bin/%{cfg.buildtarget.name}"
-    includedirs { "../PGTA", "../AudioMixer/include", "../tests/Common" }
+    includedirs
+    {
+        "../PGTA/include",
+        "../AudioMixer/include",
+        "../tests/Common"
+    }
     links
     {
         "PGTALib",

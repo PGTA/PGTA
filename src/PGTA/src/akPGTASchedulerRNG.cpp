@@ -1,7 +1,7 @@
-#include <private/akPGTASchedulerRNG.h>
+
+#include "akPGTASchedulerRNG.h"
 #include <ctime>
 #include <random>
-
 
 PGTASchedulerRNG::PGTASchedulerRNG() :
     m_probabilityDistribution(0.0f, 1.0f),

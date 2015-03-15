@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <private/akPGTATrack.h>
-#include <private/akPGTAScheduler.h>
+#include "akPGTATrack.h"
+#include "akPGTAScheduler.h"
 #include <stdint.h>
 #include <memory>
 #include <vector>

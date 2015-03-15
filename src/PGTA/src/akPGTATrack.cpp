@@ -1,6 +1,6 @@
 
-#include <private/akPGTATrack.h>
-#include <public/akPGTATypes.h>
+#include "akPGTATrack.h"
+#include <PGTA/akPGTATypes.h>
 #include <string.h>
 
 PGTATrack::PGTATrack() : 

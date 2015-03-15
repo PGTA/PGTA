@@ -9,7 +9,6 @@
 #include <signal.h>
 #include <iostream>
 #include <akPGTA.h>
-#include <public/akPGTATypes.h>
 #include "utils.h"
 #include "FileUtils.h"
 

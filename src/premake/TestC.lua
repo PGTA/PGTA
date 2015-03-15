@@ -6,7 +6,7 @@ project(testname)
     language "C"
     debugdir "../.."
     debugcommand "%{cfg.buildtarget.directory}../../../bin/%{cfg.buildtarget.name}"
-    includedirs "../PGTA"
+    includedirs "../PGTA/include"
     links "PGTALib"
     defines
     {

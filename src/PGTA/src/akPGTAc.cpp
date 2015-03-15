@@ -1,7 +1,8 @@
-#include <public/akPGTAc.h>
-#include <private/akPGTADeviceImpl.h>
-#include <private/akPGTAContextImpl.h>
-#include <private/akPGTATrack.h>
+
+#include <PGTA/akPGTAc.h>
+#include "akPGTADeviceImpl.h"
+#include "akPGTAContextImpl.h"
+#include "akPGTATrack.h"
 #include <memory>
 #include <string.h>
 

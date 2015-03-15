@@ -59,7 +59,7 @@ namespace PGTA
     }
 }
 
-#include <public/akPGTADevice.inl>
-#include <public/akPGTAContext.inl>
+#include "akPGTADevice.inl"
+#include "akPGTAContext.inl"
 
 #endif // AK_PGTA_CPP_H

@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <private/akPGTATrackTypes.h>
-#include <public/akPGTATypes.h>
+#include "akPGTATrackTypes.h"
+#include <PGTA/akPGTATypes.h>
 #include <memory>
 #include <vector>
 #include <map>

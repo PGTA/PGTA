@@ -1,7 +1,8 @@
+
 #pragma once
 
-#include <private/akPGTAUUID.h>
-#include <public/akPGTATypes.h>
+#include "akPGTAUUID.h"
+#include <PGTA/akPGTATypes.h>
 #include <memory>
 #include <vector>
 #include <string>

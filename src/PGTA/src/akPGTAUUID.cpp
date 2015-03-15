@@ -1,4 +1,5 @@
-#include <private/akPGTAUUID.h>
+
+#include "akPGTAUUID.h"
 #include <string.h>
 
 bool PGTAUUID::operator==(const PGTAUUID& other) const

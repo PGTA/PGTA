@@ -7,9 +7,9 @@
 #endif
 
 #ifndef AK_USE_PGTA_C
-#include "public/akPGTAcpp.h"
+#include "PGTA/akPGTAcpp.h"
 #else
-#include "public/akPGTAc.h"
+#include "PGTA/akPGTAc.h"
 #endif
 
 #endif // AK_PGTA

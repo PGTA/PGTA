@@ -1,13 +1,13 @@
 
 project "PGTALib"
     kind "SharedLib"
-    includedirs "../PGTA"
     defines "PGTA_EXPORTS"
     dependson "FlatbufCompiler"
     links "AudioMixer"
     includedirs
     {
-        "../AudioMixer/include/"
+        "../AudioMixer/include/",
+        "../PGTA/include"
     }
     files
     {

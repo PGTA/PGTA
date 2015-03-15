@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <public/akPGTATypes.h>
-#include <public/akPlatform.h>
+#include "akPGTATypes.h"
+#include "akPlatform.h"
 
 #ifdef __cplusplus
 extern "C" {

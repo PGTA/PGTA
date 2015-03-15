@@ -1,9 +1,9 @@
 
-#include <private/akPGTADeviceImpl.h>
-#include <private/akPGTAContextImpl.h>
-#include <private/akPGTATrack.h>
-#include <private/akPGTATrackLoader.h>
-#include <public/akPGTATypes.h>
+#include "akPGTADeviceImpl.h"
+#include "akPGTAContextImpl.h"
+#include "akPGTATrack.h"
+#include "akPGTATrackLoader.h"
+#include <PGTA/akPGTATypes.h>
 #include <memory>
 
 PGTADeviceImpl::PGTADeviceImpl()

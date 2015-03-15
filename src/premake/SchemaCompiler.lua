@@ -11,7 +11,7 @@ filter "files:**.fbs"
     buildmessage "flatc: Compiling %{file.relpath}"
     buildcommands
     {
-        runexe('flatc')..' -c -o "../../PGTA/public/schema" %{file.relpath}',
+        runexe('flatc')..' -c -o "../../PGTA/include/PGTA/schema" %{file.relpath}',
         runexe('SchemaCompiler')..' %{file.relpath}'
     }
     -- TODO: add *_generated.h to buildoutputs when

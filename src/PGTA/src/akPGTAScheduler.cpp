@@ -1,5 +1,6 @@
-#include <private/akPGTAScheduler.h>
-#include <private/akPGTAConst.h>
+
+#include "akPGTAScheduler.h"
+#include "akPGTAConst.h"
 #include <akAudioMixer.h>
 #include <algorithm>
 #include <random>
