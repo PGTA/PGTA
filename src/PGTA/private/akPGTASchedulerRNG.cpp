@@ -1,11 +1,12 @@
 #include <private/akPGTASchedulerRNG.h>
+#include <ctime>
 #include <random>
 
 
 PGTASchedulerRNG::PGTASchedulerRNG() :
     m_probabilityDistribution(0.0f, 1.0f),
     m_deviationDistribution(-1.0f, 1.0f),
-    m_generator()
+    m_generator(time(nullptr))
 {
 }
 
