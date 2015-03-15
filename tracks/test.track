@@ -22,7 +22,7 @@
     },
     {
       name: "Thunder2",
-      defaultFile: "./media/crickets.wav",
+      defaultFile: "./media/thunder2.wav",
       startTime: 4,
       period: 9,
       periodDeviation: 2,
@@ -32,7 +32,7 @@
     },
     {
       name: "Thunder3",
-      defaultFile: "./media/rainloop.wav",
+      defaultFile: "./media/thunder3.wav",
       startTime: 4,
       period: 9,
       periodDeviation: 2,
