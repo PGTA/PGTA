@@ -21,13 +21,13 @@ PGTA_API void           pgtaFreeTracks(HPGTADevice device,
                                        const int32_t numTracks,
                                        HPGTATrack* tracksIn);
 
-PGTA_API PGTATrackData pgtaGetTrackData(HPGTATrack track);
-PGTA_API void pgtaFreeTrackData(PGTATrackData trackData);
+PGTA_API PGTATrackData  pgtaGetTrackData(HPGTATrack track);
+PGTA_API void           pgtaFreeTrackData(PGTATrackData trackData);
 
 PGTA_API void           pgtaBindTrackSample(HPGTATrack track,
-                                             const int32_t id,
-                                             const int16_t* audioData,
-                                             const size_t audioDataLength);
+                                            const int32_t id,
+                                            const int16_t* audioData,
+                                            const size_t audioDataLength);
 
 PGTA_API HPGTAContext   pgtaCreateContext(HPGTADevice device, const PGTAConfig* config);
 PGTA_API void           pgtaDestroyContext(HPGTADevice device, HPGTAContext context);
