@@ -208,6 +208,11 @@ PGTABuffer PGTAScheduler::Update(const float delta)
         if (playDelay < deltaSamples)
         {
             bool canPlay = m_rng.CanPlay(sample.probability);
+
+            if (sample.audioData == nullptr)
+            {
+                canPlay = false;
+            }
            
             if (sample.period == 0.0f)
             {
@@ -224,7 +229,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
 
             bool groupConflict = false;
             bool isInGroup = !sample.group.empty();
-            if (isInGroup)
+            if (isInGroup && canPlay)
             {
                 // Check if group is playing for the full delta duration
                 groupConflict = std::find_if(m_groupsNextSchedule.begin(), m_groupsNextSchedule.end(),

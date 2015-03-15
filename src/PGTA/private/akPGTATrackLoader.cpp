@@ -124,6 +124,8 @@ static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSamp
         sample.probability = probability;
         sample.volume = volume;
         sample.id = sampleId++;
+        sample.audioData = nullptr;
+        sample.numSamples = 0;
 
         samples->emplace_back(std::move(sample));
     }
