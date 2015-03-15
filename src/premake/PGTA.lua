@@ -22,7 +22,6 @@ solution "PGTA"
     flags
     {
         "Symbols",
-        "StaticRuntime",
         "NoMinimalRebuild",
         "NoEditAndContinue",
         "MultiProcessorCompile"
