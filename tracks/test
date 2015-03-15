@@ -1,60 +1,107 @@
 {
-    "samples":
-    [
-      {
-        "name":"lionRoar",
-        "defaultFile":"./lionRoar.wav",
-        "startTime":5,
-        "frequency":1000,
-        "probability":1000,
-        "volumeMultiplier":1,
-        "group":"c07be9ab8e544d9fa85ba7ea323763c9"
-      },
-      {
-        "name":"lion1Roar",
-        "defaultFile":"./lion1Roar.wav",
-        "startTime":10,
-        "frequency":10,
-        "probability":100,
-        "volumeMultiplier":3,
-        "group":"c07be9ab8e544d9fa85ba7ea323763c9"
-      },
-      {
-        "name":"birdChirp",
-        "defaultFile":"./bird.wav",
-        "startTime":0,
-        "frequency":500,
-        "probability":10,
-        "volumeMultiplier":2,
-        "group":"c07be9ab8e544d9fa85ba7ea323763c3"
-      },
-      {
-        "name":"foobar",
-        "defaultFile":"./foobar.wav",
-        "startTime":0,
-        "frequency":200,
-        "probability":30,
-        "volumeMultiplier":2
-      }
- 
-    ],
-    "groups":
-    [
-      {
-        "name":"Lions",
-        "uuid":"c07be9ab8e544d9fa85ba7ea323763c9"
-      },
-      {
-        "name":"Birds",
-        "uuid":"c07be9ab8e544d9fa85ba7ea323763c3"
-      }
- 
-    ],
-    "restrictions":
-    [
-      {
-        "group1":"c07be9ab8e544d9fa85ba7ea323763c9",
-        "group2":"c07be9ab8e544d9fa85ba7ea323763c3"
-      }
-    ]
+  samples: [
+    {
+      name: "Rain",
+      defaultFile: "./media/rainLoop.wav",
+      startTime: 0,
+      period: 0,
+      periodDeviation: 0,
+      probability: 1.0,
+      volume: 6,
+      group: ""
+    },
+    {
+      name: "Crickets",
+      defaultFile: "./media/crickets.wav",
+      startTime: 0,
+      period: 0,
+      periodDeviation: 0,
+      probability: 1.0,
+      volume: 0,
+      group: ""
+    },
+    {
+      name: "Thunder2",
+      defaultFile: "./media/crickets.wav",
+      startTime: 4,
+      period: 9,
+      periodDeviation: 2,
+      probability: 0.6,
+      volume: 0,
+      group: "c07be9ab8e544d9fa85ba7ea323763c9"
+    },
+    {
+      name: "Thunder3",
+      defaultFile: "./media/rainloop.wav",
+      startTime: 4,
+      period: 9,
+      periodDeviation: 2,
+      probability: 0.8,
+      volume: 0,
+      group: "c07be9ab8e544d9fa85ba7ea323763c9"
+    },
+    {
+      name: "Owl",
+      defaultFile: "./media/owl.wav",
+      startTime: 0,
+      period: 15,
+      periodDeviation: 2,
+      probability: 0.6,
+      volume: 3,
+      group: "c07be9ab8e544d9fa85ba7ea323763c6"
+    },
+    {
+      name: "Loon",
+      defaultFile: "./media/loon.wav",
+      startTime: 0,
+      period: 10,
+      periodDeviation: 2,
+      probability: 0.6,
+      volume: 2,
+      group: "c07be9ab8e544d9fa85ba7ea323763c6"
+    },
+    {
+      name: "Osprey",
+      defaultFile: "./media/osprey.wav",
+      startTime: 0,
+      period: 25,
+      periodDeviation: 8,
+      probability: 0.6,
+      volume: 0,
+      group: "c07be9ab8e544d9fa85ba7ea323763c6"
+    },
+    {
+      name: "Whipperwill",
+      defaultFile: "./media/whipperwill.wav",
+      startTime: 0,
+      period: 15,
+      periodDeviation: 5,
+      probability: 0.6,
+      volume: 0,
+      group: "c07be9ab8e544d9fa85ba7ea323763c6"
+    },
+    {
+      name: "Frogs",
+      defaultFile: "./media/frogs.wav",
+      startTime: 0,
+      period: 0,
+      periodDeviation: 0,
+      probability: 1.0,
+      volume: -1,
+      group: ""
+    }
+  ],
+  groups: [
+    {
+      name: "Thunder",
+      uuid: "c07be9ab8e544d9fa85ba7ea323763c9"
+    },
+    {
+      name: "Birds",
+      uuid: "c07be9ab8e544d9fa85ba7ea323763c6"
+    }
+  ],
+  restrictions: [
+
+  ]
 }
