@@ -8,15 +8,17 @@
 #include <vector>
 #include <math.h>
 
-PGTAScheduler::PGTAScheduler() :
+PGTAScheduler::PGTAScheduler():
+    m_groupsNextSchedule(),
+    m_endingGroups(),
     m_primaryTrack(nullptr),
     m_primaryWeight(1.0f),
     m_primaryNextSchedules(),
     m_transTrack(nullptr),
     m_transNextSchedules(),
+    m_rng(),
     m_groupReadyPools(),
     m_mixRequests(),
-    m_rng(),
     m_config(),
     m_mixer(nullptr),
     m_bufferData()
