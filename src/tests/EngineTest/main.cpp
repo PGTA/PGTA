@@ -71,7 +71,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
     // load track data to memory
     // "tracks/demo.track"
     std::string trackSource;
-    if (!ReadBinaryFileToString("tracks/test", trackSource))
+    if (!ReadBinaryFileToString("tracks/test.track", trackSource))
     {
         return -1;
     }
