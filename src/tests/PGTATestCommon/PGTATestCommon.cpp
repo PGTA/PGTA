@@ -132,7 +132,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName, std::a
     return 0;
 }
 
-void PGTATestCommon::PlayTrack(std::string trackName, std::atomic<int> &playbackControl)
+void PGTATestCommon::PlayTrack(std::string trackName, std::atomic<int> &playbackControl, std::string &message)
 {
     SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -148,7 +148,14 @@ void PGTATestCommon::PlayTrack(std::string trackName, std::atomic<int> &playback
     if (audioDevice > 1)
     {
         SDL_PauseAudioDevice(audioDevice, 0);
-        ret = pgtaMain(audioDevice, trackName, playbackControl);
+        try
+        {
+            ret = pgtaMain(audioDevice, trackName, playbackControl);
+        }
+        catch (SDLWavException &e)
+        {
+            message = e.what();
+        }
         SDL_PauseAudioDevice(audioDevice, 1);
         SDL_CloseAudioDevice(audioDevice);
     }

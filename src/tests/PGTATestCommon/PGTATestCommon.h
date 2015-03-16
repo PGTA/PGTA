@@ -6,5 +6,5 @@
 
 namespace PGTATestCommon
 {
-    void PlayTrack(std::string trackName, std::atomic<int> &playbackControl);
+    void PlayTrack(std::string trackName, std::atomic<int> &playbackControl, std::string &message);
 }
