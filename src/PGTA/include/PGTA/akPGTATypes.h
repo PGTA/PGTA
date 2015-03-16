@@ -68,7 +68,7 @@ typedef struct PGTATrackData
     uint16_t numRestrictions;
     const PGTARestrictionData* restrictions;
 
-    bool isMeasuredInBeats;
+    int isMeasuredInBeats;
 } PGTATrackData;
 
 #undef DECLARE_HANDLE

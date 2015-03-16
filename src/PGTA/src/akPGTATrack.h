@@ -32,6 +32,7 @@ public:
     void FreeTrackData();
 
     bool GetIsMeasuredInBeats() const { return m_isMeasuredInBeats;  }
+    void SetIsMeasuredInBeats(const bool inBeats) { m_isMeasuredInBeats = inBeats;  }
     
     std::vector<PGTASampleData> CopySampleData() const;
     std::vector<PGTAGroupData> CopyGroupData() const;

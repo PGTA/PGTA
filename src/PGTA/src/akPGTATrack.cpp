@@ -167,6 +167,7 @@ PGTATrackData PGTATrack::GetTrackData(HPGTATrack trackHandle)
         m_trackData->restrictions = std::move(CopyRestrictionData());
 
         m_trackData->trackHandle = trackHandle;
+        m_trackData->isMeasuredInBeats = static_cast<int>(m_isMeasuredInBeats);
     }
     
     m_dataReferences++;
