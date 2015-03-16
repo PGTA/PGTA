@@ -12,6 +12,21 @@
 #include "utils.h"
 #include "FileUtils.h"
 
+class SDLWavException : public std::exception
+{
+public:
+    SDLWavException(std::string message) :
+        m_message(message)
+    {
+    }
+    virtual const char* what() const throw()
+    {
+        return m_message.c_str();
+    }
+private:
+    std::string m_message;
+};
+
 class SDLWav
 {
 public:
@@ -21,9 +36,10 @@ public:
         m_spec()
     {
         SDL_LoadWAV(filename, &m_spec, &m_audioBuf, &m_audioLen);
-        assert(m_spec.freq == 44100);
-        assert(m_spec.format == AUDIO_S16);
-        assert(m_spec.channels == 1);
+        if (m_spec.freq != 44100 || m_spec.format != AUDIO_S16 || m_spec.channels != 1)
+        {
+            throw SDLWavException("Error loading file "+std::string(filename));
+        }
         std::cout << filename << " has " << (m_audioLen >> 1) << " samples\n";
     }
 
