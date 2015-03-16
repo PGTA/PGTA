@@ -107,7 +107,7 @@ int32_t PGTAScheduler::ConvertBeatsToSamples(const float beats)
 {
     uint16_t channels = m_config.audioDesc.channels;
     uint32_t samplesPerSecond = m_config.audioDesc.samplesPerSecond;
-    return static_cast<int32_t>(round(beats / (m_config.beatsPerMinute * 60) * channels * samplesPerSecond));
+    return static_cast<int32_t>(round(beats / (m_config.beatsPerMinute / 60) * channels * samplesPerSecond));
 }
 
 PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequests)
