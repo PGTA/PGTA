@@ -37,6 +37,7 @@ namespace PGTA
     class PGTAContext
     {
     public:
+        explicit inline PGTAContext(HPGTAContext context = nullptr);
         inline PGTAContext(const PGTAContext& other);
         inline ~PGTAContext();
         
@@ -47,13 +48,12 @@ namespace PGTA
     protected:
         friend PGTAContext PGTADevice::CreateContext(const PGTAConfig &config);
         friend void PGTADevice::DestroyContext(PGTAContext& context);
-        explicit inline PGTAContext(HPGTAContext context);
 
     private:
         HPGTAContext m_pgtaContext;
     };
 
-    void    BindTrackSample(HPGTATrack track, const int32_t id, const int16_t* audioData, const size_t audioDataLength)
+    inline void BindTrackSample(HPGTATrack track, const int32_t id, const int16_t* audioData, const size_t audioDataLength)
     {
         pgtaBindTrackSample(track, id, audioData, audioDataLength);
     }
