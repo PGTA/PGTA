@@ -4,7 +4,13 @@
 #include <string.h>
 
 PGTATrack::PGTATrack() : 
-    m_dataReferences(0)
+    m_samples(),
+    m_groups(),
+    m_groupRestrictions(),
+    m_numRestrictions(0),
+    m_isMeasuredInBeats(false),
+    m_dataReferences(0),
+    m_trackData(nullptr)
 {
 }
 

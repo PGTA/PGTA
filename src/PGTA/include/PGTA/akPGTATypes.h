@@ -27,7 +27,7 @@ typedef struct PGTABuffer
 typedef struct PGTAConfig
 {
     PGTAAudioDesc audioDesc;
-
+    uint16_t beatsPerMinute;
     float mixAhead;
 } PGTAConfig;
 
@@ -67,6 +67,8 @@ typedef struct PGTATrackData
 
     uint16_t numRestrictions;
     const PGTARestrictionData* restrictions;
+
+    bool isMeasuredInBeats;
 } PGTATrackData;
 
 #undef DECLARE_HANDLE

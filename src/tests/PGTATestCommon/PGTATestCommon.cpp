@@ -102,6 +102,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName, std::a
     config.audioDesc.samplesPerSecond = 44100;
     config.audioDesc.bytesPerSample = 2;
     config.audioDesc.channels = 1;
+    config.beatsPerMinute = 120;
     config.mixAhead = 0.5f;
     PGTA::PGTAContext pgtaContext(pgtaDevice.CreateContext(config));
 

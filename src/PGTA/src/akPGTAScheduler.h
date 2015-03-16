@@ -38,6 +38,7 @@ public:
 private:
     PGTABuffer MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequest);
     int32_t ConvertTimeToSamples(const float delta);
+    int32_t ConvertBeatsToSamples(const float beats);
 
 private:
     std::vector<std::pair<std::string, uint32_t>> m_groupsNextSchedule;

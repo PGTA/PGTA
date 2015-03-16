@@ -30,6 +30,7 @@ table Track
     samples:[Sample];
     groups:[Group];
     restrictions:[Restriction];
+    isMeasuredInBeats:bool = false;
 }
 
 root_type Track;

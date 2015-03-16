@@ -30,6 +30,8 @@ public:
     
     PGTATrackData GetTrackData(const HPGTATrack trackHandle);
     void FreeTrackData();
+
+    bool GetIsMeasuredInBeats() const { return m_isMeasuredInBeats;  }
     
     std::vector<PGTASampleData> CopySampleData() const;
     std::vector<PGTAGroupData> CopyGroupData() const;
@@ -41,6 +43,7 @@ private:
     std::map<std::string, std::vector<std::string> > m_groupRestrictions;
     uint16_t m_numRestrictions;
 
+    bool m_isMeasuredInBeats;
     int m_dataReferences;
     std::unique_ptr<PGTACachedTrackData> m_trackData;
 };

@@ -53,6 +53,8 @@ struct PGTACachedTrackData
 {
     HPGTATrack trackHandle;
 
+    bool isMeasuredInBeats;
+
     std::vector<PGTASampleData> samples;
     std::vector<PGTAGroupData> groups;
     std::vector<PGTARestrictionData> restrictions;

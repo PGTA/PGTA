@@ -77,11 +77,20 @@ void PGTAScheduler::SetPrimaryTrack(const PGTATrack* track)
     m_primaryTrack = track;
 
     const PGTATrackSample* samples = track->GetSamples()->data();
+    bool isMeasuredInBeats = track->GetIsMeasuredInBeats();
     int numSamples = static_cast<int>(track->GetNumSamples());
     m_primaryNextSchedules.resize(numSamples);
     for (int i = 0; i < numSamples; ++i)
     {
-        uint32_t startTime = ConvertTimeToSamples(samples[i].startTime);
+        uint32_t startTime;
+        if (isMeasuredInBeats)
+        {
+            startTime = ConvertBeatsToSamples(samples[i].startTime);
+        }
+        else
+        {
+            startTime = ConvertTimeToSamples(samples[i].startTime);
+        }
         m_primaryNextSchedules[i].samplesUntilPlay = startTime;
         m_primaryNextSchedules[i].samplesOffPeriod = startTime;
     }
@@ -92,6 +101,13 @@ int32_t PGTAScheduler::ConvertTimeToSamples(const float delta)
     uint16_t channels = m_config.audioDesc.channels;
     uint32_t samplesPerSecond = m_config.audioDesc.samplesPerSecond;
     return static_cast<int32_t>(round(delta * channels * samplesPerSecond));
+}
+
+int32_t PGTAScheduler::ConvertBeatsToSamples(const float beats)
+{
+    uint16_t channels = m_config.audioDesc.channels;
+    uint32_t samplesPerSecond = m_config.audioDesc.samplesPerSecond;
+    return static_cast<int32_t>(round(beats / (m_config.beatsPerMinute * 60) * channels * samplesPerSecond));
 }
 
 PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequests)
@@ -200,6 +216,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
     }
 
     int numTrackSamples = m_primaryTrack->GetNumSamples();
+    bool isMeasuredInBeats = m_primaryTrack->GetIsMeasuredInBeats();
     const std::vector<PGTATrackSample>* samples = m_primaryTrack->GetSamples();
     uint16_t numPooledSamples = 0;
 
@@ -226,8 +243,19 @@ PGTABuffer PGTAScheduler::Update(const float delta)
             }
             else
             {
-                uint32_t samplesPerPeriod = ConvertTimeToSamples(sample.period);
-                int32_t deviation = ConvertTimeToSamples(m_rng.GetDeviation(sample.periodDeviation));
+                uint32_t samplesPerPeriod;
+                int32_t deviation;
+                if (isMeasuredInBeats)
+                {
+                    samplesPerPeriod = ConvertBeatsToSamples(sample.period);
+                    deviation = ConvertBeatsToSamples(m_rng.GetDeviation(sample.periodDeviation));
+                }
+                else
+                {
+                    samplesPerPeriod = ConvertTimeToSamples(sample.period);
+                    deviation = ConvertTimeToSamples(m_rng.GetDeviation(sample.periodDeviation));
+                }
+
                 primaryNextSchedule.samplesOffPeriod += samplesPerPeriod;
                 primaryNextSchedule.samplesUntilPlay = primaryNextSchedule.samplesOffPeriod + deviation;
             }
