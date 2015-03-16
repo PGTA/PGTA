@@ -41,10 +41,10 @@ public:
 private:
     std::vector<PGTATrackSample> m_samples;
     std::vector<PGTATrackGroup> m_groups;
-    std::map<std::string, std::vector<std::string> > m_groupRestrictions;
-    uint16_t m_numRestrictions;
-
-    bool m_isMeasuredInBeats;
-    int m_dataReferences;
+    std::map<std::string, std::vector<std::string>> m_groupRestrictions;
     std::unique_ptr<PGTACachedTrackData> m_trackData;
+    
+    uint16_t m_dataReferences;
+    uint16_t m_numRestrictions;
+    bool m_isMeasuredInBeats;
 };

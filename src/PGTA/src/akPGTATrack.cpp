@@ -7,10 +7,10 @@ PGTATrack::PGTATrack() :
     m_samples(),
     m_groups(),
     m_groupRestrictions(),
-    m_numRestrictions(0),
-    m_isMeasuredInBeats(false),
+    m_trackData(nullptr),
     m_dataReferences(0),
-    m_trackData(nullptr)
+    m_numRestrictions(0),
+    m_isMeasuredInBeats(false)
 {
 }
 
@@ -157,20 +157,19 @@ std::vector<PGTASampleData> PGTATrack::CopySampleData() const
 
 PGTATrackData PGTATrack::GetTrackData(HPGTATrack trackHandle)
 {
-    PGTATrackData trackData;
     if (m_dataReferences == 0)
     {      
         m_trackData = std::make_unique<PGTACachedTrackData>();
         
-        m_trackData->samples = std::move(CopySampleData());
-        m_trackData->groups = std::move(CopyGroupData());
-        m_trackData->restrictions = std::move(CopyRestrictionData());
-
         m_trackData->trackHandle = trackHandle;
-        m_trackData->isMeasuredInBeats = static_cast<int>(m_isMeasuredInBeats);
+        m_trackData->samples = CopySampleData();
+        m_trackData->groups = CopyGroupData();
+        m_trackData->restrictions = CopyRestrictionData();
     }
-    
-    m_dataReferences++;
+    ++m_dataReferences;
+
+    PGTATrackData trackData = PGTATrackData();
+    trackData.trackHandle = m_trackData->trackHandle;
 
     trackData.numSamples = static_cast<uint16_t>(m_trackData->samples.size());
     trackData.samples = m_trackData->samples.data();
@@ -181,21 +180,16 @@ PGTATrackData PGTATrack::GetTrackData(HPGTATrack trackHandle)
     trackData.numRestrictions = static_cast<uint16_t>(m_trackData->restrictions.size());
     trackData.restrictions = m_trackData->restrictions.data();
 
-    trackData.trackHandle = m_trackData->trackHandle;
+    trackData.isMeasuredInBeats = m_isMeasuredInBeats;
+
     return trackData;
 }
 
 void PGTATrack::FreeTrackData()
 {
-    if (m_dataReferences <= 0)
+    if ((m_dataReferences > 0) &&
+        (--m_dataReferences == 0))
     {
-        m_dataReferences = 0;
-        return;
-    }
-    m_dataReferences--;
-
-    if (m_dataReferences != 0)
-    {
-        return;
+        m_trackData.reset();
     }
 }

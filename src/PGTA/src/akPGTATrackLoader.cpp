@@ -233,6 +233,6 @@ static PGTATrack* InitTrackData(PGTATrack* const track, const PGTASchema::Track*
         track->SetRestrictions(groupRestrictions, numValidRestrictions);
     }
 
-    track->SetIsMeasuredInBeats(schemaTrack->isMeasuredInBeats());
+    track->SetIsMeasuredInBeats(schemaTrack->isMeasuredInBeats() != 0);
     return track;
 }
