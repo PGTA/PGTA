@@ -53,7 +53,7 @@ namespace PGTA
         HPGTAContext m_pgtaContext;
     };
 
-    void    BindTrackSample(HPGTATrack track, const int32_t id, const int16_t* audioData, const size_t audioDataLength)
+    inline void BindTrackSample(HPGTATrack track, const int32_t id, const int16_t* audioData, const size_t audioDataLength)
     {
         pgtaBindTrackSample(track, id, audioData, audioDataLength);
     }
