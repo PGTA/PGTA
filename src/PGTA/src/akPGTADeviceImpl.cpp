@@ -22,13 +22,13 @@ bool PGTADeviceImpl::Initialize()
 
 void PGTADeviceImpl::Shutdown()
 {
-    for (auto context : m_contexts)
+    for (PGTAContextImpl* context : m_contexts)
     {
         context->Shutdown();
         delete context;
     }
 
-    for (auto track : m_tracks)
+    for (PGTATrack* track : m_tracks)
     {
         delete track;
     }
@@ -76,21 +76,23 @@ void PGTADeviceImpl::FreeTracks(const int32_t numTracks, PGTATrack** tracksIn)
 
 PGTAContextImpl* PGTADeviceImpl::CreateContext(const PGTAConfig& config)
 {
-    auto context = new PGTAContextImpl();
-    if (context->Initialize(config))
+    PGTAContextImpl* context = new PGTAContextImpl();
+    if (context && context->Initialize(config))
     {
         m_contexts.emplace(context);
+        return context;
     }
-    else
-    {
-        delete context;
-        context = nullptr;
-    }
-    return context;
+    delete context;
+    return nullptr;
 }
 
 void PGTADeviceImpl::DestroyContext(PGTAContextImpl* pgtaContext)
 {
-    pgtaContext->Shutdown();
-    delete pgtaContext;
+    auto it = m_contexts.find(pgtaContext);
+    if (pgtaContext && (it != m_contexts.end()))
+    {
+        m_contexts.erase(it);
+        pgtaContext->Shutdown();
+        delete pgtaContext;
+    }
 }
