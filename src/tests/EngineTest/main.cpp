@@ -68,22 +68,22 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
     }
 
     // load track data to memory
-    // "tracks/demo.track"
+    // "tracks/test.track"
     std::string trackSource;
     if (!ReadBinaryFileToString("tracks/test.track", trackSource))
     {
         return -1;
     }
 
-    HPGTATrack demoTrack = nullptr;
+    HPGTATrack demoTrack1 = nullptr;
     const char* source = trackSource.data();
     const size_t length = trackSource.length();
-    if (pgtaDevice.CreateTracks(1, &source, &length, &demoTrack) <= 0 || !demoTrack)
+    if (pgtaDevice.CreateTracks(1, &source, &length, &demoTrack1) <= 0 || !demoTrack1)
     {
         return -1;
     }
 
-    const PGTATrackData trackData = pgtaGetTrackData(demoTrack);
+    const PGTATrackData trackData = pgtaGetTrackData(demoTrack1);
     const int numSamples = trackData.numSamples;
 
     std::vector<SDLWav> audioFiles;
@@ -92,9 +92,39 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
     {
         const PGTASampleData* sampleData = (trackData.samples + i);
         audioFiles.emplace_back(sampleData->defaultFile);
-        pgtaBindTrackSample(demoTrack, sampleData->id,
+        pgtaBindTrackSample(demoTrack1, sampleData->id,
                             audioFiles[i].GetSamplePtr(),
                             audioFiles[i].GetNumSamples() * 2);
+    }
+
+    // load track data to memory
+    // "tracks/upbeat.track"
+    std::string trackSource2;
+    if (!ReadBinaryFileToString("tracks/upbeat.track", trackSource2))
+    {
+        return -1;
+    }
+
+    HPGTATrack demoTrack2 = nullptr;
+    const char* source2 = trackSource2.data();
+    const size_t length2 = trackSource2.length();
+    if (pgtaDevice.CreateTracks(1, &source2, &length2, &demoTrack2) <= 0 || !demoTrack2)
+    {
+        return -1;
+    }
+
+    const PGTATrackData trackData2 = pgtaGetTrackData(demoTrack2);
+    const int numSamples2 = trackData2.numSamples;
+
+    std::vector<SDLWav> audioFiles2;
+    audioFiles2.reserve(numSamples2);
+    for (int i = 0; i < numSamples2; ++i)
+    {
+        const PGTASampleData* sampleData = (trackData2.samples + i);
+        audioFiles2.emplace_back(sampleData->defaultFile);
+        pgtaBindTrackSample(demoTrack2, sampleData->id,
+            audioFiles2[i].GetSamplePtr(),
+            audioFiles2[i].GetNumSamples() * 2);
     }
 
     PGTAConfig config;
@@ -105,7 +135,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
     config.mixAhead = 0.1f;
     PGTA::PGTAContext pgtaContext(pgtaDevice.CreateContext(config));
 
-    pgtaContext.BindTrack(demoTrack);
+    pgtaContext.BindTrack(demoTrack1);
     utils::RunLoop(0.01f, [&](double /*absoluteTime*/, float delta)
     {
         const PGTABuffer output = pgtaContext.Update(delta);

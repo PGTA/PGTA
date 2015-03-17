@@ -31,6 +31,11 @@ namespace PGTA
 
     void PGTAContext::BindTrack(HPGTATrack track)
     {
-        return pgtaBindTrack(m_pgtaContext, track);
+        pgtaBindTrack(m_pgtaContext, track);
+    }
+
+    void PGTAContext::Transition(HPGTATrack track, const float percentAmount, const float durationSeconds)
+    {
+        pgtaTransition(m_pgtaContext, track, percentAmount, durationSeconds);
     }
 }

@@ -38,6 +38,16 @@ void PGTAContextImpl::BindTrack(const PGTATrack* track)
     m_scheduler->SetPrimaryTrack(track);
 }
 
+void PGTAContextImpl::Transition(const PGTATrack* track, const float percentAmount, const float durationSeconds)
+{
+    if (!m_scheduler)
+    {
+        return;
+    }
+
+    m_scheduler->TransitionRequest(track, percentAmount, durationSeconds);
+}
+
 PGTABuffer PGTAContextImpl::Update(const float deltaSeconds)
 {
     m_outputBuffer = m_scheduler->Update(deltaSeconds);

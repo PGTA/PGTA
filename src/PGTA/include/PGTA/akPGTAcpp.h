@@ -44,6 +44,7 @@ namespace PGTA
         inline PGTABuffer Update(const float deltaSeconds);
         inline PGTABuffer GetOutputBuffer();
         inline void BindTrack(HPGTATrack track);
+        inline void Transition(HPGTATrack track, const float percentAmount, const float durationSeconds);
 
     protected:
         friend PGTAContext PGTADevice::CreateContext(const PGTAConfig &config);

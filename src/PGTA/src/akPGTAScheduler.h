@@ -33,6 +33,7 @@ public:
 
     bool Initialize(const PGTAConfig& config);
     void SetPrimaryTrack(const PGTATrack* track);
+    void TransitionRequest(const PGTATrack* track, const float percentAmount, const float durationSeconds);
     PGTABuffer Update(const float deltaSeconds);
 
 private:

@@ -96,6 +96,10 @@ void PGTAScheduler::SetPrimaryTrack(const PGTATrack* track)
     }
 }
 
+void PGTAScheduler::TransitionRequest(const PGTATrack* track, const float percentAmount, const float durationSeconds)
+{
+}
+
 int32_t PGTAScheduler::ConvertTimeToSamples(const float deltaSeconds) const
 {
     uint16_t channels = m_config.audioDesc.channels;

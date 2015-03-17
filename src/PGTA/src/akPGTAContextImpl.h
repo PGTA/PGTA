@@ -20,6 +20,7 @@ public:
     void Shutdown();
 
     void BindTrack(const PGTATrack* track);
+    void Transition(const PGTATrack* track, const float percentAmount, const float durationSeconds);
 
     PGTABuffer Update(const float deltaSeconds);
 

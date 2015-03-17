@@ -34,6 +34,10 @@ PGTA_API void           pgtaDestroyContext(HPGTADevice device, HPGTAContext cont
 
 PGTA_API void           pgtaBindTrack(HPGTAContext context, HPGTATrack track);
 PGTA_API PGTABuffer     pgtaUpdate(HPGTAContext context, const float deltaSeconds);
+PGTA_API void           pgtaTransition(HPGTAContext context,
+                                       HPGTATrack track,
+                                       const float percentAmount,
+                                       const float durationSeconds);
 PGTA_API PGTABuffer     pgtaGetOutputBuffer(HPGTAContext context);
 
 #ifdef __cplusplus
