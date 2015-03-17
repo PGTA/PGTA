@@ -100,6 +100,7 @@ static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSamp
         const float period = schemaSample->period();
         const float periodDeviation = schemaSample->periodDeviation();
         const float probability = schemaSample->probability();
+        const float transitionWeight = schemaSample->transitionWeight();
         const float gain = schemaSample->gain();
 
         // TODO: sanity checks for schemaSample properties
@@ -122,6 +123,7 @@ static void InitSamples(const SchemaSamples& schemaSamples, vector<PGTATrackSamp
         sample.period = period;
         sample.periodDeviation = periodDeviation;
         sample.probability = probability;
+        sample.transitionWeight = transitionWeight;
         sample.gain = gain;
         sample.id = sampleId++;
         sample.audioData = nullptr;

@@ -137,6 +137,7 @@ void pgtaBindTrackSample(HPGTATrack track, const int32_t id, const uint8_t* audi
 
         trackSample.audioData = audioData;
         trackSample.audioDataNumBytes = static_cast<uint32_t>(audioDataNumBytes);
+        break;
     }
 }
 

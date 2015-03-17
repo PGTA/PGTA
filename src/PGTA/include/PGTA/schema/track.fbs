@@ -9,6 +9,7 @@ table Sample
     period:float;
     periodDeviation: float = 0;
     probability:float;
+    transitionWeight: float = 0;
     gain:float = 0;
     group:string;
 }

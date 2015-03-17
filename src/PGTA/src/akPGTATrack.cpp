@@ -145,6 +145,7 @@ std::vector<PGTASampleData> PGTATrack::CopySampleData() const
         sample.period = sourceSample.period;
         sample.periodDeviation = sourceSample.periodDeviation;
         sample.probability = sourceSample.probability;
+        sample.transitionWeight = sourceSample.transitionWeight;
         sample.startTime = sourceSample.startTime;
         sample.gain = sourceSample.gain;
         sample.sampleName = cachedsample.sampleName.c_str();

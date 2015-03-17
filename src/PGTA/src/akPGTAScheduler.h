@@ -12,7 +12,7 @@
 
 struct MixRequest
 {
-    // TODO: Add track
+    bool isPrimary;
     uint32_t delay;
     uint16_t sampleId;
 
@@ -39,6 +39,10 @@ private:
     PGTABuffer MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequest);
     int32_t ConvertTimeToSamples(const float deltaTime) const;
     int32_t ConvertBeatsToSamples(const float deltaBeats) const;
+
+    void SelectSchedulingCandidates(const bool isPrimary, const uint32_t deltaSamples);
+    bool HasGroupConflict(const std::string& group, const uint32_t delay);
+    bool HasRestrictionConflict(const bool isPrimary, const std::string& group, const uint32_t delay);
 
 private:
     std::vector<std::pair<std::string, uint32_t>> m_groupsNextSchedule;
