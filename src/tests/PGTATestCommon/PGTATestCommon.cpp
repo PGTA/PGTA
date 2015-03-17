@@ -160,8 +160,8 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName,
     return 0;
 }
 
-void PlayTrack(const std::string trackName, const std::atomic<PlaybackControl>& playbackControl,
-               const std::atomic<uint8_t>& volumeMultiplier, std::string& errorMessage)
+void PGTATestCommon::PlayTrack(const std::string trackName, const std::atomic<PlaybackControl>& playbackControl,
+                               const std::atomic<uint8_t>& volumeMultiplier, std::string& errorMessage)
 {
     SDL_Init(SDL_INIT_EVERYTHING);
 
