@@ -1,7 +1,5 @@
 
 #include "PGTATestCommon.h"
-
-
 #include <SDL.h>
 #include <SDL_audio.h>
 #include <akAudioMixer.h>
@@ -9,6 +7,7 @@
 #include <signal.h>
 #include <iostream>
 #include <algorithm>
+#include <cstring>
 #include <akPGTA.h>
 #include "utils.h"
 #include "FileUtils.h"
@@ -85,6 +84,7 @@ void ApplyVolume(const uint8_t* samplesIn, const uint32_t numBytesIn,
 {
     volumeMultiplier = std::min(volumeMultiplier, static_cast<uint8_t>(100));
     samplesOut.resize(numBytesIn);
+    memset(samplesOut.data(), 0, samplesOut.size());
     const int volume = static_cast<int>(round(volumeMultiplier * (SDL_MIX_MAXVOLUME / 100.0f)));
     SDL_MixAudioFormat(samplesOut.data(), samplesIn,
                        AUDIO_S16, numBytesIn, volume);
@@ -153,6 +153,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName,
             SDL_PauseAudioDevice(audioDevice, 1);
             SDL_Delay(5);
         }
+        SDL_PauseAudioDevice(audioDevice, 0);
         return (output.samples != nullptr) &&
                (output.numSamples > 0) &&
                (playbackControl.load() == PlaybackControl::Play);
