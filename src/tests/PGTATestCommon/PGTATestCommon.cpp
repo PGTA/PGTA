@@ -8,6 +8,7 @@
 #include <assert.h>
 #include <signal.h>
 #include <iostream>
+#include <algorithm>
 #include <akPGTA.h>
 #include "utils.h"
 #include "FileUtils.h"
@@ -78,7 +79,20 @@ private:
     SDL_AudioSpec m_spec;
 };
 
-int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName, std::atomic<int> &playbackControl)
+void ApplyVolume(const uint8_t* samplesIn, const uint32_t numBytesIn,
+                 std::vector<uint8_t>& samplesOut,
+                 uint8_t volumeMultiplier)
+{
+    volumeMultiplier = std::min(volumeMultiplier, static_cast<uint8_t>(100));
+    samplesOut.resize(numBytesIn);
+    const int volume = static_cast<int>(round(volumeMultiplier * (SDL_MIX_MAXVOLUME / 100.0f)));
+    SDL_MixAudioFormat(samplesOut.data(), samplesIn,
+                       AUDIO_S16, numBytesIn, volume);
+}
+
+int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName,
+             const std::atomic<PlaybackControl> &playbackControl,
+             const std::atomic<uint8_t>& volumeMultiplier)
 {
     PGTA::PGTADevice pgtaDevice;
     if (!pgtaDevice.Initialize())
@@ -101,7 +115,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName, std::a
         return -1;
     }
 
-    auto data = pgtaGetTrackData(demoTrack);
+    PGTATrackData data = pgtaGetTrackData(demoTrack);
     int numSamples = data.numSamples;
 
     std::vector<SDLWav> audioFiles;
@@ -114,7 +128,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName, std::a
         pgtaBindTrackSample(demoTrack, id, audioFiles[i].GetSamplePtr(), audioFiles[i].GetNumSamples() * 2);
     }
 
-    PGTAConfig config;
+    PGTAConfig config = PGTAConfig();
     config.audioDesc.samplesPerSecond = 44100;
     config.audioDesc.bytesPerSample = 2;
     config.audioDesc.channels = 1;
@@ -123,16 +137,31 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName, std::a
     PGTA::PGTAContext pgtaContext(pgtaDevice.CreateContext(config));
 
     pgtaContext.BindTrack(demoTrack);
+
+    std::vector<uint8_t> audioData;
     utils::RunLoop(0.01f, [&](double /*absoluteTime*/, float delta)
     {
         const PGTABuffer output = pgtaContext.Update(delta);
-        SDL_QueueAudio(audioDevice, output.samples, static_cast<Uint32>(output.numSamples * 2));
-        return (output.samples != nullptr) && (output.numSamples > 0) && playbackControl.load() == 0;
+        if ((output.numSamples > 0) && output.samples)
+        {
+            ApplyVolume(reinterpret_cast<const uint8_t*>(output.samples),
+                        output.numSamples * 2, audioData, volumeMultiplier.load());
+            SDL_QueueAudio(audioDevice, audioData.data(), static_cast<Uint32>(audioData.size()));
+        }
+        while (playbackControl.load() == PlaybackControl::Pause)
+        {
+            SDL_PauseAudioDevice(audioDevice, 1);
+            SDL_Delay(5);
+        }
+        return (output.samples != nullptr) &&
+               (output.numSamples > 0) &&
+               (playbackControl.load() == PlaybackControl::Play);
     });
     return 0;
 }
 
-void PGTATestCommon::PlayTrack(std::string trackName, std::atomic<int> &playbackControl, std::string &message)
+void PlayTrack(const std::string trackName, const std::atomic<PlaybackControl>& playbackControl,
+               const std::atomic<uint8_t>& volumeMultiplier, std::string& errorMessage)
 {
     SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -150,11 +179,11 @@ void PGTATestCommon::PlayTrack(std::string trackName, std::atomic<int> &playback
         SDL_PauseAudioDevice(audioDevice, 0);
         try
         {
-            ret = pgtaMain(audioDevice, trackName, playbackControl);
+            ret = pgtaMain(audioDevice, trackName, playbackControl, volumeMultiplier);
         }
         catch (SDLWavException &e)
         {
-            message = e.what();
+            errorMessage = e.what();
         }
         SDL_PauseAudioDevice(audioDevice, 1);
         SDL_CloseAudioDevice(audioDevice);
