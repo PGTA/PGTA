@@ -133,7 +133,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName,
     config.audioDesc.bytesPerSample = 2;
     config.audioDesc.channels = 1;
     config.beatsPerMinute = 120;
-    config.mixAhead = 0.5f;
+    config.mixAhead = 0.1f;
     PGTA::PGTAContext pgtaContext(pgtaDevice.CreateContext(config));
 
     pgtaContext.BindTrack(demoTrack);
