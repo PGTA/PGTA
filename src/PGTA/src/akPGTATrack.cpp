@@ -146,7 +146,7 @@ std::vector<PGTASampleData> PGTATrack::CopySampleData() const
         sample.periodDeviation = sourceSample.periodDeviation;
         sample.probability = sourceSample.probability;
         sample.startTime = sourceSample.startTime;
-        sample.volume = sourceSample.volume;
+        sample.gain = sourceSample.gain;
         sample.sampleName = cachedsample.sampleName.c_str();
         sample.defaultFile = cachedsample.defaultFile.c_str();
         sample.groupUUID = cachedsample.groupUUID.c_str();

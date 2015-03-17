@@ -7,7 +7,7 @@
       period: 0,
       periodDeviation: 0,
       probability: 1.0,
-      volume: 6,
+      gain: 6,
       group: ""
     },
     {
@@ -17,27 +17,27 @@
       period: 0,
       periodDeviation: 0,
       probability: 1.0,
-      volume: 0,
+      gain: 0,
       group: ""
     },
     {
       name: "Thunder2",
       defaultFile: "./media/thunder2.wav",
-      startTime: 4,
+      startTime: 0,
       period: 9,
       periodDeviation: 2,
-      probability: 0.6,
-      volume: 0,
+      probability: 1.0,
+      gain: 0,
       group: "c07be9ab8e544d9fa85ba7ea323763c9"
     },
     {
       name: "Thunder3",
       defaultFile: "./media/thunder3.wav",
-      startTime: 4,
+      startTime: 0,
       period: 9,
       periodDeviation: 2,
-      probability: 0.8,
-      volume: 0,
+      probability: 1.0,
+      gain: 0,
       group: "c07be9ab8e544d9fa85ba7ea323763c9"
     },
     {
@@ -46,8 +46,8 @@
       startTime: 0,
       period: 15,
       periodDeviation: 2,
-      probability: 0.6,
-      volume: 3,
+      probability: 1.0,
+      gain: 3,
       group: "c07be9ab8e544d9fa85ba7ea323763c6"
     },
     {
@@ -56,8 +56,8 @@
       startTime: 0,
       period: 10,
       periodDeviation: 2,
-      probability: 0.6,
-      volume: 2,
+      probability: 1.0,
+      gain: 2,
       group: "c07be9ab8e544d9fa85ba7ea323763c6"
     },
     {
@@ -66,8 +66,8 @@
       startTime: 0,
       period: 25,
       periodDeviation: 8,
-      probability: 0.6,
-      volume: 0,
+      probability: 1.0,
+      gain: 0,
       group: "c07be9ab8e544d9fa85ba7ea323763c6"
     },
     {
@@ -77,7 +77,7 @@
       period: 15,
       periodDeviation: 5,
       probability: 0.6,
-      volume: 0,
+      gain: 0,
       group: "c07be9ab8e544d9fa85ba7ea323763c6"
     },
     {
@@ -87,7 +87,7 @@
       period: 0,
       periodDeviation: 0,
       probability: 1.0,
-      volume: -1,
+      gain: -1,
       group: ""
     }
   ],
@@ -102,6 +102,9 @@
     }
   ],
   restrictions: [
-
+    {
+      group1: "c07be9ab8e544d9fa85ba7ea323763c6",
+      group2: "c07be9ab8e544d9fa85ba7ea323763c9"
+    },
   ]
 }
