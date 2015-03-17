@@ -32,7 +32,7 @@ bool AudioMixerImpl::Initialize(const akAudioMixer::AudioMixerConfig& cfg)
     m_mixHandleIndexCounter = 0;
 
     // allocate double the number of mix ahead samples initially
-    m_mixBuffer.reserve(numMixAheadSamples << 1);
+    m_mixBuffer.reserve(static_cast<size_t>(numMixAheadSamples) << 1);
     m_sources.Clear();
     m_sourceMixInfo.clear();
     m_cfg = cfg;
@@ -68,7 +68,7 @@ akAudioMixer::AudioBuffer AudioMixerImpl::Update(const uint32_t deltaNumSamples)
     m_userTime = userTime + deltaNumSamples;
 
     m_mixBuffer.resize(numSamplesToMix);
-    if (m_mixBuffer.capacity() > (numSamplesToMix << 1))
+    if (m_mixBuffer.capacity() > (static_cast<size_t>(numSamplesToMix) << 1))
     {
         m_mixBuffer.shrink_to_fit();
     }

@@ -39,12 +39,12 @@ void AudioSourceMixer::Mix(DataTable<SourceMixPair>& sources,
                            int16_t* outputBuf, uint32_t numSamplesToMix)
 {
     m_mixBuffer.resize(numSamplesToMix);
-    if (m_mixBuffer.capacity() > (numSamplesToMix << 1))
+    if (m_mixBuffer.capacity() > (static_cast<size_t>(numSamplesToMix) << 1))
     {
         m_mixBuffer.shrink_to_fit();
     }
     m_scratchBuffer.resize(numSamplesToMix);
-    if (m_scratchBuffer.capacity() > (numSamplesToMix << 1))
+    if (m_scratchBuffer.capacity() > (static_cast<size_t>(numSamplesToMix) << 1))
     {
         m_scratchBuffer.shrink_to_fit();
     }
