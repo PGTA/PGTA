@@ -13,10 +13,14 @@ PGTAScheduler::PGTAScheduler():
     m_groupsNextSchedule(),
     m_endingGroups(),
     m_primaryTrack(nullptr),
-    m_primaryWeight(1.0f),
+    m_currPrimaryWeight(1.0f),
     m_primaryNextSchedules(),
     m_transTrack(nullptr),
     m_transNextSchedules(),
+    m_startPrimaryWeight(0.0f),
+    m_targetPrimaryWeight(1.0f),
+    m_elapsedTransSamples(0),
+    m_transDurationSamples(0),
     m_rng(),
     m_pooledRequests(),
     m_poolSchedulerOrder(),
@@ -73,7 +77,8 @@ void PGTAScheduler::SetPrimaryTrack(const PGTATrack* track)
     m_transNextSchedules.resize(0);
     m_transTrack = nullptr;
 
-    m_primaryWeight = 1.0f;
+    m_currPrimaryWeight = 1.0f;
+    m_targetPrimaryWeight = 1.0f;
     m_primaryTrack = track;
 
     const PGTATrackSample* samples = track->GetSamples()->data();
@@ -98,6 +103,38 @@ void PGTAScheduler::SetPrimaryTrack(const PGTATrack* track)
 
 void PGTAScheduler::TransitionRequest(const PGTATrack* track, const float percentAmount, const float durationSeconds)
 {
+    if (!track || percentAmount < 0.0f || percentAmount > 1.0f ||
+        durationSeconds <= 0.0f || (1.0f - percentAmount) == m_currPrimaryWeight)
+    {
+        return;
+    }
+
+    // TODO: properly queue transition requests (currently just executing the next request immediately)
+
+    m_targetPrimaryWeight = 1.0f - percentAmount;
+    m_startPrimaryWeight = m_currPrimaryWeight;
+    m_transDurationSamples = static_cast<uint32_t>(ConvertTimeToSamples(durationSeconds));
+    m_elapsedTransSamples = 0;
+    m_transTrack = track;
+
+    const PGTATrackSample* samples = track->GetSamples()->data();
+    bool isTransMeasuredInBeats = track->GetIsMeasuredInBeats();
+    int numSamples = static_cast<int>(track->GetNumSamples());
+    m_transNextSchedules.resize(numSamples);
+    for (int i = 0; i < numSamples; ++i)
+    {
+        uint32_t startTime;
+        if (isTransMeasuredInBeats)
+        {
+            startTime = ConvertBeatsToSamples(samples[i].startTime);
+        }
+        else
+        {
+            startTime = ConvertTimeToSamples(samples[i].startTime);
+        }
+        m_transNextSchedules[i].samplesUntilPlay = startTime;
+        m_transNextSchedules[i].samplesOffPeriod = startTime;
+    }
 }
 
 int32_t PGTAScheduler::ConvertTimeToSamples(const float deltaSeconds) const
@@ -148,7 +185,7 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
 
         uint16_t idx = mixRequests[reqNum].sampleId;
         bool isPrimary = mixRequests[reqNum].isPrimary;
-        float volumeMultiplier = isPrimary ? m_primaryWeight : 1.0f - m_primaryWeight;
+        float volumeMultiplier = isPrimary ? m_currPrimaryWeight : 1.0f - m_currPrimaryWeight;
         const PGTATrackSample& sample = isPrimary ? m_primaryTrack->GetSamples()->at(idx) :
             m_transTrack->GetSamples()->at(idx);
 
@@ -211,7 +248,7 @@ void PGTAScheduler::SelectSchedulingCandidates(const bool isPrimary, const uint3
     uint16_t numPooledSamples = 0;
 
     std::vector<ScheduleData>& nextSchedules = isPrimary ? m_primaryNextSchedules : m_transNextSchedules;
-    float transValue = isPrimary ? m_primaryWeight : 1.0f - m_primaryWeight;
+    float transValue = isPrimary ? m_currPrimaryWeight : 1.0f - m_currPrimaryWeight;
 
     for (int i = 0; i < numTrackSamples; ++i)
     {
@@ -362,6 +399,30 @@ PGTABuffer PGTAScheduler::Update(const float deltaSeconds)
     m_poolSchedulerOrder.clear();
     
     uint32_t deltaSamples = ConvertTimeToSamples(deltaSeconds);
+
+    // Modify transition related values
+    if (m_transTrack && m_currPrimaryWeight != m_targetPrimaryWeight)
+    {
+        if (m_currPrimaryWeight != m_targetPrimaryWeight)
+        {
+            m_currPrimaryWeight = (m_targetPrimaryWeight - m_startPrimaryWeight) 
+                * std::fmin(1.0f, (static_cast<float>(m_elapsedTransSamples) / m_transDurationSamples)) + m_startPrimaryWeight;
+            m_elapsedTransSamples += deltaSamples;
+        }
+
+        if (m_currPrimaryWeight == m_targetPrimaryWeight && m_currPrimaryWeight == 1.0f)
+        {
+            m_transTrack = nullptr;
+        }
+        else if (m_currPrimaryWeight == m_targetPrimaryWeight && m_currPrimaryWeight == 0.0f)
+        {
+            m_primaryTrack = m_transTrack;
+            m_primaryNextSchedules = m_transNextSchedules;
+            m_transTrack = nullptr;
+            m_currPrimaryWeight = 1.0f;
+        }
+            
+    }
 
     // Decrement the group schedule times
     for (auto iter = m_groupsNextSchedule.begin(); iter != m_groupsNextSchedule.end();)

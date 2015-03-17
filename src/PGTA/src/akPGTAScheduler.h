@@ -50,11 +50,16 @@ private:
     std::vector<std::pair<std::string, uint32_t>> m_endingGroups;
 
     const PGTATrack* m_primaryTrack;
-    float m_primaryWeight;
+    float m_currPrimaryWeight;
     std::vector<ScheduleData> m_primaryNextSchedules;
 
     const PGTATrack* m_transTrack;
     std::vector<ScheduleData> m_transNextSchedules;
+
+    float m_startPrimaryWeight;
+    float m_targetPrimaryWeight;
+    uint32_t m_elapsedTransSamples;
+    uint32_t m_transDurationSamples;
     
     PGTASchedulerRNG m_rng;
     std::vector<std::pair<const std::string, MixRequest>> m_pooledRequests;

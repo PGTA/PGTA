@@ -188,6 +188,22 @@ void pgtaBindTrack(HPGTAContext context, HPGTATrack track)
     tempContext.pgtaContext->BindTrack(tempTrack.pgtaTrack);
 }
 
+void pgtaTransition(HPGTAContext context, HPGTATrack track, const float percentAmount, const float durationSeconds)
+{
+    if (!context || !track)
+    {
+        return;
+    }
+
+    PGTAContextUnion tempContext;
+    tempContext.handle = context;
+
+    PGTATrackUnion tempTrack;
+    tempTrack.handle = track;
+
+    tempContext.pgtaContext->Transition(tempTrack.pgtaTrack, percentAmount, durationSeconds);
+}
+
 PGTABuffer pgtaUpdate(HPGTAContext context, float deltaSeconds)
 {
     if (!context || deltaSeconds <= 0.0f)
