@@ -114,8 +114,8 @@ void pgtaFreeTrackData(PGTATrackData trackData)
     temp.pgtaTrack->FreeTrackData();
 }
 
-void pgtaBindTrackSample(HPGTATrack track, const int32_t id, const int16_t* audioData,
-                         const size_t audioDataLength)
+void pgtaBindTrackSample(HPGTATrack track, const int32_t id, const uint8_t* audioData,
+                         const size_t audioDataNumBytes)
 {
     if (!track)
     {
@@ -136,7 +136,7 @@ void pgtaBindTrackSample(HPGTATrack track, const int32_t id, const int16_t* audi
         }
 
         trackSample.audioData = audioData;
-        trackSample.numSamples = static_cast<uint32_t>(audioDataLength);
+        trackSample.audioDataNumBytes = static_cast<uint32_t>(audioDataNumBytes);
     }
 }
 
@@ -187,16 +187,16 @@ void pgtaBindTrack(HPGTAContext context, HPGTATrack track)
     tempContext.pgtaContext->BindTrack(tempTrack.pgtaTrack);
 }
 
-PGTABuffer pgtaUpdate(HPGTAContext context, float delta)
+PGTABuffer pgtaUpdate(HPGTAContext context, float deltaSeconds)
 {
-    if (!context || delta <= 0.0f)
+    if (!context || deltaSeconds <= 0.0f)
     {
         return PGTABuffer();
     }
 
     PGTAContextUnion temp;
     temp.handle = context;
-    return temp.pgtaContext->Update(delta);
+    return temp.pgtaContext->Update(deltaSeconds);
 }
 
 PGTABuffer pgtaGetOutputBuffer(HPGTAContext context)

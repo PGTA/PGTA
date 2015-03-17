@@ -33,12 +33,12 @@ public:
 
     bool Initialize(const PGTAConfig& config);
     void SetPrimaryTrack(const PGTATrack* track);
-    PGTABuffer Update(const float delta);
+    PGTABuffer Update(const float deltaSeconds);
 
 private:
     PGTABuffer MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequest);
-    int32_t ConvertTimeToSamples(const float delta);
-    int32_t ConvertBeatsToSamples(const float beats);
+    int32_t ConvertTimeToSamples(const float deltaTime) const;
+    int32_t ConvertBeatsToSamples(const float deltaBeats) const;
 
 private:
     std::vector<std::pair<std::string, uint32_t>> m_groupsNextSchedule;

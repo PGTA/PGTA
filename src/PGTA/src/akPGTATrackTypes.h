@@ -26,8 +26,8 @@ struct PGTATrackSample
 
     std::string group;
 
-    uint32_t numSamples;
-    const int16_t* audioData;
+    uint32_t audioDataNumBytes;
+    const uint8_t* audioData;
 };
 
 struct PGTACachedGroupData

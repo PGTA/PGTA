@@ -96,18 +96,19 @@ void PGTAScheduler::SetPrimaryTrack(const PGTATrack* track)
     }
 }
 
-int32_t PGTAScheduler::ConvertTimeToSamples(const float delta)
+int32_t PGTAScheduler::ConvertTimeToSamples(const float deltaSeconds) const
 {
     uint16_t channels = m_config.audioDesc.channels;
     uint32_t samplesPerSecond = m_config.audioDesc.samplesPerSecond;
-    return static_cast<int32_t>(round(delta * channels * samplesPerSecond));
+    return static_cast<int32_t>(round(deltaSeconds * channels * samplesPerSecond));
 }
 
-int32_t PGTAScheduler::ConvertBeatsToSamples(const float beats)
+int32_t PGTAScheduler::ConvertBeatsToSamples(const float deltaBeats) const
 {
     uint16_t channels = m_config.audioDesc.channels;
     uint32_t samplesPerSecond = m_config.audioDesc.samplesPerSecond;
-    return static_cast<int32_t>(round(beats / (m_config.beatsPerMinute / 60) * channels * samplesPerSecond));
+    return static_cast<int32_t>(round(deltaBeats / (static_cast<float>(m_config.beatsPerMinute) / 60)
+        * channels * samplesPerSecond));
 }
 
 PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequests)
@@ -117,7 +118,7 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
 
     uint64_t samplesMixed = 0;
     akAudioMixer::AudioBuffer output = m_mixer->Update(0);
-    m_bufferData.resize(deltaSamples + output.numSamples);
+    m_bufferData.resize(static_cast<size_t>(deltaSamples + output.numSamples));
     int numSamples = static_cast<int>(output.numSamples);
     for (int i = 0; i < numSamples; ++i)
     {
@@ -138,7 +139,7 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
         numSamples = static_cast<int>(output.numSamples);
         for (int sampleIdx = 0; sampleIdx < numSamples; ++sampleIdx)
         {
-            m_bufferData[sampleIdx + samplesMixed] = output.samples[sampleIdx];
+            m_bufferData[static_cast<size_t>(sampleIdx + samplesMixed)] = output.samples[sampleIdx];
         }
         samplesMixed += output.numSamples;
 
@@ -156,7 +157,8 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
         }
 
         akAudioMixer::AudioSource source;
-        source.SetSource(sample.audioData, sample.numSamples);
+        source.SetSource(reinterpret_cast<const int16_t*>(sample.audioData), 
+            sample.audioDataNumBytes / m_config.audioDesc.bytesPerSample);
 
         akAudioMixer::AudioMixer::MixHandle handle = m_mixer->AddSource(source);
         akAudioMixer::MixControl mixControl = m_mixer->GetMixControl(handle);
@@ -174,7 +176,7 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
     numSamples = static_cast<int>(output.numSamples);
     for (int sampleIdx = 0; sampleIdx < numSamples; ++sampleIdx)
     {
-        m_bufferData[sampleIdx + samplesMixed] = output.samples[sampleIdx];
+        m_bufferData[static_cast<size_t>(sampleIdx + samplesMixed)] = output.samples[sampleIdx];
     }
 
     PGTABuffer outputBuffer;
@@ -185,7 +187,7 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
     return outputBuffer;
 }
 
-PGTABuffer PGTAScheduler::Update(const float delta)
+PGTABuffer PGTAScheduler::Update(const float deltaSeconds)
 {
     if (!m_primaryTrack)
     {
@@ -197,7 +199,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
     m_pooledRequests.clear();
     m_poolSchedulerOrder.clear();
     
-    uint32_t deltaSamples = ConvertTimeToSamples(delta);
+    uint32_t deltaSamples = ConvertTimeToSamples(deltaSeconds);
 
     // Decrement the group schedule times
     for (auto iter = m_groupsNextSchedule.begin(); iter != m_groupsNextSchedule.end();)
@@ -217,12 +219,12 @@ PGTABuffer PGTAScheduler::Update(const float delta)
 
     int numTrackSamples = m_primaryTrack->GetNumSamples();
     bool isMeasuredInBeats = m_primaryTrack->GetIsMeasuredInBeats();
-    const std::vector<PGTATrackSample>* samples = m_primaryTrack->GetSamples();
+    const std::vector<PGTATrackSample>* trackSamples = m_primaryTrack->GetSamples();
     uint16_t numPooledSamples = 0;
 
     for (int i = 0; i < numTrackSamples; ++i)
     {
-        const PGTATrackSample& sample = (*samples)[i];
+        const PGTATrackSample& sample = (*trackSamples)[i];
         
         // Sample is a candidate for playing
         ScheduleData& primaryNextSchedule = m_primaryNextSchedules[i];
@@ -238,8 +240,11 @@ PGTABuffer PGTAScheduler::Update(const float delta)
            
             if (sample.period == 0.0f)
             {
-                primaryNextSchedule.samplesOffPeriod += sample.numSamples;
-                primaryNextSchedule.samplesUntilPlay = sample.numSamples + playDelay;
+                int32_t numDataSamples = static_cast<int32_t>(sample.audioDataNumBytes / 
+                    m_config.audioDesc.bytesPerSample);
+
+                primaryNextSchedule.samplesOffPeriod += numDataSamples;
+                primaryNextSchedule.samplesUntilPlay = numDataSamples + playDelay;
             }
             else
             {
@@ -287,7 +292,7 @@ PGTABuffer PGTAScheduler::Update(const float delta)
     }
 
     // Shuffle the scheduler order to avoid sample play starvation
-    m_rng.ShuffleSchedulerOrder(m_poolSchedulerOrder);
+    m_rng.ShuffleScheduleOrder(m_poolSchedulerOrder);
 
     for (uint16_t index : m_poolSchedulerOrder)
     {
@@ -347,8 +352,9 @@ PGTABuffer PGTAScheduler::Update(const float delta)
 
         // Add the mix request for the sample
         m_mixRequests.emplace_back(pooledRequest.second);
-        uint32_t samplesUntilGroupEnds = (*m_primaryTrack->GetSamples())[pooledRequest.second.sampleId].numSamples +
-            pooledRequest.second.delay - deltaSamples;
+        int32_t numDataSamples = static_cast<int32_t>((*trackSamples)[pooledRequest.second.sampleId].audioDataNumBytes /
+            m_config.audioDesc.bytesPerSample);
+        uint32_t samplesUntilGroupEnds = numDataSamples + pooledRequest.second.delay - deltaSamples;
         m_groupsNextSchedule.emplace_back(std::pair<const std::string, uint32_t>(m_pooledRequests[index].first, samplesUntilGroupEnds));
     }
 

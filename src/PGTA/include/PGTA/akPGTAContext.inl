@@ -19,9 +19,9 @@ namespace PGTA
     {
     }
 
-    PGTABuffer PGTAContext::Update(const float delta)
+    PGTABuffer PGTAContext::Update(const float deltaSeconds)
     {
-        return pgtaUpdate(m_pgtaContext, delta);
+        return pgtaUpdate(m_pgtaContext, deltaSeconds);
     }
 
     PGTABuffer PGTAContext::GetOutputBuffer()

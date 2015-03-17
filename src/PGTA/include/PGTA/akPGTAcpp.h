@@ -41,7 +41,7 @@ namespace PGTA
         inline PGTAContext(const PGTAContext& other);
         inline ~PGTAContext();
         
-        inline PGTABuffer Update(const float delta);
+        inline PGTABuffer Update(const float deltaSeconds);
         inline PGTABuffer GetOutputBuffer();
         inline void BindTrack(HPGTATrack track);
 
@@ -53,9 +53,9 @@ namespace PGTA
         HPGTAContext m_pgtaContext;
     };
 
-    inline void BindTrackSample(HPGTATrack track, const int32_t id, const int16_t* audioData, const size_t audioDataLength)
+    inline void BindTrackSample(HPGTATrack track, const int32_t id, const uint8_t* audioData, const size_t audioDataNumBytes)
     {
-        pgtaBindTrackSample(track, id, audioData, audioDataLength);
+        pgtaBindTrackSample(track, id, audioData, audioDataNumBytes);
     }
 }
 

@@ -13,7 +13,7 @@ public:
 
     bool CanPlay(const float probability);
     float GetDeviation(const float maxDeviation);
-    void ShuffleSchedulerOrder(std::vector<uint16_t>& scheduleOrder);
+    void ShuffleScheduleOrder(std::vector<uint16_t>& scheduleOrder);
 private:
     std::uniform_real_distribution<float> m_probabilityDistribution;
     std::uniform_real_distribution<float> m_deviationDistribution;

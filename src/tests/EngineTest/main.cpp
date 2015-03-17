@@ -42,9 +42,9 @@ public:
         return m_spec;
     }
 
-    const int16_t* GetSamplePtr() const
+    const uint8_t* GetSamplePtr() const
     {
-        return reinterpret_cast<const int16_t*>(m_audioBuf);
+        return reinterpret_cast<const uint8_t*>(m_audioBuf);
     }
 
     uint32_t GetNumSamples() const
@@ -94,7 +94,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
         audioFiles.emplace_back(sampleData->defaultFile);
         pgtaBindTrackSample(demoTrack, sampleData->id,
                             audioFiles[i].GetSamplePtr(),
-                            audioFiles[i].GetNumSamples());
+                            audioFiles[i].GetNumSamples() * 2);
     }
 
     PGTAConfig config;
