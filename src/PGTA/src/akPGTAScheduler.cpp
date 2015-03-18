@@ -215,7 +215,7 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
         if (mixControl)
         {
             
-            if (!m_transTrack || sample.period != 0)
+            if (!m_transTrack)
             {
                 akAudioMixer::MixEffect effectGain;
                 effectGain.type = akAudioMixer::MixEffects::MixEffect_Gain;

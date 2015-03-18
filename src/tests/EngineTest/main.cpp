@@ -140,16 +140,17 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
     uint64_t count = 0;
     utils::RunLoop(0.01f, [&](double /*absoluteTime*/, float delta)
     {
-        count++;
-        if (count == 1000)
+        count = ((count + 1) % 2000);
+        if (count == 0)
         {
-            pgtaContext.Transition(demoTrack1, 1.0f, 30.0f);
+            pgtaContext.Transition(demoTrack1, 1.0f, 10.0f);
+            std::swap(demoTrack1, demoTrack2);
         }
         const PGTABuffer output = pgtaContext.Update(delta);
         SDL_QueueAudio(audioDevice, output.samples, static_cast<Uint32>(output.numSamples * 2));
         return (output.samples != nullptr) && (output.numSamples > 0);
     });
-
+    return 0;
 }
 
 int main()
