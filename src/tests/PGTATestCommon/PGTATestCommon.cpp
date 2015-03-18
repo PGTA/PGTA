@@ -92,7 +92,7 @@ void ApplyVolume(const uint8_t* samplesIn, const uint32_t numBytesIn,
 
 int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName,
              const std::atomic<PlaybackControl> &playbackControl,
-             const std::atomic<uint8_t>& volumeMultiplier)
+             const std::atomic<uint8_t>& volumeMultiplier, const uint16_t beatsPerMinute)
 {
     PGTA::PGTADevice pgtaDevice;
     if (!pgtaDevice.Initialize())
@@ -132,7 +132,7 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName,
     config.audioDesc.samplesPerSecond = 44100;
     config.audioDesc.bytesPerSample = 2;
     config.audioDesc.channels = 1;
-    config.beatsPerMinute = 120;
+    config.beatsPerMinute = beatsPerMinute;
     config.mixAhead = 0.1f;
     PGTA::PGTAContext pgtaContext(pgtaDevice.CreateContext(config));
 
@@ -162,7 +162,8 @@ int pgtaMain(SDL_AudioDeviceID audioDevice, const std::string &trackName,
 }
 
 void PGTATestCommon::PlayTrack(const std::string trackName, const std::atomic<PlaybackControl>& playbackControl,
-                               const std::atomic<uint8_t>& volumeMultiplier, std::string& errorMessage)
+                               const std::atomic<uint8_t>& volumeMultiplier, const uint16_t beatsPerMinute,
+                               std::string& errorMessage)
 {
     SDL_Init(SDL_INIT_EVERYTHING);
 
@@ -180,7 +181,7 @@ void PGTATestCommon::PlayTrack(const std::string trackName, const std::atomic<Pl
         SDL_PauseAudioDevice(audioDevice, 0);
         try
         {
-            ret = pgtaMain(audioDevice, trackName, playbackControl, volumeMultiplier);
+            ret = pgtaMain(audioDevice, trackName, playbackControl, volumeMultiplier, beatsPerMinute);
         }
         catch (SDLWavException &e)
         {
