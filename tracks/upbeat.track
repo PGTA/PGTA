@@ -1,0 +1,114 @@
+{
+  samples: [
+    {
+      name: "Guitar Overlay 6",
+      defaultFile: "./media/guitarOverlay6.wav",
+      startTime: 16,
+      period: 12,
+      probability: 0.2,
+      group: "8d519c0d49c24b9db3d8768ab7addd9d"
+    },
+    {
+      name: "Guitar Overlay 5",
+      defaultFile: "./media/guitarOverlay5.wav",
+      startTime: 20,
+      period: 24,
+      probability: 0.2,
+      group: "8d519c0d49c24b9db3d8768ab7addd9d"
+    },
+    {
+      name: "Guitar Overlay",
+      defaultFile: "./media/guitarOverlay1.wav",
+      startTime: 16,
+      period: 12,
+      probability: 0.2,
+      group: "8d519c0d49c24b9db3d8768ab7addd9d"
+    },
+    {
+      name: "Guitar Overlay 2",
+      defaultFile: "./media/guitarOverlay2.wav",
+      startTime: 16,
+      period: 12,
+      probability: 0.2,
+      group: "8d519c0d49c24b9db3d8768ab7addd9d"
+    },
+    {
+      name: "Guitar Overlay 3",
+      defaultFile: "./media/guitarOverlay3.wav",
+      startTime: 16,
+      period: 12,
+      probability: 0.2,
+      gain: -4,
+      group: "8d519c0d49c24b9db3d8768ab7addd9d"
+    },
+    {
+      name: "Guitar Overlay 4",
+      defaultFile: "./media/guitarOverlay4.wav",
+      startTime: 28,
+      period: 12,
+      probability: 0.2,
+      group: "8d519c0d49c24b9db3d8768ab7addd9d"
+    },
+    {
+      name: "Bass Overlay 2",
+      defaultFile: "./media/bassOverlay2.wav",
+      startTime: 4,
+      period: 12,
+      probability: 1,
+      gain: 2,
+      group: "ee93cabb986944eeacade41048baac77"
+    },
+    {
+      name: "Bass Overlay 3",
+      defaultFile: "./media/bassOverlay3.wav",
+      startTime: 4,
+      period: 12,
+      probability: 1,
+      gain: 2,
+      group: "ee93cabb986944eeacade41048baac77"
+    },
+    {
+      name: "Bass Overlay",
+      defaultFile: "./media/bassOverlay1.wav",
+      startTime: 4,
+      period: 12,
+      probability: 1,
+      gain: 2,
+      group: "ee93cabb986944eeacade41048baac77"
+    },
+    {
+      name: "Melody Loop",
+      defaultFile: "./media/melodyLoop.wav",
+      probability: 1,
+      group: ""
+    },
+    {
+      name: "Drum Overlay",
+      defaultFile: "./media/drumOverlay1.wav",
+      period: 28,
+      probability: 1,
+      gain: -4,
+      group: ""
+    },
+    {
+      name: "Drum Loop",
+      defaultFile: "./media/drumLoop1.wav",
+      startTime: 28,
+      probability: 1,
+      group: ""
+    }
+  ],
+  groups: [
+    {
+      name: "Guitar Overlays",
+      uuid: "8d519c0d49c24b9db3d8768ab7addd9d"
+    },
+    {
+      name: "Bass Overlays",
+      uuid: "ee93cabb986944eeacade41048baac77"
+    }
+  ],
+  restrictions: [
+
+  ]
+}

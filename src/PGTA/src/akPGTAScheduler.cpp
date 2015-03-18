@@ -186,6 +186,8 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
         uint16_t idx = mixRequests[reqNum].sampleId;
         bool isPrimary = mixRequests[reqNum].isPrimary;
         float volumeMultiplier = isPrimary ? m_currPrimaryWeight : 1.0f - m_currPrimaryWeight;
+        volumeMultiplier = std::fmax(volumeMultiplier, 0.1f);
+
         const PGTATrackSample& sample = isPrimary ? m_primaryTrack->GetSamples()->at(idx) :
             m_transTrack->GetSamples()->at(idx);
 
@@ -212,10 +214,23 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
         akAudioMixer::MixControl mixControl = m_mixer->GetMixControl(handle);
         if (mixControl)
         {
-            akAudioMixer::MixEffect effect;
-            effect.type = akAudioMixer::MixEffects::MixEffect_Gain;
-            effect.gain.dBGain = gain;
-            mixControl.AddEffect(effect);
+            
+            if (!m_transTrack || sample.period != 0)
+            {
+                akAudioMixer::MixEffect effectGain;
+                effectGain.type = akAudioMixer::MixEffects::MixEffect_Gain;
+                effectGain.gain.dBGain = gain;
+                mixControl.AddEffect(effectGain);
+            }
+            else
+            {
+                akAudioMixer::MixEffect effectFade;
+                effectFade.type = akAudioMixer::MixEffects::MixEffect_Fade;
+                effectFade.fade.dBInitial = gain;
+                effectFade.fade.dBFinal = gain;
+                effectFade.fade.fadeOverNumSamples = sample.audioDataNumBytes / m_config.audioDesc.bytesPerSample;
+                mixControl.AddEffect(effectFade);
+            }
         }
     }
 
@@ -408,6 +423,8 @@ PGTABuffer PGTAScheduler::Update(const float deltaSeconds)
             m_currPrimaryWeight = (m_targetPrimaryWeight - m_startPrimaryWeight) 
                 * std::fmin(1.0f, (static_cast<float>(m_elapsedTransSamples) / m_transDurationSamples)) + m_startPrimaryWeight;
             m_elapsedTransSamples += deltaSamples;
+
+            //Next weight?
         }
 
         if (m_currPrimaryWeight == m_targetPrimaryWeight && m_currPrimaryWeight == 1.0f)
