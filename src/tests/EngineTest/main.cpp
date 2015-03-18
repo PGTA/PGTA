@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <iostream>
 #include <akPGTA.h>
+#include <chrono>
 #include "utils.h"
 #include "FileUtils.h"
 
@@ -18,6 +19,7 @@ public:
         m_spec()
     {
         SDL_LoadWAV(filename, &m_spec, &m_audioBuf, &m_audioLen);
+        std::cout << filename << std::endl;
         assert(m_spec.freq == 44100);
         assert(m_spec.format == AUDIO_S16);
         assert(m_spec.channels == 1);
@@ -57,6 +59,37 @@ private:
     Uint8* m_audioBuf;
     Uint32 m_audioLen;
     SDL_AudioSpec m_spec;
+};
+
+class CAverageValueSampler
+{
+public:
+    CAverageValueSampler():
+        m_samples(32, 0.0),
+        m_runningTotal(0.0),
+        m_iCurSample(0)
+    {
+    }
+
+    void TakeSample( double sample )
+    {
+        m_iCurSample %= 32;
+        
+        m_runningTotal -= m_samples[m_iCurSample];
+        m_runningTotal += sample;
+        
+        m_samples[m_iCurSample++] = sample;
+    }
+    
+    double GetAverage() const
+    {
+        return m_runningTotal / 32.0;
+    }
+    
+private:
+    std::vector<double> m_samples;
+    double m_runningTotal;
+    uint8_t m_iCurSample;
 };
 
 int pgtaMain(SDL_AudioDeviceID audioDevice)
@@ -138,23 +171,37 @@ int pgtaMain(SDL_AudioDeviceID audioDevice)
     pgtaContext.BindTrack(demoTrack2);
 
     uint64_t count = 0;
+    CAverageValueSampler avgValue;
     utils::RunLoop(0.01f, [&](double /*absoluteTime*/, float delta)
     {
+        using namespace std::chrono;
         count = ((count + 1) % 2000);
         if (count == 0)
         {
             pgtaContext.Transition(demoTrack1, 1.0f, 10.0f);
             std::swap(demoTrack1, demoTrack2);
         }
+        auto asdf = high_resolution_clock::now();
         const PGTABuffer output = pgtaContext.Update(delta);
+        auto asdf2 = high_resolution_clock::now();
+        duration<double> curTimeDouble = duration_cast<duration<double>>(asdf2 - asdf);
+        avgValue.TakeSample(curTimeDouble.count());
+        std::cout << "Time: " << avgValue.GetAverage() << "\n";
         SDL_QueueAudio(audioDevice, output.samples, static_cast<Uint32>(output.numSamples * 2));
         return (output.samples != nullptr) && (output.numSamples > 0);
     });
     return 0;
 }
 
+static void quit(int /*param*/)
+{
+    exit(1);
+}
+
 int main()
 {
+    std::cout.sync_with_stdio(false);
+    signal(SIGINT, &quit);
     utils::FixWorkingDirectory();
     SDL_Init(SDL_INIT_EVERYTHING);
 

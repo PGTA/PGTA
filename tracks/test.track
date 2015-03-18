@@ -2,7 +2,7 @@
   samples: [
     {
       name: "Rain",
-      defaultFile: "./media/rainLoop.wav",
+      defaultFile: "./media/rainloop.wav",
       startTime: 0,
       period: 0,
       periodDeviation: 0,
