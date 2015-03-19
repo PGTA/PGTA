@@ -9,4 +9,5 @@ namespace PGTAConst
 
     static const float MIN_GAIN = -95.0f;
     static const float MAX_GAIN = 6.0f;
+    static const float MIN_VOLUME_MULTIPLIER = 0.05f;
 };

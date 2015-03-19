@@ -25,6 +25,14 @@ struct ScheduleData
     int32_t samplesOffPeriod;
 };
 
+struct MixSource
+{
+    akAudioMixer::AudioMixer::MixHandle handle;
+    uint32_t remainingSamples;
+    uint32_t samplesElapsed;
+    float currentGain;
+};
+
 class PGTAScheduler
 {
 public:
@@ -69,6 +77,7 @@ private:
     PGTAConfig m_config;
 
     akAudioMixer::AudioMixer* m_mixer;
+    std::vector<MixSource> m_mixerSources;
     
     std::vector<int16_t> m_bufferData;
 };

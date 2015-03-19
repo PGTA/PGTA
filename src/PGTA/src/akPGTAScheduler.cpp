@@ -27,6 +27,7 @@ PGTAScheduler::PGTAScheduler():
     m_mixRequests(),
     m_config(),
     m_mixer(nullptr),
+    m_mixerSources(),
     m_bufferData()
 {
 }
@@ -74,12 +75,14 @@ void PGTAScheduler::SetPrimaryTrack(const PGTATrack* track)
         return;
     }
 
-    m_transNextSchedules.resize(0);
+    m_transNextSchedules.clear();
     m_transTrack = nullptr;
 
     m_currPrimaryWeight = 1.0f;
     m_targetPrimaryWeight = 1.0f;
     m_primaryTrack = track;
+
+    m_mixerSources.clear();
 
     const PGTATrackSample* samples = track->GetSamples()->data();
     bool isPrimaryMeasuredInBeats = track->GetIsMeasuredInBeats();
@@ -99,6 +102,12 @@ void PGTAScheduler::SetPrimaryTrack(const PGTATrack* track)
         m_primaryNextSchedules[i].samplesUntilPlay = startTime;
         m_primaryNextSchedules[i].samplesOffPeriod = startTime;
     }
+}
+
+static float ModifyGain(const float volumeMultiplier, const float baseGain)
+{
+    float linear = std::exp(baseGain * std::log(10.0f) / 20.0f) * volumeMultiplier;
+    return 20 * std::log(linear) / std::log(10.0f);
 }
 
 void PGTAScheduler::TransitionRequest(const PGTATrack* track, const float percentAmount, const float durationSeconds)
@@ -135,6 +144,28 @@ void PGTAScheduler::TransitionRequest(const PGTATrack* track, const float percen
         m_transNextSchedules[i].samplesUntilPlay = startTime;
         m_transNextSchedules[i].samplesOffPeriod = startTime;
     }
+
+    for (MixSource& source : m_mixerSources)
+    {
+        akAudioMixer::MixControl mixControl = m_mixer->GetMixControl(source.handle);
+        if (mixControl)
+        {
+            // Calculate the faded gain value that corresponds to the sample endtime
+            float fadedWeight = (m_targetPrimaryWeight - m_startPrimaryWeight)
+                * std::fmin(1.0f, (static_cast<float>(source.samplesElapsed) / m_transDurationSamples)) + m_startPrimaryWeight;
+
+            float fadedVolumeMultiplier = fadedWeight;
+            fadedVolumeMultiplier = std::fmax(fadedVolumeMultiplier, PGTAConst::MIN_VOLUME_MULTIPLIER);
+            float fadedGain = ModifyGain(fadedVolumeMultiplier, source.currentGain);
+
+            akAudioMixer::MixEffect effectFade;
+            effectFade.type = akAudioMixer::MixEffects::MixEffect_Fade;
+            effectFade.fade.dBInitial = source.currentGain;
+            effectFade.fade.dBFinal = fadedGain;
+            effectFade.fade.fadeOverNumSamples = source.remainingSamples;
+            mixControl.AddEffect(effectFade);
+        }
+    }
 }
 
 int32_t PGTAScheduler::ConvertTimeToSamples(const float deltaSeconds) const
@@ -150,12 +181,6 @@ int32_t PGTAScheduler::ConvertBeatsToSamples(const float deltaBeats) const
     uint32_t samplesPerSecond = m_config.audioDesc.samplesPerSecond;
     return static_cast<int32_t>(round(deltaBeats / (static_cast<float>(m_config.beatsPerMinute) / 60)
         * channels * samplesPerSecond));
-}
-
-static float ModifyGain(const float volumeMultiplier, const float baseGain)
-{
-    float linear = std::exp(baseGain * std::log(10.0f) / 20.0f) * volumeMultiplier;
-    return 20 * std::log(linear) / std::log(10.0f);
 }
 
 PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector<MixRequest>& mixRequests)
@@ -198,7 +223,7 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
         uint32_t numDataSamples = sample.audioDataNumBytes / m_config.audioDesc.bytesPerSample;
          
         float volumeMultiplier = isPrimary ? m_currPrimaryWeight : 1.0f - m_currPrimaryWeight;
-        volumeMultiplier = std::fmax(volumeMultiplier, 0.05f);
+        volumeMultiplier = std::fmax(volumeMultiplier, PGTAConst::MIN_VOLUME_MULTIPLIER);
         float gain = ModifyGain(volumeMultiplier, sample.gain);
 
         if (sample.gain <= PGTAConst::MIN_GAIN)
@@ -224,6 +249,15 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
                 effectGain.type = akAudioMixer::MixEffects::MixEffect_Gain;
                 effectGain.gain.dBGain = gain;
                 mixControl.AddEffect(effectGain);
+
+                // Need to keep mix information about these samples in case a transition
+                // happens during their playtime (fade is applied on transitions)
+                MixSource mixSource = MixSource();
+                mixSource.handle = handle;
+                mixSource.remainingSamples = numDataSamples;
+                mixSource.samplesElapsed = 0;
+                mixSource.currentGain = gain;
+                m_mixerSources.emplace_back(mixSource);
             }
             else
             {
@@ -231,14 +265,10 @@ PGTABuffer PGTAScheduler::MixScheduleRequests(uint32_t deltaSamples, std::vector
                 float fadedWeight = (m_targetPrimaryWeight - m_startPrimaryWeight)
                     * std::fmin(1.0f, (static_cast<float>(m_elapsedTransSamples + numDataSamples)
                     / m_transDurationSamples)) + m_startPrimaryWeight;
-                if (!isPrimary)
-                {
-                    fadedWeight *= -1.0f;
-                }
-
+                
                 float fadedVolumeMultiplier = isPrimary ? fadedWeight : 1.0f - fadedWeight;
-                fadedVolumeMultiplier = std::fmax(fadedVolumeMultiplier, 0.05f);
-                float fadedGain = ModifyGain(fadedVolumeMultiplier, gain);
+                fadedVolumeMultiplier = std::fmax(fadedVolumeMultiplier, PGTAConst::MIN_VOLUME_MULTIPLIER);
+                float fadedGain = ModifyGain(fadedVolumeMultiplier, sample.gain);
 
                 akAudioMixer::MixEffect effectFade;
                 effectFade.type = akAudioMixer::MixEffects::MixEffect_Fade;
@@ -469,6 +499,21 @@ PGTABuffer PGTAScheduler::Update(const float deltaSeconds)
         }
     }
 
+    // Decrement the remaining duration on mixer sources
+    for (auto iter = m_mixerSources.begin(); iter != m_mixerSources.end();)
+    {
+        if (iter->remainingSamples > deltaSamples)
+        {
+            iter->remainingSamples -= deltaSamples;
+            iter->samplesElapsed += deltaSamples;
+            ++iter;
+        }
+        else
+        {
+            iter = m_mixerSources.erase(iter);
+        }
+    }
+
     /* Check which samples are valid candidates to play and update next schedule times
        Will create mix requests for valid candidates that are loops or are not part of a group
        Will create pooled requests for samples that are valid but in a group (these samples need
@@ -476,7 +521,8 @@ PGTABuffer PGTAScheduler::Update(const float deltaSeconds)
     SelectSchedulingCandidates(true, deltaSamples);
     SelectSchedulingCandidates(false, deltaSamples);
 
-    // Shuffle the scheduler order to avoid sample play starvation
+    // Shuffle the order of pooled samples to avoid sample play starvation
+    // Samples at lower indices are granted higher scheduling priority
     m_rng.ShuffleScheduleOrder(m_poolSchedulerOrder);
 
     for (uint16_t index : m_poolSchedulerOrder)
