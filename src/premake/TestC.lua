@@ -24,14 +24,19 @@ project(testname)
     filter "platforms:x64"
         targetsuffix "_x64"
     filter {}
+    
+    filter "system:windows"
+        postbuildcommands "{COPY} SDL2.dll ../../../bin/"
+    filter "system:not windows"
+        postbuildcommands "{COPY} libSDL2* ../../../bin/"
+    filter {}
 
     run_include("sdl2_include.lua", "SDL2")
 
     postbuildcommands
     {
         "{MKDIR} ../../../bin",
-        "{COPY} %{cfg.buildtarget.name} ../../../bin/",
-        "{COPY} libSDL2.* ../../../bin/"
+        "{COPY} %{cfg.buildtarget.name} ../../../bin/"
     }
 
 project "*"

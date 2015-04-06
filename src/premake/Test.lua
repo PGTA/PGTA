@@ -40,6 +40,12 @@ project(testname)
         "{MKDIR} ../../../bin",
         "{COPY} %{cfg.buildtarget.name} ../../../bin/"
     }
+    
+    filter "system:windows"
+        postbuildcommands "{COPY} SDL2.dll ../../../bin/"
+    filter "system:not windows"
+        postbuildcommands "{COPY} libSDL2* ../../../bin/"
+    filter {}
 
     run_include("sdl2_include.lua", "SDL2")
 
