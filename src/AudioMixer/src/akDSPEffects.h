@@ -58,7 +58,8 @@ inline bool ProcessFade(float* samples, uint32_t numSamples,
     const float linearFinal = dBToLinear(params.dBFinal);
 
     const float fadeFactorInc = (linearFinal - linearInitial) / fadeSamplesTotal;
-    float fadeFactor = std::fma(fadeFactorInc, fadeSamplesOffset, linearInitial);
+    float fadeFactor = std::fma(fadeFactorInc,
+        static_cast<float>(fadeSamplesOffset), linearInitial);
     for (uint_fast32_t i = 0; i < numSamples; ++i)
     {
         samples[i] *= fadeFactor;
