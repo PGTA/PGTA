@@ -32,14 +32,13 @@ union PGTATrackArrayUnion
 
 HPGTADevice pgtaCreateDevice()
 {
-    PGTADeviceUnion temp;
-    temp.pgtaDevice = new PGTADeviceImpl();
-    if (!temp.pgtaDevice->Initialize())
+    PGTADeviceImpl* pgtaDevice = new PGTADeviceImpl();
+    if (!pgtaDevice->Initialize())
     {
-        delete temp.pgtaDevice;
-        temp.pgtaDevice = nullptr;
+        delete pgtaDevice;
+        pgtaDevice = nullptr;
     }
-    return temp.handle;
+    return reinterpret_cast<PGTADeviceUnion*>(&pgtaDevice)->handle;
 }
 
 void pgtaDestroyDevice(HPGTADevice device)
@@ -49,11 +48,9 @@ void pgtaDestroyDevice(HPGTADevice device)
         return;
     }
 
-    PGTADeviceUnion temp;
-    temp.handle = device;
-    temp.pgtaDevice->Shutdown();
-
-    delete temp.pgtaDevice;
+    PGTADeviceImpl* pgtaDevice = reinterpret_cast<PGTADeviceUnion*>(&device)->pgtaDevice;
+    pgtaDevice->Shutdown();
+    delete pgtaDevice;
 }
 
 int pgtaCreateTracks(HPGTADevice device, const int numTracks, const char** trackSourcesIn,
@@ -64,13 +61,11 @@ int pgtaCreateTracks(HPGTADevice device, const int numTracks, const char** track
         return 0;
     }
 
-    PGTATrackArrayUnion tracks;
-    tracks.handle = tracksOut;
+    PGTADeviceImpl* pgtaDevice = reinterpret_cast<PGTADeviceUnion*>(&device)->pgtaDevice;
+    PGTATrack** pgtaTracks = reinterpret_cast<PGTATrackArrayUnion*>(&tracksOut)->pgtaTracks;
 
-    PGTADeviceUnion temp;
-    temp.handle = device;
-    return temp.pgtaDevice->CreateTracks(numTracks, trackSourcesIn,
-                                         trackSourceLengths, tracks.pgtaTracks);
+    return pgtaDevice->CreateTracks(numTracks, trackSourcesIn,
+                                    trackSourceLengths, pgtaTracks);
 }
 
 void pgtaFreeTracks(HPGTADevice device, const int numTracks, HPGTATrack* tracksIn)
@@ -80,12 +75,10 @@ void pgtaFreeTracks(HPGTADevice device, const int numTracks, HPGTATrack* tracksI
         return;
     }
 
-    PGTATrackArrayUnion tracks;
-    tracks.handle = tracksIn;
+    PGTADeviceImpl* pgtaDevice = reinterpret_cast<PGTADeviceUnion*>(&device)->pgtaDevice;
+    PGTATrack** pgtaTracks = reinterpret_cast<PGTATrackArrayUnion*>(&tracksIn)->pgtaTracks;
 
-    PGTADeviceUnion temp;
-    temp.handle = device;
-    temp.pgtaDevice->FreeTracks(numTracks, tracks.pgtaTracks);
+    pgtaDevice->FreeTracks(numTracks, pgtaTracks);
 }
 
 PGTATrackData pgtaGetTrackData(HPGTATrack track)
@@ -95,23 +88,20 @@ PGTATrackData pgtaGetTrackData(HPGTATrack track)
         return PGTATrackData();
     }
 
-    PGTATrackUnion temp;
-    temp.handle = track;
+    PGTATrack* pgtaTrack = reinterpret_cast<PGTATrackUnion*>(&track)->pgtaTrack;
 
-    return temp.pgtaTrack->GetTrackData(temp.handle);
+    return pgtaTrack->GetTrackData(track);
 }
 
 void pgtaFreeTrackData(PGTATrackData trackData)
 {
-    PGTATrackUnion temp;
-    temp.handle = trackData.trackHandle;
-
-    if (!temp.pgtaTrack)
+    PGTATrack* pgtaTrack = reinterpret_cast<PGTATrackUnion*>(&trackData.trackHandle)->pgtaTrack;
+    if (!pgtaTrack)
     {
         return;
     }
 
-    temp.pgtaTrack->FreeTrackData();
+    pgtaTrack->FreeTrackData();
 }
 
 void pgtaBindTrackSample(HPGTATrack track, const int32_t id, const uint8_t* audioData,
@@ -122,22 +112,15 @@ void pgtaBindTrackSample(HPGTATrack track, const int32_t id, const uint8_t* audi
         return;
     }
 
-    PGTATrackUnion temp;
-    temp.handle = track;
-
-    int numSamples = (int)temp.pgtaTrack->GetNumSamples();
-    auto* trackSamples = temp.pgtaTrack->GetSamplesForBinding();
-    for (int i = 0; i < numSamples; ++i)
+    PGTATrack* pgtaTrack = reinterpret_cast<PGTATrackUnion*>(&track)->pgtaTrack;
+    for (PGTATrackSample& trackSample : *pgtaTrack->GetSamplesForBinding())
     {
-        PGTATrackSample& trackSample = trackSamples->at(i);
-        if (trackSample.id != id)
+        if (trackSample.id == id)
         {
-            continue;
+            trackSample.audioData = audioData;
+            trackSample.audioDataNumBytes = static_cast<uint32_t>(audioDataNumBytes);
+            break;
         }
-
-        trackSample.audioData = audioData;
-        trackSample.audioDataNumBytes = static_cast<uint32_t>(audioDataNumBytes);
-        break;
     }
 }
 
@@ -148,12 +131,10 @@ HPGTAContext pgtaCreateContext(HPGTADevice device, const PGTAConfig* config)
         return nullptr;
     }
 
-    PGTADeviceUnion devUnion;
-    devUnion.handle = device;
-    
-    PGTAContextUnion contextUnion;
-    contextUnion.pgtaContext = devUnion.pgtaDevice->CreateContext(*config);
-    return contextUnion.handle;
+    PGTADeviceImpl* pgtaDevice = reinterpret_cast<PGTADeviceUnion*>(&device)->pgtaDevice;
+    PGTAContextImpl* pgtaContext = pgtaDevice->CreateContext(*config);
+
+    return reinterpret_cast<PGTAContextUnion*>(&pgtaContext)->handle;
 }
 
 void pgtaDestroyContext(HPGTADevice device, HPGTAContext context)
@@ -163,13 +144,10 @@ void pgtaDestroyContext(HPGTADevice device, HPGTAContext context)
         return;
     }
 
-    PGTADeviceUnion devUnion;
-    devUnion.handle = device;
+    PGTADeviceImpl* pgtaDevice = reinterpret_cast<PGTADeviceUnion*>(&device)->pgtaDevice;
+    PGTAContextImpl* pgtaContext = reinterpret_cast<PGTAContextUnion*>(&context)->pgtaContext;
 
-    PGTAContextUnion contextUnion;
-    contextUnion.handle = context;
-
-    devUnion.pgtaDevice->DestroyContext(contextUnion.pgtaContext);
+    pgtaDevice->DestroyContext(pgtaContext);
 }
 
 void pgtaBindTrack(HPGTAContext context, HPGTATrack track)
@@ -179,13 +157,10 @@ void pgtaBindTrack(HPGTAContext context, HPGTATrack track)
         return;
     }
 
-    PGTAContextUnion tempContext;
-    tempContext.handle = context;
+    PGTAContextImpl* pgtaContext = reinterpret_cast<PGTAContextUnion*>(&context)->pgtaContext;
+    PGTATrack* pgtaTrack = reinterpret_cast<PGTATrackUnion*>(&track)->pgtaTrack;
 
-    PGTATrackUnion tempTrack;
-    tempTrack.handle = track;
-
-    tempContext.pgtaContext->BindTrack(tempTrack.pgtaTrack);
+    pgtaContext->BindTrack(pgtaTrack);
 }
 
 void pgtaTransition(HPGTAContext context, HPGTATrack track, const float percentAmount, const float durationSeconds)
@@ -195,13 +170,10 @@ void pgtaTransition(HPGTAContext context, HPGTATrack track, const float percentA
         return;
     }
 
-    PGTAContextUnion tempContext;
-    tempContext.handle = context;
+    PGTAContextImpl* pgtaContext = reinterpret_cast<PGTAContextUnion*>(&context)->pgtaContext;
+    PGTATrack* pgtaTrack = reinterpret_cast<PGTATrackUnion*>(&track)->pgtaTrack;
 
-    PGTATrackUnion tempTrack;
-    tempTrack.handle = track;
-
-    tempContext.pgtaContext->Transition(tempTrack.pgtaTrack, percentAmount, durationSeconds);
+    pgtaContext->Transition(pgtaTrack, percentAmount, durationSeconds);
 }
 
 PGTABuffer pgtaUpdate(HPGTAContext context, float deltaSeconds)
@@ -211,9 +183,9 @@ PGTABuffer pgtaUpdate(HPGTAContext context, float deltaSeconds)
         return PGTABuffer();
     }
 
-    PGTAContextUnion temp;
-    temp.handle = context;
-    return temp.pgtaContext->Update(deltaSeconds);
+    PGTAContextImpl* pgtaContext = reinterpret_cast<PGTAContextUnion*>(&context)->pgtaContext;
+
+    return pgtaContext->Update(deltaSeconds);
 }
 
 PGTABuffer pgtaGetOutputBuffer(HPGTAContext context)
@@ -223,8 +195,8 @@ PGTABuffer pgtaGetOutputBuffer(HPGTAContext context)
         return PGTABuffer();
     }
 
-    PGTAContextUnion temp;
-    temp.handle = context;
-    return temp.pgtaContext->GetOutputBuffer();
+    PGTAContextImpl* pgtaContext = reinterpret_cast<PGTAContextUnion*>(&context)->pgtaContext;
+
+    return pgtaContext->GetOutputBuffer();
 }
 
